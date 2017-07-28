@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\784a9873c3bb28c7290c96d0b46ba5da1752180a\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="7f2f348b830f292429db987f74ba3e67c6752322">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_0907cde37e12859ab2a237fc7b411e8af583f033\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\d8831d2fc68409bbdcdb9c0d1176696412b37dac\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="d29714cc76b38157e3cbd034c66e1ec808eb4c19">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_2891d798d2f05d58183cefe56430d4b99162d47c\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\incremental-runtime-classes\debug\instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="3be78ebc2706b2e1fe2f12d5726887a92d6c183b">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run_0d0fd7c4eac00f61d598965986c507550b345936\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\505d34213a56567b73ec09682a2a01862fc54255\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="76fb65a4b41ea42dab8a1310ed772a2420c96b52">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_50bf2debbb10542c43bf15b65b9fee93d76af4f5\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\95c033f104b8fcae7a701957ed2142136405d25a\output\jars\libs\internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="e5343c9d19cb19ff55f6b268c7f3fe8c9d224f6f">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-25.0.0_f0abc9d6e880c34154051160562e67f519f51bdd\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\f68c802097863068c369dabc1b5d3f416a9a0aa1\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="53a420cd4f49274db6bd43475f8006ba67ef6bbd">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_2d1fff11eb4e0ce81b90e5c6ea5d7c0746e05254\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\04aec08da9aa0ebb8ca9f427705ce367cc2f03d1\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="26384be22ddc74cfe197ebda9edbc7d1fd8bd537">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_243f339d1f31112114a8a5f1a6af4881e870b0a1\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\6392c17c4e62208d726fa92552b2712332d155ad\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="a890ee8445927649d9ed50f625a315d8758688be">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_bcc97f80ceb68f8883ee5235fc3e2f5d71ca9645\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\8bd85e87c5c7377cd60cffe9864357c484d54363\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="5e497d60f0cb6ce87c458ac5420a46d0fed49bd0">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_8f2827de6b2a394896f831be82ff8d763ae13441\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\b6e8c7ad6e2f1d0e6f4d8474f611461ea2b5bca7\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="8a372c4191f80489770a231f7be4820b204b886a">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_723a524621b83f642fea159de1f9b6dd93caa224\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\d2c582681cb283c9190c827db9a55ff651084643\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="75b1f366ff0bbc78f8b1f7cf0dc82e7c53afef6a">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_bedb078678fe79dda6e1fc1a1bbe653e49efd8be\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\ae4e3823c78daf06476be13e953bdca19954fb86\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="4ccbcda5c72027c7f7c14be9ff8640d9cb0d8da0">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_0c025f58371e7bd203fdb9f8a34300f465d0db27\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\ae4e3823c78daf06476be13e953bdca19954fb86\output\jars\libs\internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="3b61a70884adaf0be3fc06c70c801e3e6df13133">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-25.0.0_ec7a604497966fca00e49521a9b8166b426a86bc\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\74d35ef4fc5be09be0b73d3e54c5791f2fce08db\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_21dc0479c1a2e8bb033e78d2b7d0da94d24441c5\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\1f1a75351a8525cf7dcc459e005691d847ea65f6\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="0c6d948e6cb9ea6f535d175fb61ba2930719c0e9">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_7ab9d5b03d6aad73d80b9a30909b5b25b60b7949\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\505d34213a56567b73ec09682a2a01862fc54255\output\jars\libs\internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="665d21a8a069c96b4d9e8b434f5096d865b4e261">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-25.0.0_358a20cd6f33f190fa3ccf93c55f36a73416a530\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\d2c582681cb283c9190c827db9a55ff651084643\output\jars\libs\internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="f2e3b9bc1ec25f652e8007ce7774c991e38f6a00">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-25.0.0_49c64cd7b2e6093c7d4847348d8d01339333a646\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\95c033f104b8fcae7a701957ed2142136405d25a\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="26674000177e45447a0326a6ad84612761199a13">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_f271c5a3f38e2aeeb2bf0aa52d11e0a109cba1be\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\incremental-classes\debug\instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="fdf80e28589ae98af129b69028ddea8865c4df13">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10000\instant-run-bootstrap_f8a6d64b5754f79db62f8602cdc86a3d8776307a\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\3d030c9171453242ef67616084489e5399f780e8\output\jars\libs\internal_impl-25.0.0.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="ee5faf4dee5b6a4364bf51587871047dde7c703a">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-25.0.0_868357181e0f9bc77e5f8aed6955c90d5e2bc0ec\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\3d030c9171453242ef67616084489e5399f780e8\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="07daa0b6e1d455c82a38422ffe287c18823d339a">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_0351fb6fbfaeb9b1d38cd54a2c761eb3060c02ca\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\76d4291f9c0b046f79f257993338479c58149e12\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="8bc45ce1f63d1a391fd38b32a201be5a42f9c95d">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_4a2aca9c93808b8b1b205fa95fb03035f8d4ee02\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\jvg63\.android\build-cache\fa068de8096c0e2d0fcd5d1aeacefac7781af01c\output\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="68956f5ba1517b7a3d513ba540548e257741cbae">
+        <dex dex="C:\Users\jvg63\AndroidStudioProjects\TrivialAndroid\app\build\intermediates\transforms\dex\debug\folders\1000\10\classes_c55df30554b9bd1f31f8e0626470223db45f2e30\classes.dex" />
+    </item>
+
+</items>
