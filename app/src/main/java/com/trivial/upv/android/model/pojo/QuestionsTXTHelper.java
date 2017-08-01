@@ -6,6 +6,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.trivial.upv.android.activity.SignInActivity;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,9 +24,16 @@ public class QuestionsTXTHelper {
     private Category mCategory;
     private Context context;
 
+    public List<QuestionsTXT> getQuestions() {
+        return mQuestions;
+    }
+
+    private List<QuestionsTXT> mQuestions = new ArrayList<>();
+
     public QuestionsTXTHelper(Context context, Category category) {
         this.mCategory = category;
         this.context = context;
+        mQuestions = new ArrayList<>();
     }
 
     public void obtienePreguntasAleatorias() {
@@ -36,11 +45,10 @@ public class QuestionsTXTHelper {
         tarea.execute();
     }
 
-    private static class EnviarMensajeEnServidorWebTask extends AsyncTask<Void, Void, String> {
+    private class EnviarMensajeEnServidorWebTask extends AsyncTask<Void, Void, String> {
         String response = "ok";
         Context contexto;
         List<String> mensaje;
-        List<QuestionsTXT> questions = new ArrayList<>();
 
         @Override
         public void onPreExecute() {
@@ -128,7 +136,7 @@ public class QuestionsTXTHelper {
                         in.close();
                         conexion.disconnect();
 
-                        questions.add(questionsTXT);
+                        mQuestions.add(questionsTXT);
                     } else {
                         response = "error";
                     }
