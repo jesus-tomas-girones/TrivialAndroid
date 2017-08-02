@@ -1,4 +1,4 @@
-package com.trivial.upv.android.model.pojo;
+package com.trivial.upv.android.model.pojo.preguntastxt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.List;
  * Created by jvg63 on 30/07/2017.
  */
 
-class QuestionTXT {
+public class QuestionTXT {
     private String enunciado;
     private List<String> respuestas;
     private List<Integer> respuestaCorrecta;
