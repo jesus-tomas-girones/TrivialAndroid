@@ -128,7 +128,7 @@ public class Category {
         return quizzes;
     }
 
-    public void setQuizzes(List<Quiz> quizzes2) {
+    public void setQuizzes(List<Quiz> quizzes) {
         this.quizzes = quizzes;
     }
 
