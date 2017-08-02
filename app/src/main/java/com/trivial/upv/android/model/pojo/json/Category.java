@@ -1,16 +1,20 @@
 
-package com.trivial.upv.android.model.pojo;
+package com.trivial.upv.android.model.pojo.json;
 
-import java.util.List;
+import android.util.Log;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.trivial.upv.android.model.quiz.Quiz;
+
+import java.util.List;
 
 public class Category {
 
-    @SerializedName("id")
+    /*@SerializedName("id")
     @Expose
     private String id;
-    @SerializedName("category")
+    @SerializedName("category")*/
     @Expose
     private String category;
     @SerializedName("access")
@@ -34,18 +38,19 @@ public class Category {
     @SerializedName("subcategories")
     @Expose
     private List<Category> subcategories = null;
-    @SerializedName("quizzes")
+    /*@SerializedName("quizzes")
     @Expose
-    private List<String> quizzes = null;
+    private List<String> quizzes = null;*/
+    private List<Quiz> quizzes = null;
 
 
-    public String getId() {
+    /*public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
+    }*/
 
     public String getCategory() {
         return category;
@@ -111,11 +116,19 @@ public class Category {
         this.subcategories = subcategories;
     }
 
-    public List<String> getQuizzes() {
+    /*public List<String> getQuizzes() {
         return quizzes;
     }
 
     public void setQuizzes(List<String> quizzes) {
+        this.quizzes = quizzes;
+    }*/
+
+    public List<Quiz> getQuizzes() {
+        return quizzes;
+    }
+
+    public void setQuizzes(List<Quiz> quizzes2) {
         this.quizzes = quizzes;
     }
 
