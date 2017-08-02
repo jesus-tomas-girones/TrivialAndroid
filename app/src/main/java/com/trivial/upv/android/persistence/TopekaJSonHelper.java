@@ -38,8 +38,17 @@ import org.json.JSONArray;
 public class TopekaJSonHelper {
 
     public static Quiz createQuizDueToType(QuestionTXT questionTXT, String type) {
-        // "magic numbers" based on QuizTable#PROJECTION
-        //final String type = cursor.getString(2);
+        //JVG.S
+// "magic numbers" based on QuizTable#PROJECTION
+//        final String type = cursor.getString(2);
+//        final String question = cursor.getString(3);
+//        final String answer = cursor.getString(4);
+//        final String options = cursor.getString(5);
+//        final int min = cursor.getInt(6);
+//        final int max = cursor.getInt(7);
+//        final int step = cursor.getInt(8);
+//        final boolean solved = getBooleanFromDatabase(cursor.getString(11));
+
         final String question = questionTXT.getEnunciado();
         final String answer = new JSONArray(questionTXT.getRespuestaCorrecta()).toString();
         final String options = new JSONArray(questionTXT.getRespuestas()).toString();
@@ -47,7 +56,7 @@ public class TopekaJSonHelper {
         final int max = 0;
         final int step = 0;
         final boolean solved = false;
-
+// JVG.E
         switch (type) {
             case JsonAttributes.QuizType.ALPHA_PICKER: {
                 return new AlphaPickerQuiz(question, answer, solved);
@@ -123,10 +132,7 @@ public class TopekaJSonHelper {
     private static Quiz createToggleTranslateQuiz(String question, String answer,
                                                   String options, boolean solved) {
         final int[] answerArray = JsonHelper.jsonArrayToIntArray(answer);
-        // JVG.S
-//        final String[][] optionsArrays = extractOptionsArrays(options);
-        final String[][] optionsArrays = null;
-        // JVG.E
+        final String[][] optionsArrays = extractOptionsArrays(options);
         return new ToggleTranslateQuiz(question, answerArray, optionsArrays, solved);
     }
 
@@ -139,5 +145,14 @@ public class TopekaJSonHelper {
         return new TrueFalseQuiz(question, answerValue, solved);
     }
 
+
+    private static String[][] extractOptionsArrays(String options) {
+        final String[] optionsLvlOne = JsonHelper.jsonArrayToStringArray(options);
+        final String[][] optionsArray = new String[optionsLvlOne.length][];
+        for (int i = 0; i < optionsLvlOne.length; i++) {
+            optionsArray[i] = JsonHelper.jsonArrayToStringArray(optionsLvlOne[i]);
+        }
+        return optionsArray;
+    }
 
 }
