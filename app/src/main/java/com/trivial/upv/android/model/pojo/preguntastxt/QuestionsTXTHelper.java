@@ -264,10 +264,8 @@ public class QuestionsTXTHelper {
                         }
 
                         quizzes.add(quizz);
-                        Log.d("QUIZZES", quizz.getType() + " - " + quizz.getQuestion());
+                        //Log.d("QUIZZES", quizz.getType() + " - " + quizz.getQuestion());
 
-                        if (quizz.getQuestion() == null)
-                            Log.d("NULL", "NULL");
 
                     }
 
@@ -289,11 +287,10 @@ public class QuestionsTXTHelper {
         public void onPostExecute(String res) {
             if (res == "ok") {
                 pendingRequests--;
-
                 if (pendingRequests == 0) {
                     Log.d("CARGA", "CARGA_FINALIZADA_TXT");
-                    ((SignInActivity)mContext).closeDialogProgress();
-                }else {
+                    ((SignInActivity) mContext).closeDialogProgress();
+                } else if (pendingRequests < 0) {
                     Log.d("CARGA", "pendientes: " + pendingRequests);
 
                 }
@@ -302,6 +299,7 @@ public class QuestionsTXTHelper {
             }
         }
     }
+
     /**
      * Partiendo de un fichero JSON generar la estructura recursiva de Categorias, Subcategorias, Sub-Subcategorias, ...
      * hasta llegar al módulo raíz con los Quizzes
@@ -389,8 +387,8 @@ public class QuestionsTXTHelper {
 
                     sub_subcategories.add(sub_subcategory);
 
-                    //getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
-                    localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
+                    getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
+//                    localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
                 }
 
 
@@ -409,14 +407,11 @@ public class QuestionsTXTHelper {
     }
 
 
-
     private List<Category> asignaSubtemas(JSONObject subcategorias) throws JSONException, MalformedURLException, URISyntaxException {
 
         JSONObject subcategory;
         List<Category> preguntas = new ArrayList<>();
         Category pregunta = null;
-
-        pendingRequests = 0;
 
         Iterator<String> keys = subcategorias.keys();
         while (keys.hasNext()) {
@@ -466,8 +461,8 @@ public class QuestionsTXTHelper {
 
                         sub_subcategories.add(sub_subcategory);
 
-                        //getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
-                        localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
+                        getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
+//                        localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
                     }
 
 
@@ -509,11 +504,11 @@ public class QuestionsTXTHelper {
             @Override
             public void onResponse(String response) {
                 try {
-                    getQuizzesFromString(sub_subcategory, response,urlStr);
+                    getQuizzesFromString(sub_subcategory, response, urlStr);
                     pendingRequests--;
                     if (pendingRequests == 0) {
                         Log.d("CARGA", "CARGA_FINALIZADA");
-                        ((SignInActivity)mContext).closeDialogProgress();
+                        ((SignInActivity) mContext).closeDialogProgress();
 
 
                     }
