@@ -1,7 +1,6 @@
 {
-  "categories": [
-    {
-      "id": "0_mooc",
+  "categories": {
+    "0_mooc": {
       "category": "MOOC Introducción",
       "access": 0,
       "success": 0,
@@ -9,9 +8,8 @@
       "theme": "blue",
       "img": "https://www.edx.org/sites/default/files/theme/edx-logo-header.png",
       "moreinfo": "https://www.edx.org/course/android-introduccion-la-programacion-upvalenciax-aip201x-1",
-      "subcategories": [
-        {
-          "id": "0_java",
+      "subcategories": {
+        "0_java": {
           "category": "Java y POO",
           "access": 0,
           "success": 0,
@@ -31,8 +29,7 @@
             "http://mmoviles.upv.es/test_fundamentos/0_8%20Tipos%20de%20enumerados%20en%20Java.txt"
           ]
         },
-        {
-          "id": "1_intro",
+        "1_intro": {
           "category": "Introducción a Android y entorno de desarrollo",
           "access": 0,
           "success": 0,
@@ -53,8 +50,7 @@
             "http://mmoviles.upv.es/test_fundamentos/1_8 Elementos de un proyecto.txt"
           ]
         },
-        {
-          "id": "2_interfaz",
+        "2_interfaz": {
           "category": "Interfaz de usuario",
           "access": 0,
           "success": 0,
@@ -74,8 +70,7 @@
             "http://mmoviles.upv.es/test_fundamentos/2_9 Estilos y temas.txt"
           ]
         },
-        {
-          "id": "3_actividades",
+        "3_actividades": {
           "category": "Actividades",
           "access": 0,
           "success": 0,
@@ -91,8 +86,7 @@
             "http://mmoviles.upv.es/test_fundamentos/3_5 Preferencias.txt"
           ]
         },
-        {
-          "id": "4_recyclerview",
+        "4_recyclerview": {
           "category": "RecyclerView e Intenciones",
           "access": 0,
           "success": 0,
@@ -106,8 +100,7 @@
             "http://mmoviles.upv.es/test_fundamentos/3_8 Repaso y temas varios.txt"
           ]
         },
-        {
-          "id": "5_seguridad",
+        "5_seguridad": {
           "category": "Ciclo de vida, multimedia y seguridad",
           "access": 0,
           "success": 0,
@@ -126,8 +119,7 @@
             "http://mmoviles.upv.es/test_fundamentos/7_3b Los permisos en Android 6.txt"
           ]
         },
-        {
-          "id": "6_posicionamiento",
+        "6_posicionamiento": {
           "category": "Posicionamiento y mapas",
           "access": 0,
           "success": 0,
@@ -142,8 +134,7 @@
             "http://mmoviles.upv.es/test_fundamentos/7_7 Google Maps.txt"
           ]
         },
-        {
-          "id": "7_bases_de_datos",
+        "7_bases_de_datos": {
           "category": "Bases de datos y Fragments",
           "access": 0,
           "success": 0,
@@ -157,10 +148,9 @@
             "http://mmoviles.upv.es/test_fundamentos/7_3 Fragments.txt"
           ]
         }
-      ]
+      }
     },
-    {
-      "id": "1_fundamentos",
+    "1_fundamentos": {
       "category": "Android Fundamentos",
       "access": 0,
       "success": 0,
@@ -168,9 +158,8 @@
       "theme": "green",
       "img": "http://www.androidcurso.com/images/LogosCursos/fundamentos.png",
       "moreinfo": "http://www.androidcurso.com/index.php/modulo-avanzado/programa-fundamentos",
-      "subcategories": [
-        {
-          "id": "1_intro",
+      "subcategories": {
+        "1_intro": {
           "category": "La plataforma Android",
           "access": 0,
           "success": 0,
@@ -191,8 +180,7 @@
             "http://mmoviles.upv.es/test_fundamentos/1_8 Elementos de un proyecto.txt"
           ]
         },
-        {
-          "id": "2_",
+        "2_": {
           "category": "Diseño de la interfaz de usuario",
           "access": 0,
           "success": 0,
@@ -212,8 +200,7 @@
             "http://mmoviles.upv.es/test_fundamentos/2_9 Estilos y temas.txt"
           ]
         },
-        {
-          "id": "3_",
+        "3_": {
           "category": "Actividades e Intenciones",
           "access": 0,
           "success": 0,
@@ -232,8 +219,7 @@
             "http://mmoviles.upv.es/test_fundamentos/3_8 Repaso y temas varios.txt"
           ]
         },
-        {
-          "id": "4_",
+        "4_": {
           "category": "Gráficos en Android",
           "access": 0,
           "success": 0,
@@ -246,8 +232,7 @@
             "http://mmoviles.upv.es/test_fundamentos/4_2_Drawable.txt"
           ]
         },
-        {
-          "id": "5_",
+        "5_": {
           "category": "Hilos de ejecución y entradas en Android",
           "access": 0,
           "success": 0,
@@ -263,8 +248,7 @@
             "http://mmoviles.upv.es/test_fundamentos/5_6_Sensores.txt"
           ]
         },
-        {
-          "id": "6_",
+        "6_": {
           "category": "Multimedia y ciclo de vida de una actividad",
           "access": 0,
           "success": 0,
@@ -279,8 +263,7 @@
             "http://mmoviles.upv.es/test_fundamentos/6_4_multimedia.txt"
           ]
         },
-        {
-          "id": "7_",
+        "7_": {
           "category": "Seguridad y posicionamiento",
           "access": 0,
           "success": 0,
@@ -299,8 +282,7 @@
             "http://mmoviles.upv.es/test_fundamentos/7_7 Google Maps.txt"
           ]
         },
-        {
-          "id": "8_",
+        "8_": {
           "category": "Servicios, notificaciones y receptores de anuncios",
           "access": 0,
           "success": 0,
@@ -316,8 +298,7 @@
             "http://mmoviles.upv.es/test_fundamentos/8_5 Receptor comunicacion.txt"
           ]
         },
-        {
-          "id": "9_",
+        "9_": {
           "category": "Almacenamiento de datos",
           "access": 0,
           "success": 0,
@@ -335,8 +316,7 @@
             "http://mmoviles.upv.es/test_fundamentos/9_7 ContentProvider.txt"
           ]
         },
-        {
-          "id": "10_",
+        "10_": {
           "category": "Internet: sockets, HTTP y servicios web",
           "access": 0,
           "success": 0,
@@ -350,7 +330,7 @@
             "http://mmoviles.upv.es/test_fundamentos/10_3 Servicios Web.txt"
           ]
         }
-      ]
+      }
     }
-  ]
+  }
 }
