@@ -41,6 +41,7 @@ import com.trivial.upv.android.model.Player;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.quiz.Quiz;
 import com.trivial.upv.android.persistence.TopekaDatabaseHelper;
+import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 import com.trivial.upv.android.widget.quiz.AbsQuizView;
 
@@ -79,7 +80,10 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         String categoryId = getArguments().getString(Category.TAG);
-        mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
+        //JVG.S
+        //mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
+        mCategory = TopekaJSonHelper.getCategoryWith(categoryId);
+        //JVG.E
         super.onCreate(savedInstanceState);
     }
 
@@ -222,7 +226,10 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         final int count = mQuizView.getAdapter().getCount();
         if (nextItem < count) {
             mQuizView.showNext();
-            TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
+            //JVG.S
+            /// Actualizar el estado de los test
+            //TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
+            //JVG.E
             return true;
         }
         markCategorySolved();
@@ -231,7 +238,12 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 
     private void markCategorySolved() {
         mCategory.setSolved(true);
-        TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
+
+        //JVG.S
+        ///TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
+        /// Actualizar el estado de los test
+        TopekaJSonHelper.updateCategory();
+        //JVG.E
     }
 
     public void showSummary() {

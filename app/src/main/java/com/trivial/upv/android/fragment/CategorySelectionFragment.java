@@ -30,20 +30,23 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 import com.trivial.upv.android.R;
+import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
-import com.trivial.upv.android.adapter.CategoryAdapter;
+import com.trivial.upv.android.adapter.CategoryAdapterJSON;
 import com.trivial.upv.android.helper.TransitionHelper;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
+import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.OffsetDecoration;
-import com.trivial.upv.android.activity.QuizActivity;
-import com.trivial.upv.android.helper.TransitionHelper;
-import com.trivial.upv.android.model.JsonAttributes;
-import com.trivial.upv.android.widget.OffsetDecoration;
+
+import java.util.List;
 
 public class CategorySelectionFragment extends Fragment {
 
-    private CategoryAdapter mAdapter;
+    //JVG.S
+    //private CategoryAdapter mAdapter;
+    private CategoryAdapterJSON mAdapter;
+    //JVG.E
     private static final int REQUEST_CATEGORY = 0x2300;
 
     public static CategorySelectionFragment newInstance() {
@@ -56,27 +59,62 @@ public class CategorySelectionFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_categories, container, false);
     }
 
+    private RecyclerView categoriesView;
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        setUpQuizGrid((RecyclerView) view.findViewById(R.id.categories));
+        //JVG.S
+        ///setUpQuizGrid((RecyclerView) view.findViewById(R.id.categories););
+        categoriesView = (RecyclerView) view.findViewById(R.id.categories);
+        //JVG.E
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void setUpQuizGrid(final RecyclerView categoriesView) {
+    public CategoryAdapterJSON getAdapter() {
+        return mAdapter;
+    }
+
+    public void setUpQuizGrid() {
+
         final int spacing = getContext().getResources()
                 .getDimensionPixelSize(R.dimen.spacing_nano);
         categoriesView.addItemDecoration(new OffsetDecoration(spacing));
-        mAdapter = new CategoryAdapter(getActivity());
+        //JVG.S
+        //mAdapter = new CategoryAdapter(getActivity());
+        mAdapter = new CategoryAdapterJSON(getActivity());
+        //JVG.E
+
+        //JVG.S
         mAdapter.setOnItemClickListener(
-                new CategoryAdapter.OnItemClickListener() {
+                new CategoryAdapterJSON.OnItemClickListener() {
                     @Override
                     public void onClick(View v, int position) {
+                        if (TopekaJSonHelper.categoriesCurrent.get(position).getSubcategories() == null) {
+                            // Mostrar Quizzes
+                            Activity activity = getActivity();
+                            startQuizActivityWithTransition(activity,
+                                    v.findViewById(R.id.category_title),
+                                    mAdapter.getItem(position));
+                        } else {
+                            // Mostrar Subcategorias
+
+                            TopekaJSonHelper.navigateNextCategory(position);
+
+                            mAdapter.updateCategories();
+                            mAdapter.notifyDataSetChanged();
+                        }
+
+
+                        // JVG.S
+                        /*
                         Activity activity = getActivity();
                         startQuizActivityWithTransition(activity,
                                 v.findViewById(R.id.category_title),
-                                mAdapter.getItem(position));
+                                mAdapter.getItem(position));*/
+                        // JVG.E
                     }
                 });
+        //JVG.E
         categoriesView.setAdapter(mAdapter);
         categoriesView.getViewTreeObserver()
                 .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -92,7 +130,11 @@ public class CategorySelectionFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CATEGORY && resultCode == R.id.solved) {
+
+            /// Actualizar el estado de los test
+            /// mAdapter.notifyItemChanged(data.getStringExtra(JsonAttributes.ID));
             mAdapter.notifyItemChanged(data.getStringExtra(JsonAttributes.ID));
+            //JVG.E
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -114,5 +156,6 @@ public class CategorySelectionFragment extends Fragment {
                 REQUEST_CATEGORY,
                 transitionBundle);
     }
+
 
 }

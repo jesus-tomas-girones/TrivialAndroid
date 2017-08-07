@@ -23,8 +23,6 @@ import android.util.Log;
 
 import com.trivial.upv.android.helper.ParcelableHelper;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.helper.ParcelableHelper;
-import com.trivial.upv.android.model.quiz.Quiz;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,21 +51,33 @@ public class Category implements Parcelable {
     private List<Quiz> mQuizzes;
     private boolean mSolved;
 
+    //JVG.S
+    private final String mImg;
+
+    public String getImg() {
+        return mImg;
+    }
+    //JVG.S
+
     public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
-                    @NonNull List<Quiz> quizzes, boolean solved) {
+                    @NonNull List<Quiz> quizzes, boolean solved, @NonNull String img) {
         mName = name;
         mId = id;
         mTheme = theme;
         mQuizzes = quizzes;
         mScores = new int[quizzes.size()];
         mSolved = solved;
+        mImg = img;
     }
 
+    // JVG.S
     public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
                     @NonNull List<Quiz> quizzes, @NonNull int[] scores, boolean solved) {
         mName = name;
         mId = id;
         mTheme = theme;
+
+        // JVG.S
         if (quizzes.size() == scores.length) {
             mQuizzes = quizzes;
             mScores = scores;
@@ -75,6 +85,30 @@ public class Category implements Parcelable {
             throw new IllegalArgumentException("Quizzes and scores must have the same length");
         }
         mSolved = solved;
+        //JVG.S
+        mImg = null;
+        //JVG.E
+    }
+    // JVG.E
+
+    public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
+                    @NonNull List<Quiz> quizzes, @NonNull int[] scores, boolean solved, @NonNull String img) {
+        mName = name;
+        mId = id;
+        mTheme = theme;
+
+        // JVG.S
+        /*if (quizzes.size() == scores.length) {
+            mQuizzes = quizzes;
+            mScores = scores;
+        } else {
+            throw new IllegalArgumentException("Quizzes and scores must have the same length");
+        }*/
+        mQuizzes = quizzes;
+        mScores = scores;
+        //JVG.E
+        mSolved = solved;
+        mImg = img;
     }
 
     protected Category(Parcel in) {
@@ -85,6 +119,8 @@ public class Category implements Parcelable {
         in.readTypedList(mQuizzes, Quiz.CREATOR);
         mScores = in.createIntArray();
         mSolved = ParcelableHelper.readBoolean(in);
+        mImg = in.readString();
+        ;
     }
 
     public String getName() {
@@ -107,7 +143,7 @@ public class Category implements Parcelable {
     /**
      * Updates a score for a provided quiz within this category.
      *
-     * @param which The quiz to rate.
+     * @param which           The quiz to rate.
      * @param correctlySolved <code>true</code> if the quiz was solved else <code>false</code>.
      */
     public void setScore(Quiz which, boolean correctlySolved) {
@@ -186,6 +222,7 @@ public class Category implements Parcelable {
                 ", mQuizzes=" + mQuizzes +
                 ", mScores=" + Arrays.toString(mScores) +
                 ", mSolved=" + mSolved +
+                ", mImg=" + mImg +
                 '}';
     }
 
@@ -202,6 +239,7 @@ public class Category implements Parcelable {
         dest.writeTypedList(getQuizzes());
         dest.writeIntArray(mScores);
         ParcelableHelper.writeBoolean(dest, mSolved);
+        dest.writeString(mImg);
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -229,6 +267,10 @@ public class Category implements Parcelable {
             return false;
         }
 
+        if (!mImg.equals(category.mImg)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -238,6 +280,7 @@ public class Category implements Parcelable {
         result = 31 * result + mId.hashCode();
         result = 31 * result + mTheme.hashCode();
         result = 31 * result + mQuizzes.hashCode();
+        result = 31 * result + mImg.hashCode();
         return result;
     }
 }

@@ -26,6 +26,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -48,13 +49,17 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.fragment.QuizFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.ViewUtils;
+import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.persistence.TopekaDatabaseHelper;
+import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.TextSharedElementCallback;
 import com.trivial.upv.android.model.JsonAttributes;
 
@@ -394,7 +399,12 @@ public class QuizActivity extends AppCompatActivity {
             Log.w(TAG, "Didn't find a category. Finishing");
             finish();
         }
-        mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
+        // JVG.S
+        // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
+        mCategory = TopekaJSonHelper.getCategoryWith(categoryId);
+
+
+        // JVG.E
         setTheme(mCategory.getTheme().getStyleId());
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
             Window window = getWindow();
@@ -409,10 +419,23 @@ public class QuizActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quiz);
         //noinspection PrivateResource
         mIcon = (ImageView) findViewById(R.id.icon);
-        int resId = getResources().getIdentifier(IMAGE_CATEGORY + categoryId, DRAWABLE,
-                getApplicationContext().getPackageName());
-        mIcon.setImageResource(resId);
-        mIcon.setImageResource(resId);
+        //JVG.S
+//        int resId = getResources().getIdentifier(IMAGE_CATEGORY + categoryId, DRAWABLE,
+//                getApplicationContext().getPackageName());
+//        mIcon.setImageResource(resId);
+//        mIcon.setImageResource(resId);
+        VolleySingleton.getLectorImagenes().get(mCategory.getImg(), new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                mIcon.setImageBitmap(response.getBitmap());
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        //JVG.E
         ViewCompat.animate(mIcon)
                 .scaleX(1)
                 .scaleY(1)

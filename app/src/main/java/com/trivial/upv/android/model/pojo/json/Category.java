@@ -42,7 +42,7 @@ public class Category {
     @Expose
     private List<String> quizzes = null;*/
     private List<Quiz> quizzes = null;
-
+    private int[] score= null;
 
     /*public String getId() {
         return id;
@@ -132,4 +132,11 @@ public class Category {
         this.quizzes = quizzes;
     }
 
+    public int[] getScore() {
+        return score;
+    }
+
+    public void setScore(int[] score) {
+        this.score = score;
+    }
 }

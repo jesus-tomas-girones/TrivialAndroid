@@ -10,7 +10,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.trivial.upv.android.R;
-import com.trivial.upv.android.activity.SignInActivity;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.pojo.json.Category;
@@ -36,13 +35,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.trivial.upv.android.persistence.TopekaJSonHelper.createArrayIntFromNumQuizzes;
+import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessage;
+import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessageRefresh;
+
 /**
  * Created by jvg63 on 30/07/2017.
  */
 
 public class QuestionsTXTHelper {
 
+    public static String JsonURL = "https://trivialandroid-d2b33.firebaseio.com/.json";
+
     Context mContext;
+
 
     public QuestionsTXTHelper(Context signInActivity) {
         mContext = signInActivity;
@@ -53,16 +59,10 @@ public class QuestionsTXTHelper {
      *
      * @param category
      * @param preguntasTXT
-     * @param urlStr
      * @throws UnsupportedEncodingException
      */
-    public void getQuizzesFromString(Category category, String preguntasTXT, String urlStr) throws UnsupportedEncodingException {
+    public void getQuizzesFromString(Category category, String preguntasTXT) throws UnsupportedEncodingException {
         String line;
-
-
-        if (urlStr.equals("http://mmoviles.upv.es/test_fundamentos/1_1%20Que%20hace%20de_%20y%20Origenes.txt")) {
-            Log.d("PARADA", "TECNICA");
-        }
 
         String utf8 = URLDecoder.decode(URLEncoder.encode(preguntasTXT, "iso8859-1"), "UTF-8");
 
@@ -74,7 +74,7 @@ public class QuestionsTXTHelper {
         String[] preguntas = utf8.split("\\r?\\n");
         int contador = 0;
         for (; contador < preguntas.length; contador++) {
-            line = preguntas[contador];
+            line = removeWordsUnWanted(preguntas[contador]);
             // Primera linea: Temática
             if (contador == 0) {
                 questionTXT = new QuestionTXT();
@@ -125,22 +125,20 @@ public class QuestionsTXTHelper {
             } else {
                 quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.SINGLE_SELECT);
             }
-
             quizzes.add(quizz);
-            Log.d("QUIZZES", quizz.getType() + " - " + quizz.getQuestion());
-
-            if (quizz.getQuestion() == null)
-                Log.d("NULL", "NULL");
-
         }
         category.setQuizzes(quizzes);
+        category.setScore(createArrayIntFromNumQuizzes(category));
     }
 
 
     int pendingRequests = 0;
+    int maxPendingRequests = 0;
 
     public void getQuizzesAsyncTask(Category category, String url) {
         pendingRequests++;
+        maxPendingRequests++;
+
         EnviarMensajeEnServidorWebTask tarea = new EnviarMensajeEnServidorWebTask();
         tarea.url = url;
         tarea.category = category;
@@ -169,7 +167,6 @@ public class QuestionsTXTHelper {
                 //        appendQueryParameter("idapp", ID_PROYECTO).appendQueryParameter("apiKey", API_KEY);
                 String parametros = constructorParametros.build().getEncodedQuery();
 
-                Log.d("FICHERO:", url);
                 URL direccion = new URL(url);
                 HttpURLConnection conexion = (HttpURLConnection) direccion.openConnection();
                 conexion.setRequestMethod("GET");
@@ -205,7 +202,7 @@ public class QuestionsTXTHelper {
                     int contador = 0;
 
                     for (; contador < preguntas.length; contador++) {
-                        line = preguntas[contador];
+                        line = removeWordsUnWanted(preguntas[contador]);
                         // Primera linea: Temática
                         if (contador == 0) {
                             questionTXT = new QuestionTXT();
@@ -238,10 +235,6 @@ public class QuestionsTXTHelper {
                             else {
                                 questionTXT.setEnunciado(line);
                             }
-
-
-                            Log.d("TRZA_FICHERO_URL", line);
-
                         }
 
                     }
@@ -264,74 +257,91 @@ public class QuestionsTXTHelper {
                         }
 
                         quizzes.add(quizz);
-                        //Log.d("QUIZZES", quizz.getType() + " - " + quizz.getQuestion());
-
-
                     }
-
                     category.setQuizzes(quizzes);
 
                 } else {
                     response = "error";
                 }
-            } catch (
-                    IOException e)
-
-            {
+            } catch (IOException e) {
                 response = "error";
             }
-            //}
             return response;
         }
 
         public void onPostExecute(String res) {
             if (res == "ok") {
-                pendingRequests--;
-                if (pendingRequests == 0) {
-                    Log.d("CARGA", "CARGA_FINALIZADA_TXT");
-                    ((SignInActivity) mContext).closeDialogProgress();
-                } else if (pendingRequests < 0) {
-                    Log.d("CARGA", "pendientes: " + pendingRequests);
-
-                }
-                //Toast.makeText(contexto, "Mensaje Enviado Correctamente!", Toast.LENGTH_SHORT).show();
-
+                updateProgress();
             }
         }
     }
+
+    private String removeWordsUnWanted(String line) {
+
+        String lineTmp = line.replaceAll("<code>", "\"");
+        lineTmp = lineTmp.replaceAll("</code>", "\"");
+        lineTmp = lineTmp.replaceAll("<br/>", " ");
+        lineTmp = lineTmp.replaceAll("<br/ >", " ");
+        lineTmp = lineTmp.replaceAll("&nbsp;", " ");
+        return lineTmp;
+    }
+
+    private void updateProgress() {
+        pendingRequests--;
+
+        sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
+
+        if (pendingRequests == 0) {
+            Log.d("CARGA", "CARGA_FINALIZADA");
+
+            sendBroadCastMessage("OK");
+
+            TopekaJSonHelper.isLoaded = true;
+            TopekaJSonHelper.updateCategory();
+
+        }
+        Log.d("CARGA", "PENDING:" + pendingRequests);
+    }
+
+
+    public static boolean DEBUG = false;
 
     /**
      * Partiendo de un fichero JSON generar la estructura recursiva de Categorias, Subcategorias, Sub-Subcategorias, ...
      * hasta llegar al módulo raíz con los Quizzes
      *
-     * @param mContext
+     * @param mJSON
      * @throws IOException
      * @throws JSONException
      */
-    public List<Category> readCategoriesFromJSON(Context mContext) throws IOException, JSONException, URISyntaxException {
+    public List<Category> readCategoriesFromJSON(JSONObject mJSON) throws IOException, JSONException, URISyntaxException {
 
         List<Category> mCategories = new ArrayList<>();
+        JSONObject root;
 
-        StringBuilder categoriesJson = new StringBuilder();
-        InputStream rawCategories = mContext.getResources().openRawResource(R.raw.categories_upv);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(rawCategories));
-        String line;
+        if (DEBUG) {
+            String line;
+            StringBuilder categoriesJson = new StringBuilder();
+            InputStream rawCategories = mContext.getResources().openRawResource(R.raw.categories_upv);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(rawCategories));
 
-        // Crear una cadena con el Fichero JSON completo
-        while ((line = reader.readLine()) != null) {
-            categoriesJson.append(line);
+            // Crear una cadena con el Fichero JSON completo
+            while ((line = reader.readLine()) != null) {
+                categoriesJson.append(line);
+            }
+            rawCategories.close();
+            reader.close();
+            // Recorremos el JSON
+            String categoriesStr = categoriesJson.toString();
+            // Raiz principal
+            root = new JSONObject(categoriesStr);
+
+        } else {
+            root = mJSON;
         }
 
-        rawCategories.close();
-        reader.close();
-
-        // Recorremos el JSON
-        String categoriesStr = categoriesJson.toString();
-        // Raiz principal
-        JSONObject root = new JSONObject(categoriesStr);
         // Objeto categories
         JSONObject categories = root.getJSONObject("categories");
-
 
         // Genera tantas categorías como keys distintos tiene el JSON
         JSONObject category;
@@ -371,7 +381,6 @@ public class QuestionsTXTHelper {
                 Category sub_subcategory = null;
 
                 for (int j = 0; j < preguntasJSon.length(); j++) {
-
                     sub_subcategory = new Category();
                     //sub_subcategory.setCategory(subcategory.getString("category"));
                     sub_subcategory.setAccess(category.getLong("access"));
@@ -382,7 +391,6 @@ public class QuestionsTXTHelper {
                     sub_subcategory.setTheme(category.getString("theme"));
                     // Añade manualmente las subtcategorias de las preguntas
 
-
                     quizzies.add((String) preguntasJSon.get(j));
 
                     sub_subcategories.add(sub_subcategory);
@@ -390,22 +398,16 @@ public class QuestionsTXTHelper {
                     getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
 //                    localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
                 }
-
-
                 mCategory.setSubcategories(sub_subcategories);
-
+                // Los QUIZZIES se asignan mediente peticiones asíncronas
                 ///mCategory.setQuizzes(quizzies);
-
             } else {
-                ///mCategory.setQuizzes(null);
+                mCategory.setQuizzes(null);
             }
-
             mCategories.add(mCategory);
         }
-
         return mCategories;
     }
-
 
     private List<Category> asignaSubtemas(JSONObject subcategorias) throws JSONException, MalformedURLException, URISyntaxException {
 
@@ -439,8 +441,6 @@ public class QuestionsTXTHelper {
                     // Quizzes
                     JSONArray preguntasJSon = subcategory.getJSONArray("quizzes");
 
-                    ///List<String> quizzies = new ArrayList<>();
-
                     List<Category> sub_subcategories = new ArrayList<>();
                     Category sub_subcategory = null;
 
@@ -456,36 +456,24 @@ public class QuestionsTXTHelper {
                         sub_subcategory.setTheme(subcategory.getString("theme"));
                         // Añade manualmente las subtcategorias de las preguntas
 
-
-                        ////quizzies.add((String) preguntasJSon.get(j));
-
                         sub_subcategories.add(sub_subcategory);
 
                         getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
 //                        localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
                     }
-
-
                     pregunta.setSubcategories(sub_subcategories);
-
-                    ////pregunta.setQuizzes(quizzies);
-
+                    // Los QUIZZIES se asignan mediente peticiones asíncronas
                 } else {
                     pregunta.setQuizzes(null);
                 }
             }
-
             preguntas.add(pregunta);
-
         }
         return preguntas;
     }
 
-
     private void localizaPreguntasTXT(Category sub_subcategory, String url) {
         getQuizzesAsyncTask(sub_subcategory, url.replace(" ", "%20"));
-
-
     }
 
     /**
@@ -502,42 +490,23 @@ public class QuestionsTXTHelper {
 
         StringRequest request = new StringRequest(Request.Method.GET, urlStr.replace(" ", "%20"), new Response.Listener<String>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(final String response) {
                 try {
-                    getQuizzesFromString(sub_subcategory, response, urlStr);
-                    pendingRequests--;
-                    if (pendingRequests == 0) {
-                        Log.d("CARGA", "CARGA_FINALIZADA");
-                        ((SignInActivity) mContext).closeDialogProgress();
-
-
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    getQuizzesFromString(sub_subcategory, response);
+                    updateProgress();
+                } catch (UnsupportedEncodingException e1) {
+                    sendBroadCastMessage("ERROR");
                 }
 
             }
-
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
             }
         });
+
         VolleySingleton.getColaPeticiones().add(request);
         pendingRequests++;
-
+        maxPendingRequests++;
     }
-
-    /*private void listaCategorias() {
-
-        int i=0;
-        for (Category category: mCategories) {
-
-            Log.d("CATEGORY: ", ""+  (i++) );
-        }
-    }*/
-
-
 }
-
