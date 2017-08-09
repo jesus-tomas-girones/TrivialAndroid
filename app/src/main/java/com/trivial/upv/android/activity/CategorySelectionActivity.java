@@ -21,13 +21,16 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.databinding.DataBindingUtil;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -40,16 +43,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ActivityCategorySelectionBinding;
 import com.trivial.upv.android.fragment.CategorySelectionFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.Player;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 
@@ -57,9 +56,6 @@ import static com.trivial.upv.android.persistence.TopekaJSonHelper.ACTION_RESP;
 
 public class CategorySelectionActivity extends AppCompatActivity {
 
-    //JVG.S
-    public static final String CARGA_JSON = "CARGA_JSON";
-    //JVG.E
     private static final String EXTRA_PLAYER = "player";
 
     public static void start(Activity activity, Player player, ActivityOptionsCompat options) {
@@ -94,42 +90,57 @@ public class CategorySelectionActivity extends AppCompatActivity {
         }
         binding.setPlayer(player);
         setUpToolbar();
-        // JVG.S
+
         initActivity(savedInstanceState);
-        //JVG.E
 
         // JVG.S
-        pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Cargando...");
-        pDialog.setIndeterminate(false);
-        pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        pDialog.setProgress(0);
-        pDialog.setMax(100);
-        pDialog.setCancelable(true);
-        pDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                if (pDialog != null) {
-                    pDialog.dismiss();
-                    pDialog = null;
-                }
-                VolleySingleton.getColaPeticiones().
-
-                        cancelAll(new RequestQueue.RequestFilter() {
-                            @Override
-                            public boolean apply(Request<?> request) {
-                                return true;
-                            }
-                        });
-            }
-        });
-        pDialog.show();
-
-        filtro = new IntentFilter(ACTION_RESP); filtro.addCategory(Intent.CATEGORY_DEFAULT);
-        receiver = new ReceptorOperacion();
-        TopekaJSonHelper.getInstance(this);
-
+        loadCategories();
         // JVG.E
+    }
+
+    // JVG.S
+    private void loadCategories() {
+        // RECEIVER PARA ACTUALIZAR PROGRESO Y CARGA DE LAS CATEGORIAS
+        filtro = new IntentFilter(ACTION_RESP);
+        filtro.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new ReceptorOperacion();
+
+        if (checkInternetAccess()) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+
+            pDialog = new ProgressDialog(this);
+            pDialog.setMessage("Cargando...");
+            pDialog.setIndeterminate(false);
+            pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pDialog.setProgress(0);
+            pDialog.setMax(100);
+            pDialog.setCancelable(false);
+            pDialog.show();
+
+            new Thread() {
+                public void run() {
+                    TopekaJSonHelper.getInstance(CategorySelectionActivity.this, true);
+                }
+            }.start();
+
+        } else {
+            Snackbar snackbar = Snackbar
+                    .make(findViewById(R.id.category_container), "No hay conexión de Internet.", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("CERRAR", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            finish();
+                        }
+                    });
+
+            snackbar.show();
+        }
+    }
+
+    private boolean checkInternetAccess() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     IntentFilter filtro;
@@ -149,38 +160,49 @@ public class CategorySelectionActivity extends AppCompatActivity {
                     if (pDialog != null) {
                         pDialog.dismiss();
                         pDialog = null;
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
 
                     // Carga categorias
                     Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
                     if (fragment instanceof CategorySelectionFragment) {
-                        ((CategorySelectionFragment) fragment).setUpQuizGrid();
+                        ((CategorySelectionFragment) fragment).getAdapter().updateCategories();
+                        ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
                     }
+                    Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
 
                 } else if ("REFRESH".equals(result)) {
                     if (pDialog != null) {
                         pDialog.setProgress(intent.getExtras().getInt("REFRESH", 0));
                     }
                 } else if ("ERROR".equals(result)) {
-                    Toast.makeText(getBaseContext(), "Ha ocurrido un error cargando las categorías", Toast.LENGTH_SHORT).show();
+                    Snackbar snackbar = Snackbar
+                            .make(findViewById(R.id.root_view), "Ha ocurrido un error cargando las categorías", Snackbar.LENGTH_INDEFINITE)
+                            .setAction("CERRAR", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    finish();
+                                }
+                            });
+
                     if (pDialog != null) {
                         pDialog.dismiss();
                         pDialog = null;
+                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
                     }
-                    VolleySingleton.getColaPeticiones().cancelAll(new RequestQueue.RequestFilter() {
-                        @Override
-                        public boolean apply(Request<?> request) {
-                            return true;
-                        }
-                    });
+
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
+
+                    TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).resetData();
+
+                    snackbar.show();
                 }
             }
         }
 
     }
-
+    // JVG.E
 
     private void initActivity(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
@@ -191,25 +213,22 @@ public class CategorySelectionActivity extends AppCompatActivity {
         supportPostponeEnterTransition();
     }
 
+    //JVG.S
     @Override
     public void onBackPressed() {
-        if (!TopekaJSonHelper.thereAreMorePreviusCategories()) {
+        if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
             super.onBackPressed();
         } else {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
             if (fragment instanceof CategorySelectionFragment) {
-                TopekaJSonHelper.navigatePreviusCategory();
+                TopekaJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
                 ((CategorySelectionFragment) fragment).getAdapter().updateCategories();
-                ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
                 ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
             }
         }
     }
 
     public ProgressDialog pDialog;
-    //JVG.S
-
-
     //JVG.E
 
     @Override
@@ -218,7 +237,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
         TextView scoreView = (TextView) findViewById(R.id.score);
 //      JVG.S
 //        final int score = TopekaDatabaseHelper.getScore(this);
-        final int score = TopekaJSonHelper.getScore();
+        final int score = TopekaJSonHelper.getInstance(getBaseContext(), false).getScore();
 
 //      JVG.E
         scoreView.setText(getString(R.string.x_points, score));
@@ -268,7 +287,8 @@ public class CategorySelectionActivity extends AppCompatActivity {
         PreferencesHelper.signOut(this);
 //        JVG.S
 //        TopekaDatabaseHelper.reset(this);
-        TopekaJSonHelper.reset();
+        TopekaJSonHelper.getInstance(this, false).signOut(getBaseContext());
+
 //        JVG.E
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
             getWindow().setExitTransition(TransitionInflater.from(this)
@@ -291,7 +311,9 @@ public class CategorySelectionActivity extends AppCompatActivity {
     }
 
     private void setProgressBarVisibility(int visibility) {
-        findViewById(R.id.progress).setVisibility(visibility);
+        /// JVG.S
+        /// findViewById(R.id.progress).setVisibility(visibility);
+        /// JVG.E
     }
 
     @Override
@@ -302,17 +324,6 @@ public class CategorySelectionActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        if (pDialog != null) {
-            pDialog.dismiss();
-            pDialog = null;
-        }
-        VolleySingleton.getColaPeticiones().cancelAll(new RequestQueue.RequestFilter() {
-            @Override
-            public boolean apply(Request<?> request) {
-                return true;
-            }
-        });
     }
 
     @Override
@@ -321,6 +332,13 @@ public class CategorySelectionActivity extends AppCompatActivity {
             unregisterReceiver(receiver);
             receiver = null;
         }
+
+        if (pDialog != null) {
+            pDialog.dismiss();
+            pDialog = null;
+        }
+
+
         super.onStop();
     }
 }
