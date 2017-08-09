@@ -59,22 +59,18 @@ public class CategorySelectionFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_categories, container, false);
     }
 
-    private RecyclerView categoriesView;
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        //JVG.S
-        ///setUpQuizGrid((RecyclerView) view.findViewById(R.id.categories););
-        categoriesView = (RecyclerView) view.findViewById(R.id.categories);
-        //JVG.E
+        setUpQuizGrid((RecyclerView) view.findViewById(R.id.categories));
         super.onViewCreated(view, savedInstanceState);
     }
 
+    // JVG.S
     public CategoryAdapterJSON getAdapter() {
         return mAdapter;
     }
-
-    public void setUpQuizGrid() {
+    // JVG.E
+    private void setUpQuizGrid(final RecyclerView categoriesView) {
 
         final int spacing = getContext().getResources()
                 .getDimensionPixelSize(R.dimen.spacing_nano);
@@ -89,7 +85,7 @@ public class CategorySelectionFragment extends Fragment {
                 new CategoryAdapterJSON.OnItemClickListener() {
                     @Override
                     public void onClick(View v, int position) {
-                        if (TopekaJSonHelper.categoriesCurrent.get(position).getSubcategories() == null) {
+                        if (TopekaJSonHelper.getInstance(getContext(), false).getCategoriesCurrent().get(position).getSubcategories() == null) {
                             // Mostrar Quizzes
                             Activity activity = getActivity();
                             startQuizActivityWithTransition(activity,
@@ -98,7 +94,7 @@ public class CategorySelectionFragment extends Fragment {
                         } else {
                             // Mostrar Subcategorias
 
-                            TopekaJSonHelper.navigateNextCategory(position);
+                            TopekaJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
 
                             mAdapter.updateCategories();
                             mAdapter.notifyDataSetChanged();
