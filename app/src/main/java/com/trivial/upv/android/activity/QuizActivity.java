@@ -26,7 +26,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -58,14 +57,10 @@ import com.trivial.upv.android.helper.ViewUtils;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
-import com.trivial.upv.android.persistence.TopekaDatabaseHelper;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.TextSharedElementCallback;
-import com.trivial.upv.android.model.JsonAttributes;
 
 import java.util.List;
-
-import static com.trivial.upv.android.adapter.CategoryAdapter.DRAWABLE;
 
 public class QuizActivity extends AppCompatActivity {
 
