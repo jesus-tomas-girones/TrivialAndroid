@@ -396,7 +396,7 @@ public class QuizActivity extends AppCompatActivity {
         }
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
-        mCategory = TopekaJSonHelper.getCategoryWith(categoryId);
+        mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
 
 
         // JVG.E
