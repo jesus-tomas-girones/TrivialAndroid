@@ -36,15 +36,14 @@ import android.widget.ImageView;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.trivial.upv.android.R;
-import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.databinding.ItemCategoryBinding;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSON.ViewHolder> {
@@ -122,6 +121,7 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
         //JVG.E
         notifyItemChanged(getItemPositionById(id));
     }
+
     private int getItemPositionById(String id) {
         for (int i = 0; i < mCategories.size(); i++) {
 
@@ -145,7 +145,7 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
                 ICON_CATEGORY + category.getId(), DRAWABLE, mPackageName);
         //JVG.S
 //        final boolean solved = category.isSolved();
-        final boolean solved = TopekaJSonHelper.isSolvedCurrentCategory(position);
+        final boolean solved = TopekaJSonHelper.getInstance(mActivity, false).isSolvedCurrentCategory(position);
 
         //JVG.E
         if (solved) {
@@ -163,7 +163,7 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-
+                    Log.d("VOLLEY", "Error cargando icon!");
                 }
             });
             ////icon.setImageUrl(category.getImg(),VolleySingleton.getLectorImagenes());
@@ -172,15 +172,21 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
     }
 
 
-    private int pxFromDp(final float dp) {
-        return (int)(dp * mActivity.getResources().getDisplayMetrics().density);
-    }
-
     public void updateCategories() {
         // JVG.S
         //return TopekaDatabaseHelper.getCategories(activity, true);
-        mCategories = TopekaJSonHelper.getCategories(true);
-        Log.d("FIN", "CATEGORIAS");
+        if (TopekaJSonHelper.getInstance(mActivity, false).isLoaded()) {
+            mCategories = TopekaJSonHelper.getInstance(mActivity, false).getCategories(true);
+            Log.d("ADAPTER", "CATEGORIAS CARGADAS");
+        } else {
+            if (mCategories!=null) {
+                mCategories.clear();
+            }
+            else
+                mCategories = new ArrayList<>();
+            Log.d("ADAPTER", "NO HA TERMINADO LA CARGA DE LAS CATEGORIAS");
+        }
+
         // JVG.E
     }
 
@@ -226,12 +232,12 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
         VolleySingleton.getLectorImagenes().get(category.getImg(), new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                categoryIcon[0] = new BitmapDrawable(mActivity.getResources(),response.getBitmap());
+                categoryIcon[0] = new BitmapDrawable(mActivity.getResources(), response.getBitmap());
             }
 
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Log.d("VOLLEY", "Error cargando icon!");
             }
         });
 

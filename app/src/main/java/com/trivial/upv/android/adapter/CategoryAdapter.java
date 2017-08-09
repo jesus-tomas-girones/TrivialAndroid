@@ -37,10 +37,6 @@ import com.trivial.upv.android.databinding.ItemCategoryBinding;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.persistence.TopekaDatabaseHelper;
-import com.trivial.upv.android.databinding.ItemCategoryBinding;
-import com.trivial.upv.android.helper.ApiLevelHelper;
-import com.trivial.upv.android.model.Category;
-import com.trivial.upv.android.persistence.TopekaDatabaseHelper;
 
 import java.util.List;
 
