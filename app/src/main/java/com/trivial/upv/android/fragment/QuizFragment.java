@@ -81,7 +81,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         String categoryId = getArguments().getString(Category.TAG);
         //JVG.S
         //mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
-        mCategory = TopekaJSonHelper.getCategoryWith(categoryId);
+        mCategory = TopekaJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
         //JVG.E
         super.onCreate(savedInstanceState);
     }
@@ -241,7 +241,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         //JVG.S
         ///TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
         /// Actualizar el estado de los test
-        TopekaJSonHelper.updateCategory();
+        TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
         //JVG.E
     }
 
