@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
@@ -68,198 +69,190 @@ import java.util.List;
 public class TopekaJSonHelper {
     public static final String ACTION_RESP = "com.trivial.upv.android.activity.END_LOADING_CATEGORIES";
 
-    private static final String CARGA_JSON = "CARGA_JSON";
-
     private static Context mContext = null;
-    public static boolean isLoaded = false;
+
+    private boolean isLoaded = false;
 
 
     private TopekaJSonHelper(final Context context) {
-        mContext = context.getApplicationContext();
         isLoaded = false;
-        isSameFileJSON();
+        mContext = context.getApplicationContext();
     }
 
-    private static void isSameFileJSON() {
+
+    //1) Obtiene json de Firebase:
+//    https://trivialandroid-d2b33.firebaseio.com/ (FireBase del Proyecto)
+//2) Compara la versión almacenada en local con la versión descargada
+//	2.1) Si son iguales, búsca si la información está cacheada (fichero json deserializada) con las puntuaciones, quizzes resueltos, etc
+//		2.1.1) Si la información esta cacheada la carga en POJO: List<Category>
+//		2.1.2) Si no,
+//			2.1.2.1) carga List<Category> con los Quizzes a partir de los ficheros txt ubicados en internet, y lo complementa con el ficher .json de categorias
+//			2.1.2.2) Cachéa la información una vez finalizado
+//	2.2) Si son distintos
+//		2.2.1) carga List<Category> con los Quizzes a partir de los ficheros txt ubicados en internet, y lo complementa con el ficher .json de categorias
+//		2.2.2) Cachéa la información una vez finalizado
+//3) Devueve el control a la aplicación.
+    private void isSameFileJSON() {
         StringRequest request = new StringRequest(Request.Method.GET, QuestionsTXTHelper.JsonURL, new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
-                String[] preguntas = response.split("\\r?\\n");
+                new Thread() {
+                    public void run() {
+                        String[] preguntas = response.split("\\r?\\n");
 
-                try {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(mContext.openFileInput("categories.json")));
+                        try {
+                            BufferedReader br = new BufferedReader(new InputStreamReader(mContext.openFileInput("categories.json")));
 
-                    // Line JSON saved
-                    String line = null;
+                            // Line JSON saved
+                            String line = null;
 
+                            boolean iguales = true;
+                            int contador = 0;
+                            while ((line = br.readLine()) != null && contador < preguntas.length && iguales) {
+                                if (!preguntas[contador].equals(line)) {
+                                    iguales = false;
+                                    break;
+                                }
+                                contador++;
+                            }
+                            br.close();
 
-                    boolean iguales = true;
-                    int contador = 0;
-                    while ((line = br.readLine()) != null && contador < preguntas.length && iguales) {
+                            if (contador > 0 && iguales && contador == preguntas.length && line == null) {
+                            /* The same file  Take information from cache*/
+                                Log.d("TRAZA", "fichero no se ha modificado");
+                                readCategoriesFromCache(response, preguntas);
+                                return;
+                            } else {
+                                // New File categories readed. Update
+                                readNewFileJson(response, preguntas, true);
 
-                        if (!preguntas[contador].equals(line)) {
-                            iguales = false;
-                            break;
+                                return;
+                            }
+
+                        } catch (FileNotFoundException e1) {
+                            e1.printStackTrace();
+                            Log.d("TRAZA", "nuevo fichero");
+                            try {
+                                readNewFileJson(response, preguntas, true);
+                                return;
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                                sendBroadCastError("FILE", "Error creando fichero IO");
+                            }
+
+                            // continuar carga
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+
+                            sendBroadCastError("FILE", "Error comparando IO");
+
+                            return;
                         }
-                        contador++;
+
                     }
-
-                    br.close();
-
-                    if (contador > 0 && iguales && contador == preguntas.length && line == null) {
-                        /* The same file
-                        Take information from cache*/
-                        Log.d("TRAZA", "fichero no se ha modificado");
-                        readCategoriesFromCache(response, preguntas);
-                        return;
-                    } else {
-                        // New file
-                        readNewFileJson(response, preguntas, false);
-
-                        return;
-                    }
-
-                } catch (FileNotFoundException e1) {
-                    e1.printStackTrace();
-                    Log.d("TRAZA", "nuevo fichero");
-                    try {
-                        readNewFileJson(response, preguntas, true);
-                        return;
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        Log.e("FILE", "Error creando fichero IO");
-                        sendBroadCastMessage("ERROR");
-                    }
-
-                    // continuar carga
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                    Log.e("FILE", "Error comparando IO");
-                    sendBroadCastMessage("ERROR");
-                    return;
-                }
-
+                }.start();
             }
-        }, new Response.ErrorListener() {
+        }, new Response.ErrorListener()
+
+        {
             @Override
             public void onErrorResponse(VolleyError error) {
+                sendBroadCastError("FILE", "Error recuperando JsonURL");
             }
         });
         VolleySingleton.getColaPeticiones().add(request);
-//        JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET, QuestionsTXTHelper.JsonURL, null,
-//                /* The third parameter Listener overrides the method onResponse() and passes JSONObject as a parameter*/
-//                new Response.Listener<JSONObject>() { /* Takes the response from the JSON request*/
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        readCategoriesFromJSON(response);
-//                    }
-//                }, /* The final parameter overrides the method onErrorResponse() and passes VolleyError as a parameter*/
-//                new Response.ErrorListener() {
-//                    @Override /* Handles errors that occur due to Volley*/
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.e("Volley", "Error IO");
-//                        sendBroadCastMessage("ERROR");
-//                    }
-//                });
-//        // Adds the JSON object request "obreq" to the request queue
-//        obreq.setTag(CARGA_JSON);
-//        VolleySingleton.getColaPeticiones().add(obreq);
     }
 
-    private static void readNewFileJson(final String response, String[] preguntas, boolean createFileCategories) throws FileNotFoundException {
+    public void sendBroadCastError(String errorCode, String errorDescription) {
+        Log.d(errorCode, errorDescription);
+
+        sendBroadCastMessage("ERROR");
+        isLoaded = false;
+
+        cancelRequests();
+    }
+
+    private void readNewFileJson(final String response, String[] preguntas, boolean createFileCategories) throws FileNotFoundException {
         // File is diferent
         if (createFileCategories)
             newFileJson(preguntas);
 
-        new Thread() {
-            public void run() {
 
-                JSONObject categoriesJSON = null;
-                try {
-                    categoriesJSON = new JSONObject(response);
-                    readCategoriesFromJSON(categoriesJSON);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("JSON", "Error comparando JSON IO");
-                    sendBroadCastMessage("ERROR");
-                    e.printStackTrace();
+        JSONObject categoriesJSON = null;
+        try {
+            categoriesJSON = new JSONObject(response);
+            readCategoriesFromJSON(categoriesJSON);
+        } catch (JSONException e) {
+            sendBroadCastError("JSON", "Error comparando JSON IO");
+            e.printStackTrace();
 
-                    return;
-                }
-                ///sendBroadCastMessage("OK");
-            }
-
-        }.start();
+            return;
+        }
+        ///sendBroadCastMessage("OK");
     }
 
-    private static void newFileJson(String[] preguntas) throws FileNotFoundException {
+
+    private void newFileJson(String[] preguntas) throws FileNotFoundException {
          /* New File*/
 
-            PrintWriter pw = null;
-            pw = new PrintWriter(mContext.openFileOutput("categories.json", Context.MODE_PRIVATE));
+        PrintWriter pw = null;
+        pw = new PrintWriter(mContext.openFileOutput("categories.json", Context.MODE_PRIVATE));
 
-            String line;
-            for (int contador = 0; contador < preguntas.length; contador++) {
-                line = preguntas[contador];
-                pw.println(line);
-            }
-            pw.close();
-            Log.d("TRAZA", "nuevo fichero");
+        String line;
+        for (int contador = 0; contador < preguntas.length; contador++) {
+            line = preguntas[contador];
+            pw.println(line);
+        }
+        pw.close();
+        Log.d("TRAZA", "nuevo fichero creado");
 
     }
 
 
-    public static List<Category> categories;
-    public static List<com.trivial.upv.android.model.pojo.json.Category> categoriesCurrent;
-    public static ArrayList<List<com.trivial.upv.android.model.pojo.json.Category>> categoriesPath;
+    public List<Category> categories;
+
+    public List<Category> getCategoriesCurrent() {
+        return categoriesCurrent;
+    }
+
+    public List<com.trivial.upv.android.model.pojo.json.Category> categoriesCurrent;
+    public ArrayList<List<com.trivial.upv.android.model.pojo.json.Category>> categoriesPath;
 
 
-    private static void readCategoriesFromJSON(final JSONObject response) {
-        new Thread() {
-            public void run() {
+    private void readCategoriesFromJSON(final JSONObject response) {
 
-                QuestionsTXTHelper helper = new QuestionsTXTHelper(mContext);
-                try {
-                    resetData();
-                    categories = helper.readCategoriesFromJSON(response);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("Volley", "Error IO");
-                    sendBroadCastMessage("ERROR");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("Volley", "Error JSON");
-                    sendBroadCastMessage("ERROR");
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    Log.e("Volley", "Error URI");
-                    sendBroadCastMessage("ERROR");
-
-                }
-                categoriesCurrent = categories;
-                categoriesPath = new ArrayList<>();
-            }
-        }.start();
-
+        QuestionsTXTHelper helper = new QuestionsTXTHelper(mContext);
+        try {
+            resetData();
+            categories = helper.readCategoriesFromJSON(response);
+            categoriesCurrent = categories;
+            categoriesPath = new ArrayList<>();
+        } catch (IOException e) {
+            e.printStackTrace();
+            sendBroadCastError("Volley", "Error IO");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            sendBroadCastError("Volley", "Error JSON");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            sendBroadCastError("Volley", "Error URI");
+        }
     }
 
     private static TopekaJSonHelper mInstance = null;
 
-    public static TopekaJSonHelper getInstance(Context context) {
+    public synchronized static TopekaJSonHelper getInstance(Context context, boolean forceLoad) {
         if (mInstance == null) {
-
-//            1.- Cargar json si no está en ya en caché (puedes apoyarte en Volley)
-//            2.- Pasar json a objetos, repitiendo
-//            3.- Cargar txt si no está en ya en caché (puedes apoyarte en Volley)
-//            4.- Pasar txt a objetos Quizz
-
             mInstance = new TopekaJSonHelper(context.getApplicationContext());
-        } else {
-            isSameFileJSON();
-
         }
+
+        if (forceLoad)
+            mInstance.isSameFileJSON();
+
         return mInstance;
     }
+
+
 
     public static void sendBroadCastMessage(String msg) {
         Intent i = new Intent();
@@ -455,21 +448,21 @@ public class TopekaJSonHelper {
         return optionsArray;
     }
 
-    public static List<com.trivial.upv.android.model.Category> mCategories;
+    public List<com.trivial.upv.android.model.Category> mCategories;
 
     /**
      * Gets all categories with their quizzes.
      *
      * @param fromDatabase <code>true</code> if a data refresh is needed, else <code>false</code>.  @return All categories stored in the database.
      */
-    public static List<com.trivial.upv.android.model.Category> getCategories(boolean fromDatabase) {
+    public List<com.trivial.upv.android.model.Category> getCategories(boolean fromDatabase) {
         if (mCategories == null || fromDatabase) {
             mCategories = loadCategories();
         }
         return mCategories;
     }
 
-    private static List<com.trivial.upv.android.model.Category> loadCategories() {
+    private List<com.trivial.upv.android.model.Category> loadCategories() {
 
         int i = 0;
 
@@ -536,10 +529,10 @@ public class TopekaJSonHelper {
         int numQuizzes = 0;
 
 
-            if (categoryTXT.getQuizzes() == null)
-                for (Category subcategoryTXT : categoryTXT.getSubcategories())
-                    numQuizzes += getNumQuizzesForCategory(subcategoryTXT);
-            else return categoryTXT.getQuizzes().size();
+        if (categoryTXT.getQuizzes() == null)
+            for (Category subcategoryTXT : categoryTXT.getSubcategories())
+                numQuizzes += getNumQuizzesForCategory(subcategoryTXT);
+        else return categoryTXT.getQuizzes().size();
 
         return numQuizzes;
     }
@@ -555,9 +548,9 @@ public class TopekaJSonHelper {
      * @param categoryId Id of the category to look for.
      * @return The found category.
      */
-    public static com.trivial.upv.android.model.Category getCategoryWith(String categoryId) {
+    public com.trivial.upv.android.model.Category getCategoryWith(String categoryId) {
         com.trivial.upv.android.model.Category tmpCategory = null;
-        for (com.trivial.upv.android.model.Category category : TopekaJSonHelper.mCategories) {
+        for (com.trivial.upv.android.model.Category category : mCategories) {
             if (category.getId().equals(categoryId)) {
                 tmpCategory = category;
                 break;
@@ -566,7 +559,7 @@ public class TopekaJSonHelper {
         return tmpCategory;
     }
 
-    public static int getScore() {
+    public int getScore() {
         int tmpScore = 0;
 
         if (categories != null && isLoaded) {
@@ -606,23 +599,23 @@ public class TopekaJSonHelper {
         return tmpScore;
     }
 
-    public static boolean thereAreMorePreviusCategories() {
+    public boolean thereAreMorePreviusCategories() {
         if (categoriesPath == null || categoriesPath.size() == 0)
             return false;
         return true;
     }
 
-    public static void navigatePreviusCategory() {
+    public void navigatePreviusCategory() {
         categoriesCurrent = categoriesPath.remove(categoriesPath.size() - 1);
     }
 
-    public static void navigateNextCategory(int position) {
+    public void navigateNextCategory(int position) {
         categoriesPath.add(categoriesCurrent);
         categoriesCurrent = categoriesCurrent.get(position).getSubcategories();
 
     }
 
-    public static boolean isSolvedCurrentCategory(int id) {
+    public boolean isSolvedCurrentCategory(int id) {
         if (categoriesCurrent != null) {
             int numQuizzes = getNumQuizzesForCategory(categoriesCurrent.get(id));
             int getNumSolvedByCategory = getScoreCategory(categoriesCurrent.get(id));
@@ -685,29 +678,34 @@ public class TopekaJSonHelper {
     }
 
 
-    public static void reset() {
+    public void signOut(Context context) {
         resetData();
 
         mInstance = null;
 
-        mContext.deleteFile("categories.json");
+        context.deleteFile("cache.json");
 
         mContext = null;
 
 
-
     }
 
-    private static void resetData() {
-        if (categories != null)
-            categories.clear();
-        if (categoriesCurrent != null)
-            categoriesCurrent.clear();
-        if (categoriesPath != null)
-            categoriesPath.clear();
+    public void resetData() {
+        isLoaded = false;
 
-        if (mCategories != null)
+        if (categories != null) {
+            categories.clear();
+        }
+        if (categoriesCurrent != null) {
+            categoriesCurrent.clear();
+        }
+        if (categoriesPath != null) {
+            categoriesPath.clear();
+        }
+
+        if (mCategories != null) {
             mCategories.clear();
+        }
 
         categories = null;
         categoriesCurrent = null;
@@ -715,7 +713,7 @@ public class TopekaJSonHelper {
         mCategories = null;
     }
 
-    public static void updateCategory() {
+    public void updateCategory() {
         Gson gson = new Gson();
         Type type = new TypeToken<List<Category>>() {
         }.getType();
@@ -734,10 +732,18 @@ public class TopekaJSonHelper {
             e.printStackTrace();
         }
 
-        Log.d("OBJECT", "TRAZA");
+//        Log.d("OBJECT", "TRAZA");
     }
 
-    public static void readCategoriesFromCache(String response, String[] preguntas) {
+    public boolean isLoaded() {
+        return isLoaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        isLoaded = loaded;
+    }
+
+    public void readCategoriesFromCache(String response, String[] preguntas) {
         Type type = new TypeToken<List<Category>>() {
         }.getType();
 
@@ -754,37 +760,44 @@ public class TopekaJSonHelper {
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
-
             br.close();
 
             resetData();
 
             categories = gson.fromJson(sb.toString(), type);
-
             categoriesCurrent = categories;
-
             categoriesPath = new ArrayList<>();
+            isLoaded = true;
 
+            sendBroadCastMessageRefresh(100);
             sendBroadCastMessage("OK");
 
-            isLoaded = true;
+            Log.d("CACHE", "CARGA OK");
+
         } catch (FileNotFoundException e) {
+            Log.d("CACHE", "Error loading NOT FOUND");
             try {
-                readNewFileJson(response, preguntas, true);
+                readNewFileJson(response, preguntas, false);
                 Log.d("CACHE", "CACHE NOT FOUND");
             } catch (FileNotFoundException e1) {
                 e1.printStackTrace();
-                Log.d("CACHE", "Error loading");
-                sendBroadCastMessage("ERROR");
+                sendBroadCastError("CACHE", "Error loading");
             }
-            Log.d("CACHE", "Error loading NOT FOUND");
+
         } catch (IOException e) {
             e.printStackTrace();
-            Log.d("CACHE", "Error loading");
-            sendBroadCastMessage("ERROR");
+            sendBroadCastError("CACHE", "Error loading");
         }
 
-        Log.d("OBJECT", "TRAZA");
+
     }
 
+    public static void cancelRequests() {
+        VolleySingleton.getColaPeticiones().cancelAll(new RequestQueue.RequestFilter() {
+            @Override
+            public boolean apply(Request<?> request) {
+                return true;
+            }
+        });
+    }
 }
