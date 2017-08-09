@@ -40,7 +40,6 @@ import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.Player;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaDatabaseHelper;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 import com.trivial.upv.android.widget.quiz.AbsQuizView;
