@@ -1,4 +1,4 @@
-package com.trivial.upv.android.model.pojo.preguntastxt;
+package com.trivial.upv.android.model.txtquiz;
 
 import java.util.ArrayList;
 import java.util.List;

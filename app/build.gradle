@@ -45,7 +45,7 @@ android {
 }
 
 ext {
-    supportLibVersion = "25.2.0"
+    supportLibVersion = "25.3.1"
     espressoVersion = "2.2.2"
     androidTestVersion = "0.5"
     hamcrestVersion = "1.3"

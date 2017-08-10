@@ -1,4 +1,4 @@
-package com.trivial.upv.android.model.pojo.preguntastxt;
+package com.trivial.upv.android.model.txtquiz;
 
 import android.content.Context;
 import android.net.Uri;
@@ -12,7 +12,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
-import com.trivial.upv.android.model.pojo.json.Category;
+import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.model.quiz.Quiz;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 
@@ -39,6 +39,7 @@ import static com.trivial.upv.android.persistence.TopekaJSonHelper.createArrayIn
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessage;
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessageRefresh;
 
+
 /**
  * Created by jvg63 on 30/07/2017.
  */
@@ -61,7 +62,7 @@ public class QuestionsTXTHelper {
      * @param preguntasTXT
      * @throws UnsupportedEncodingException
      */
-    public void getQuizzesFromString(Category category, String preguntasTXT) throws UnsupportedEncodingException {
+    public void getQuizzesFromString(CategoryJSON category, String preguntasTXT) throws UnsupportedEncodingException {
         String line;
 
         String utf8 = URLDecoder.decode(URLEncoder.encode(preguntasTXT, "iso8859-1"), "UTF-8");
@@ -131,13 +132,17 @@ public class QuestionsTXTHelper {
         category.setScore(createArrayIntFromNumQuizzes(category));
     }
 
+    private synchronized void addRequest() {
+        pendingRequests++;
+        maxPendingRequests++;
+    }
 
     int pendingRequests = 0;
     int maxPendingRequests = 0;
 
-    public void getQuizzesAsyncTask(Category category, String url) {
-        pendingRequests++;
-        maxPendingRequests++;
+    public void getQuizzesAsyncTask(CategoryJSON category, String url) {
+
+        addRequest();
 
         EnviarMensajeEnServidorWebTask tarea = new EnviarMensajeEnServidorWebTask();
         tarea.url = url;
@@ -150,7 +155,7 @@ public class QuestionsTXTHelper {
 
         public String response = "ok";
         public String url;
-        public Category category;
+        public CategoryJSON category;
 
         @Override
         public void onPreExecute() {
@@ -280,27 +285,36 @@ public class QuestionsTXTHelper {
 
         String lineTmp = line.replaceAll("<code>", "\"");
         lineTmp = lineTmp.replaceAll("</code>", "\"");
-        lineTmp = lineTmp.replaceAll("<br/>", " ");
-        lineTmp = lineTmp.replaceAll("<br/ >", " ");
+        lineTmp = lineTmp.replaceAll("<br/>", "\n");
+        lineTmp = lineTmp.replaceAll("<br/ >", "\n");
         lineTmp = lineTmp.replaceAll("&nbsp;", " ");
         return lineTmp;
     }
 
     private void updateProgress() {
-        pendingRequests--;
 
-        sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
+        removeRequest();
+        synchronized (this) {
+            if (pendingRequests == 0) {
+                Log.d("CARGA", "CARGA_FINALIZADA");
 
-        if (pendingRequests == 0) {
-            Log.d("CARGA", "CARGA_FINALIZADA");
+                sendBroadCastMessageRefresh(100);
 
-            sendBroadCastMessage("OK");
+                TopekaJSonHelper.getInstance(mContext, false).setLoaded(true);
+                TopekaJSonHelper.getInstance(mContext, false).updateCategory();
 
-            TopekaJSonHelper.isLoaded = true;
-            TopekaJSonHelper.updateCategory();
-
+                sendBroadCastMessage("OK");
+            }
+//        Log.d("CARGA", "PENDING:" + pendingRequests);
+            else {
+                sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
+            }
         }
-        Log.d("CARGA", "PENDING:" + pendingRequests);
+
+    }
+
+    private synchronized void removeRequest() {
+        pendingRequests--;
     }
 
 
@@ -314,9 +328,9 @@ public class QuestionsTXTHelper {
      * @throws IOException
      * @throws JSONException
      */
-    public List<Category> readCategoriesFromJSON(JSONObject mJSON) throws IOException, JSONException, URISyntaxException {
+    public List<CategoryJSON> readCategoriesFromJSON(JSONObject mJSON) throws IOException, JSONException, URISyntaxException {
 
-        List<Category> mCategories = new ArrayList<>();
+        List<CategoryJSON> mCategories = new ArrayList<>();
         JSONObject root;
 
         if (DEBUG) {
@@ -345,13 +359,13 @@ public class QuestionsTXTHelper {
 
         // Genera tantas categorías como keys distintos tiene el JSON
         JSONObject category;
-        Category mCategory;
+        CategoryJSON mCategory;
         Iterator<String> keys = categories.keys();
         while (keys.hasNext()) {
             // Note that "key" must be "1", "2", "3"...
             String key = keys.next();
 
-            mCategory = new Category();
+            mCategory = new CategoryJSON();
             category = (JSONObject) categories.get(key);
 
             //mCategory.setId(category.getString("id"));
@@ -377,11 +391,11 @@ public class QuestionsTXTHelper {
 
                 List<String> quizzies = new ArrayList<>();
 
-                List<Category> sub_subcategories = new ArrayList<>();
-                Category sub_subcategory = null;
+                List<CategoryJSON> sub_subcategories = new ArrayList<>();
+                CategoryJSON sub_subcategory = null;
 
                 for (int j = 0; j < preguntasJSon.length(); j++) {
-                    sub_subcategory = new Category();
+                    sub_subcategory = new CategoryJSON();
                     //sub_subcategory.setCategory(subcategory.getString("category"));
                     sub_subcategory.setAccess(category.getLong("access"));
                     sub_subcategory.setSuccess(category.getLong("success"));
@@ -409,16 +423,16 @@ public class QuestionsTXTHelper {
         return mCategories;
     }
 
-    private List<Category> asignaSubtemas(JSONObject subcategorias) throws JSONException, MalformedURLException, URISyntaxException {
+    private List<CategoryJSON> asignaSubtemas(JSONObject subcategorias) throws JSONException, MalformedURLException, URISyntaxException {
 
         JSONObject subcategory;
-        List<Category> preguntas = new ArrayList<>();
-        Category pregunta = null;
+        List<CategoryJSON> preguntas = new ArrayList<>();
+        CategoryJSON pregunta = null;
 
         Iterator<String> keys = subcategorias.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            pregunta = new Category();
+            pregunta = new CategoryJSON();
 
             subcategory = (JSONObject) subcategorias.get(key);
 
@@ -441,12 +455,12 @@ public class QuestionsTXTHelper {
                     // Quizzes
                     JSONArray preguntasJSon = subcategory.getJSONArray("quizzes");
 
-                    List<Category> sub_subcategories = new ArrayList<>();
-                    Category sub_subcategory = null;
+                    List<CategoryJSON> sub_subcategories = new ArrayList<>();
+                    CategoryJSON sub_subcategory = null;
 
                     for (int j = 0; j < preguntasJSon.length(); j++) {
 
-                        sub_subcategory = new Category();
+                        sub_subcategory = new CategoryJSON();
                         //sub_subcategory.setCategory(subcategory.getString("category"));
                         sub_subcategory.setAccess(subcategory.getLong("access"));
                         sub_subcategory.setSuccess(subcategory.getLong("success"));
@@ -472,7 +486,7 @@ public class QuestionsTXTHelper {
         return preguntas;
     }
 
-    private void localizaPreguntasTXT(Category sub_subcategory, String url) {
+    private void localizaPreguntasTXT(CategoryJSON sub_subcategory, String url) {
         getQuizzesAsyncTask(sub_subcategory, url.replace(" ", "%20"));
     }
 
@@ -482,7 +496,7 @@ public class QuestionsTXTHelper {
      * @param sub_subcategory
      * @param urlStr
      */
-    private void getQuizzesTXTFromInternetVolley(final Category sub_subcategory, final String urlStr) throws MalformedURLException, URISyntaxException {
+    private void getQuizzesTXTFromInternetVolley(final CategoryJSON sub_subcategory, final String urlStr) throws MalformedURLException, URISyntaxException {
 //        URL url = new URL(urlStr);
 //        URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
 //        String urlVolley = uri.toASCIIString();
@@ -491,22 +505,35 @@ public class QuestionsTXTHelper {
         StringRequest request = new StringRequest(Request.Method.GET, urlStr.replace(" ", "%20"), new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
-                try {
-                    getQuizzesFromString(sub_subcategory, response);
-                    updateProgress();
-                } catch (UnsupportedEncodingException e1) {
-                    sendBroadCastMessage("ERROR");
-                }
 
+                new Thread() {
+                    public void run() {
+
+                        try {
+                            getQuizzesFromString(sub_subcategory, response);
+                            updateProgress();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                            sendBroadCastMessage("ERROR");
+                        }
+
+                    }
+                }.start();
             }
-        }, new Response.ErrorListener() {
+        }, new Response.ErrorListener()
+
+        {
             @Override
             public void onErrorResponse(VolleyError error) {
+                TopekaJSonHelper.getInstance(mContext, false).sendBroadCastError("Volley", "Loading quizzes!");
+
+                TopekaJSonHelper.cancelRequests();
             }
         });
 
         VolleySingleton.getColaPeticiones().add(request);
-        pendingRequests++;
-        maxPendingRequests++;
+
+        addRequest();
     }
+
 }

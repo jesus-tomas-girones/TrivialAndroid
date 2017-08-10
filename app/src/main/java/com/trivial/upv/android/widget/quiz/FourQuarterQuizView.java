@@ -18,11 +18,13 @@ package com.trivial.upv.android.widget.quiz;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.OptionsQuizAdapter;
@@ -37,7 +39,7 @@ public class FourQuarterQuizView extends AbsQuizView<FourQuarterQuiz> {
 
     private static final String KEY_ANSWER = "ANSWER";
     private int mAnswered = -1;
-    private GridView mAnswerView;
+    private AutoGridView mAnswerView;
 
     public FourQuarterQuizView(Context context, Category category, FourQuarterQuiz quiz) {
         super(context, category, quiz);
@@ -45,7 +47,8 @@ public class FourQuarterQuizView extends AbsQuizView<FourQuarterQuiz> {
 
     @Override
     protected View createQuizContentView() {
-        mAnswerView = new GridView(getContext());
+        mAnswerView = new AutoGridView(getContext());
+
         mAnswerView.setSelector(R.drawable.selector_button);
         mAnswerView.setNumColumns(2);
         mAnswerView.setAdapter(new OptionsQuizAdapter(getQuiz().getOptions(),

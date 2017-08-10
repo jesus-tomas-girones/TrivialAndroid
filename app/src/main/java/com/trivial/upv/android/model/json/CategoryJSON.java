@@ -1,7 +1,5 @@
 
-package com.trivial.upv.android.model.pojo.json;
-
-import android.util.Log;
+package com.trivial.upv.android.model.json;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -9,7 +7,7 @@ import com.trivial.upv.android.model.quiz.Quiz;
 
 import java.util.List;
 
-public class Category {
+public class CategoryJSON {
 
     /*@SerializedName("id")
     @Expose
@@ -37,7 +35,7 @@ public class Category {
     private String moreinfo;
     @SerializedName("subcategories")
     @Expose
-    private List<Category> subcategories = null;
+    private List<CategoryJSON> subcategories = null;
     /*@SerializedName("quizzes")
     @Expose
     private List<String> quizzes = null;*/
@@ -108,11 +106,11 @@ public class Category {
         this.moreinfo = moreinfo;
     }
 
-    public List<Category> getSubcategories() {
+    public List<CategoryJSON> getSubcategories() {
         return subcategories;
     }
 
-    public void setSubcategories(List<Category> subcategories) {
+    public void setSubcategories(List<CategoryJSON> subcategories) {
         this.subcategories = subcategories;
     }
 

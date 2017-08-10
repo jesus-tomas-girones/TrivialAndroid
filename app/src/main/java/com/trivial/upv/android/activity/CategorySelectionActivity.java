@@ -93,47 +93,60 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
         initActivity(savedInstanceState);
 
-        // JVG.S
-        loadCategories();
-        // JVG.E
+
     }
 
     // JVG.S
     private void loadCategories() {
+
+
         // RECEIVER PARA ACTUALIZAR PROGRESO Y CARGA DE LAS CATEGORIAS
         filtro = new IntentFilter(ACTION_RESP);
         filtro.addCategory(Intent.CATEGORY_DEFAULT);
         receiver = new ReceptorOperacion();
 
-        if (checkInternetAccess()) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+        // Carga categorias
+        int numCategorias = 0;
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+        if (fragment instanceof CategorySelectionFragment) {
+            numCategorias = ((CategorySelectionFragment) fragment).getAdapter().getItemCount();
 
-            pDialog = new ProgressDialog(this);
-            pDialog.setMessage("Cargando...");
-            pDialog.setIndeterminate(false);
-            pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            pDialog.setProgress(0);
-            pDialog.setMax(100);
-            pDialog.setCancelable(false);
-            pDialog.show();
+        }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        
+        if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() || numCategorias ==0) {
+            if (checkInternetAccess()) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
-            new Thread() {
-                public void run() {
-                    TopekaJSonHelper.getInstance(CategorySelectionActivity.this, true);
-                }
-            }.start();
+                pDialog = new ProgressDialog(this);
+                pDialog.setMessage("Cargando...");
+                pDialog.setIndeterminate(false);
+                pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                pDialog.setProgress(0);
+                pDialog.setMax(100);
+                pDialog.setCancelable(false);
+                pDialog.show();
 
-        } else {
-            Snackbar snackbar = Snackbar
-                    .make(findViewById(R.id.category_container), "No hay conexión de Internet.", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("CERRAR", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            finish();
-                        }
-                    });
+                new Thread() {
+                    public void run() {
 
-            snackbar.show();
+                        TopekaJSonHelper.getInstance(CategorySelectionActivity.this, true);
+
+                    }
+                }.start();
+
+            } else {
+                Snackbar snackbar = Snackbar
+                        .make(findViewById(R.id.category_container), "No hay conexión de Internet.", Snackbar.LENGTH_INDEFINITE)
+                        .setAction("CERRAR", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                finish();
+                            }
+                        });
+
+                snackbar.show();
+            }
         }
     }
 
@@ -247,6 +260,10 @@ public class CategorySelectionActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        // JVG.S
+        loadCategories();
+        // JVG.E
         registerReceiver(receiver, filtro);
     } //JVG.E
 

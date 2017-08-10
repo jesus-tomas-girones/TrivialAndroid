@@ -228,6 +228,12 @@ public class QuizFragment extends android.support.v4.app.Fragment {
             //JVG.S
             /// Actualizar el estado de los test
             //TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
+            new Thread() {
+                @Override
+                public void run() {
+                    TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+                }
+            }.start();
             //JVG.E
             return true;
         }
@@ -241,7 +247,12 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         //JVG.S
         ///TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
         /// Actualizar el estado de los test
-        TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+        new Thread() {
+            @Override
+            public void run() {
+                TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+            }
+        }.start();
         //JVG.E
     }
 
@@ -257,11 +268,12 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     public boolean hasSolvedStateListener() {
         return mSolvedStateListener != null;
     }
+
     public void setSolvedStateListener(SolvedStateListener solvedStateListener) {
         mSolvedStateListener = solvedStateListener;
         if (mCategory.isSolved() && null != mSolvedStateListener) {
-                mSolvedStateListener.onCategorySolved();
-            }
+            mSolvedStateListener.onCategorySolved();
+        }
     }
 
     private ScoreAdapter getScoreAdapter() {

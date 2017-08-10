@@ -33,9 +33,9 @@ import com.trivial.upv.android.helper.JsonHelper;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.Theme;
-import com.trivial.upv.android.model.pojo.json.Category;
-import com.trivial.upv.android.model.pojo.preguntastxt.QuestionTXT;
-import com.trivial.upv.android.model.pojo.preguntastxt.QuestionsTXTHelper;
+import com.trivial.upv.android.model.json.CategoryJSON;
+import com.trivial.upv.android.model.txtquiz.QuestionTXT;
+import com.trivial.upv.android.model.txtquiz.QuestionsTXTHelper;
 import com.trivial.upv.android.model.quiz.AlphaPickerQuiz;
 import com.trivial.upv.android.model.quiz.FillBlankQuiz;
 import com.trivial.upv.android.model.quiz.FillTwoBlanksQuiz;
@@ -209,14 +209,14 @@ public class TopekaJSonHelper {
     }
 
 
-    public List<Category> categories;
+    public List<CategoryJSON> categories;
 
-    public List<Category> getCategoriesCurrent() {
+    public List<CategoryJSON> getCategoriesCurrent() {
         return categoriesCurrent;
     }
 
-    public List<com.trivial.upv.android.model.pojo.json.Category> categoriesCurrent;
-    public ArrayList<List<com.trivial.upv.android.model.pojo.json.Category>> categoriesPath;
+    public List<CategoryJSON> categoriesCurrent;
+    public ArrayList<List<CategoryJSON>> categoriesPath;
 
 
     private void readCategoriesFromJSON(final JSONObject response) {
@@ -469,7 +469,7 @@ public class TopekaJSonHelper {
         List<com.trivial.upv.android.model.Category> tmpCategories = new ArrayList<>();
 
         if (categoriesCurrent != null) {
-            for (com.trivial.upv.android.model.pojo.json.Category categoryTXT : categoriesCurrent) {
+            for (CategoryJSON categoryTXT : categoriesCurrent) {
 
                 com.trivial.upv.android.model.Category category = getCategory(categoryTXT);
 
@@ -498,7 +498,7 @@ public class TopekaJSonHelper {
     /**
      * Gets a category from the given position of the cursor provided.
      */
-    private static com.trivial.upv.android.model.Category getCategory(com.trivial.upv.android.model.pojo.json.Category categoryTXT) {
+    private static com.trivial.upv.android.model.Category getCategory(CategoryJSON categoryTXT) {
 // "magic numbers" based on CategoryTable#PROJECTION
         final String id = categoryTXT.getCategory();
         final String name = categoryTXT.getCategory();
@@ -513,7 +513,7 @@ public class TopekaJSonHelper {
         return new com.trivial.upv.android.model.Category(name, id, theme, quizzes, scores, solved, img);
     }
 
-    public static int[] createArrayIntFromNumQuizzes(com.trivial.upv.android.model.pojo.json.Category categoryTXT) {
+    public static int[] createArrayIntFromNumQuizzes(CategoryJSON categoryTXT) {
         int numQuizzes = getNumQuizzesForCategory(categoryTXT);
 
         int[] tmpScores = new int[numQuizzes];
@@ -525,12 +525,12 @@ public class TopekaJSonHelper {
         return tmpScores;
     }
 
-    private static int getNumQuizzesForCategory(com.trivial.upv.android.model.pojo.json.Category categoryTXT) {
+    private static int getNumQuizzesForCategory(CategoryJSON categoryTXT) {
         int numQuizzes = 0;
 
 
         if (categoryTXT.getQuizzes() == null)
-            for (Category subcategoryTXT : categoryTXT.getSubcategories())
+            for (CategoryJSON subcategoryTXT : categoryTXT.getSubcategories())
                 numQuizzes += getNumQuizzesForCategory(subcategoryTXT);
         else return categoryTXT.getQuizzes().size();
 
@@ -563,7 +563,7 @@ public class TopekaJSonHelper {
         int tmpScore = 0;
 
         if (categories != null && isLoaded) {
-            for (com.trivial.upv.android.model.pojo.json.Category category : categories) {
+            for (CategoryJSON category : categories) {
                 if (category.getQuizzes() == null) {
 
                     tmpScore += getScore2(category.getSubcategories());
@@ -579,11 +579,11 @@ public class TopekaJSonHelper {
         return tmpScore;
     }
 
-    private static int getScore2(List<com.trivial.upv.android.model.pojo.json.Category> subcategories) {
+    private static int getScore2(List<CategoryJSON> subcategories) {
         int tmpScore = 0;
 
         if (subcategories != null) {
-            for (com.trivial.upv.android.model.pojo.json.Category category : subcategories) {
+            for (CategoryJSON category : subcategories) {
                 if (category.getQuizzes() == null) {
 
                     tmpScore += getScore2(category.getSubcategories());
@@ -627,12 +627,12 @@ public class TopekaJSonHelper {
     }
 
 
-    public static int getScoreCategory(com.trivial.upv.android.model.pojo.json.Category category) {
+    public static int getScoreCategory(CategoryJSON category) {
         int tmpSolved = 0;
 
         if (category != null) {
             if (category.getSubcategories() != null) {
-                for (com.trivial.upv.android.model.pojo.json.Category subcategory : category.getSubcategories()) {
+                for (CategoryJSON subcategory : category.getSubcategories()) {
                     if (subcategory.getQuizzes() == null) {
                         tmpSolved += getScoreCategory2(subcategory.getSubcategories());
 
@@ -657,10 +657,10 @@ public class TopekaJSonHelper {
         return tmpSolved;
     }
 
-    private static int getScoreCategory2(List<com.trivial.upv.android.model.pojo.json.Category> subcategories) {
+    private static int getScoreCategory2(List<CategoryJSON> subcategories) {
         int tmpSolved = 0;
         if (subcategories != null) {
-            for (com.trivial.upv.android.model.pojo.json.Category subsubcategory : subcategories) {
+            for (CategoryJSON subsubcategory : subcategories) {
                 if (subsubcategory.getQuizzes() == null) {
                     tmpSolved += getScoreCategory2(subsubcategory.getSubcategories());
 
@@ -715,7 +715,7 @@ public class TopekaJSonHelper {
 
     public void updateCategory() {
         Gson gson = new Gson();
-        Type type = new TypeToken<List<Category>>() {
+        Type type = new TypeToken<List<CategoryJSON>>() {
         }.getType();
 
         String json = gson.toJson(categories, type);
@@ -744,7 +744,7 @@ public class TopekaJSonHelper {
     }
 
     public void readCategoriesFromCache(String response, String[] preguntas) {
-        Type type = new TypeToken<List<Category>>() {
+        Type type = new TypeToken<List<CategoryJSON>>() {
         }.getType();
 
         GsonBuilder builder = new GsonBuilder();
