@@ -100,7 +100,6 @@ public class CategorySelectionFragment extends Fragment {
                             // Mostrar Subcategorias
 
                             TopekaJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
-
                             animateTransitionSubcategories(v);
                         }
 
@@ -114,6 +113,15 @@ public class CategorySelectionFragment extends Fragment {
                         // JVG.E
                     }
                 });
+        mAdapter.setOnLongItemClickListener(new CategoryAdapterJSON.OnLongItemClickListener() {
+            @Override
+            public void onClick(View v, int position) {
+                (TopekaJSonHelper.getInstance(getContext(), false)).deleteProgressCategory(position);
+                mAdapter.updateCategories();
+                mAdapter.notifyItemChanged(position);
+
+            }
+        });
         //JVG.E
         categoriesView.setAdapter(mAdapter);
         categoriesView.getViewTreeObserver()
@@ -157,6 +165,7 @@ public class CategorySelectionFragment extends Fragment {
                 transitionBundle);
     }
 
+    //JVG.S
     // To reveal a previously invisible view using this effect:
     private void showRecyclerView() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -213,11 +222,8 @@ public class CategorySelectionFragment extends Fragment {
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     view.setVisibility(View.INVISIBLE);
-
-                    if (viewSelectedRecyclerView != null) {
-                        mAdapter.updateCategories();
-                        mAdapter.notifyDataSetChanged();
-                    }
+                    mAdapter.updateCategories();
+                    mAdapter.notifyDataSetChanged();
                     showRecyclerView();
                 }
             });
@@ -226,5 +232,5 @@ public class CategorySelectionFragment extends Fragment {
             anim.start();
         }
     }
-
+    //JVG.E
 }
