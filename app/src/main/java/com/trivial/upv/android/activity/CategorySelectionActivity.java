@@ -114,7 +114,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
         }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
-        if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() || numCategorias ==0) {
+        if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() || numCategorias == 0) {
             if (checkInternetAccess()) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
@@ -179,8 +179,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
                     // Carga categorias
                     Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
                     if (fragment instanceof CategorySelectionFragment) {
-                        ((CategorySelectionFragment) fragment).getAdapter().updateCategories();
-                        ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
+                        ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
                     }
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
 

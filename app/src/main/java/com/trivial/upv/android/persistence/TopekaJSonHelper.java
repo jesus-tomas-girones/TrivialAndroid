@@ -816,4 +816,58 @@ public class TopekaJSonHelper {
             }
         });
     }
+
+    public void deleteProgressCategory(int numCategory) {
+        if (categoriesCurrent != null) {
+            CategoryJSON categoryJSON = categoriesCurrent.get(numCategory);
+            if (categoryJSON.getQuizzes() != null) {
+                for (Quiz quiz : categoryJSON.getQuizzes()) {
+                    quiz.setSolved(false);
+                }
+            }
+            else {
+                if (categoryJSON.getSubcategories()!=null) {
+                    for (CategoryJSON subcategory: categoryJSON.getSubcategories()) {
+                        if (categoryJSON.getQuizzes() != null) {
+                            for (Quiz quiz : categoryJSON.getQuizzes()) {
+                                quiz.setSolved(false);
+                            }
+                        }
+                        else {
+                            deleteProgressSubCategory(subcategory);
+                        }
+                    }
+                }
+            }
+            new Thread() {
+                public void run() {
+                    TopekaJSonHelper.getInstance(mContext, false).updateCategory();
+                }
+            }.start();
+        }
+    }
+
+    private void deleteProgressSubCategory(CategoryJSON subcategory) {
+        if (subcategory != null) {
+            if (subcategory.getQuizzes() != null) {
+                for (Quiz quiz : subcategory.getQuizzes()) {
+                    quiz.setSolved(false);
+                }
+            }
+            else {
+                if (subcategory.getSubcategories()!=null) {
+                    for (CategoryJSON subsubcategory: subcategory.getSubcategories()) {
+                        if (subsubcategory.getQuizzes() != null) {
+                            for (Quiz quiz : subsubcategory.getQuizzes()) {
+                                quiz.setSolved(false);
+                            }
+                        }
+                        else {
+                            deleteProgressSubCategory(subsubcategory);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

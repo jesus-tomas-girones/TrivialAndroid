@@ -42,14 +42,6 @@ import com.trivial.upv.android.widget.quiz.PickerQuizView;
 import com.trivial.upv.android.widget.quiz.SelectItemQuizView;
 import com.trivial.upv.android.widget.quiz.ToggleTranslateQuizView;
 import com.trivial.upv.android.widget.quiz.TrueFalseQuizView;
-import com.trivial.upv.android.model.quiz.FourQuarterQuiz;
-import com.trivial.upv.android.model.quiz.PickerQuiz;
-import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.widget.quiz.FillBlankQuizView;
-import com.trivial.upv.android.widget.quiz.FillTwoBlanksQuizView;
-import com.trivial.upv.android.widget.quiz.FourQuarterQuizView;
-import com.trivial.upv.android.widget.quiz.ToggleTranslateQuizView;
-import com.trivial.upv.android.widget.quiz.TrueFalseQuizView;
 
 import java.util.ArrayList;
 import java.util.HashSet;

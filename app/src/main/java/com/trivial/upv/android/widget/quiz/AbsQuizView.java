@@ -30,6 +30,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
+import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Property;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -125,7 +127,11 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
         mQuestionView = (TextView) mLayoutInflater.inflate(R.layout.question, this, false);
         mQuestionView.setBackgroundColor(ContextCompat.getColor(getContext(),
                 mCategory.getTheme().getPrimaryColor()));
-        mQuestionView.setText(getQuiz().getQuestion());
+//JVG.S
+//        mQuestionView.setText(getQuiz().getQuestion());
+        mQuestionView.setText(Html.fromHtml(getQuiz().getQuestion()));
+        mQuestionView.setMovementMethod(new ScrollingMovementMethod());
+//JVG.E
     }
 
     private LinearLayout createContainerLayout(Context context) {
@@ -398,7 +404,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
                                 }
                             });
                     View snackbarView = snackbar.getView();
-                    TextView tv= (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+                    TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
                     tv.setMaxLines(25);
                     snackbar.show();
                 } else {

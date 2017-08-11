@@ -18,6 +18,7 @@ package com.trivial.upv.android.adapter;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,7 +95,10 @@ public class OptionsQuizAdapter extends BaseAdapter {
             convertView = inflater.inflate(mLayoutId, parent, false);
         }
         String text = getText(position);
-        ((TextView) convertView).setText(text);
+        //JVG.S
+//        ((TextView) convertView).setText(text);
+        ((TextView) convertView).setText(Html.fromHtml(text));
+        //JVG.S
         return convertView;
     }
 

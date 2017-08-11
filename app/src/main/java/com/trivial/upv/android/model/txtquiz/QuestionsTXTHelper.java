@@ -34,6 +34,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.createArrayIntFromNumQuizzes;
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessage;
@@ -285,18 +287,35 @@ public class QuestionsTXTHelper {
 
     private String removeWordsUnWanted(String line) {
 
-        String lineTmp = line.replaceAll("<code>", "\"");
-        lineTmp = lineTmp.replaceAll("</code>", "\"");
-        lineTmp = lineTmp.replaceAll("<br/>", "\n");
-        lineTmp = lineTmp.replaceAll("<br/ >", "\n");
-        lineTmp = lineTmp.replaceAll("&nbsp;", " ");
+        String lineTmp = line.replaceAll("<br><br>", "<br>");
+//        String lineTmp = line.replaceAll("<code>", "");
+//        lineTmp = lineTmp.replaceAll("</code>", "");
+        lineTmp = lineTmp.replaceAll("</br>", "<br>");
+//        lineTmp = lineTmp.replaceAll("<br/ >", "</br>");
+//        lineTmp = lineTmp.replaceAll("<br>", "<br>");
+//        lineTmp = lineTmp.replaceAll("&nbsp;", "");
+//        lineTmp = lineTmp.replaceAll("&lt;", "<");
+
+//        return removeTags(lineTmp);
         return lineTmp;
+    }
+
+    private static final Pattern REMOVE_TAGS = Pattern.compile("<.+?>");
+
+    public static String removeTags(String string) {
+        if (string == null || string.length() == 0) {
+            return string;
+        }
+
+        Matcher m = REMOVE_TAGS.matcher(string);
+        return m.replaceAll("");
     }
 
     private void updateProgress() {
 
-        removeRequest();
         synchronized (this) {
+            removeRequest();
+
             if (pendingRequests == 0) {
                 Log.d("CARGA", "CARGA_FINALIZADA");
 
