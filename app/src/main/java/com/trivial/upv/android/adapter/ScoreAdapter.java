@@ -22,6 +22,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,8 +81,12 @@ public class ScoreAdapter extends BaseAdapter {
 
         final Quiz quiz = getItem(position);
         ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-        viewHolder.mQuizView.setText(quiz.getQuestion());
-        viewHolder.mAnswerView.setText(quiz.getStringAnswer());
+        //JVG.S
+//        viewHolder.mQuizView.setText(quiz.getQuestion());
+//        viewHolder.mAnswerView.setText(quiz.getStringAnswer());
+        viewHolder.mQuizView.setText(Html.fromHtml(quiz.getQuestion()));
+        viewHolder.mAnswerView.setText(Html.fromHtml(quiz.getStringAnswer()));
+        //JVG.E
         setSolvedStateForQuiz(viewHolder.mSolvedState, position);
         return convertView;
     }
@@ -114,9 +119,9 @@ public class ScoreAdapter extends BaseAdapter {
     /**
      * Convenience method to aid tintint of vector drawables at runtime.
      *
-     * @param context The {@link Context} for this app.
+     * @param context    The {@link Context} for this app.
      * @param drawableId The id of the drawable to load.
-     * @param tintColor The tint to apply.
+     * @param tintColor  The tint to apply.
      * @return The tinted drawable.
      */
     private Drawable loadAndTint(Context context, @DrawableRes int drawableId,
