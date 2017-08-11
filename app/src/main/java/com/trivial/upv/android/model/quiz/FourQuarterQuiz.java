@@ -38,14 +38,37 @@ public final class FourQuarterQuiz extends OptionsQuiz<String> {
         }
     };
 
-    public FourQuarterQuiz(String question, int[] answer, String[] options, boolean solved) {
+    //JVG.S
+//    public FourQuarterQuiz(String question, int[] answer, String[] options, boolean solved) {
+//        super(question, answer, options, solved);
+//    }
+    public FourQuarterQuiz(String question, int[] answer, String[] options, String[] comments, boolean solved) {
         super(question, answer, options, solved);
+
+        //JVG.S
+        mComments = comments;
+        //JVG.E
     }
+
+    public String[] getComments() {
+        return mComments;
+    }
+
+    public void setComments(String[] mComments) {
+        this.mComments = mComments;
+    }
+
+    private String[] mComments;
+    //JVG.E
+
 
     public FourQuarterQuiz(Parcel in) {
         super(in);
         String options[] = in.createStringArray();
         setOptions(options);
+        //JVG.S
+        mComments = in.createStringArray();
+        //JVG.E
     }
 
     @Override
@@ -68,6 +91,9 @@ public final class FourQuarterQuiz extends OptionsQuiz<String> {
         super.writeToParcel(dest, flags);
         String[] options = getOptions();
         dest.writeStringArray(options);
+        //JVG.S
+        dest.writeStringArray(getComments());
+        //JVG.E
     }
 
     @Override
@@ -94,6 +120,12 @@ public final class FourQuarterQuiz extends OptionsQuiz<String> {
             return false;
         }
 
+        //JVG.S
+        if (!Arrays.equals(getComments(), quiz.getComments())) {
+            return false;
+        }
+        //JVG.S
+
         return true;
     }
 
@@ -102,6 +134,9 @@ public final class FourQuarterQuiz extends OptionsQuiz<String> {
         int result = super.hashCode();
         result = 31 * result + Arrays.hashCode(getOptions());
         result = 31 * result + Arrays.hashCode(getAnswer());
+        //JVG.S
+        result = 31 * result + Arrays.hashCode(getComments());
+        //JVG.E
         return result;
     }
 

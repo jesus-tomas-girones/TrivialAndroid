@@ -34,8 +34,6 @@ import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.json.CategoryJSON;
-import com.trivial.upv.android.model.txtquiz.QuestionTXT;
-import com.trivial.upv.android.model.txtquiz.QuestionsTXTHelper;
 import com.trivial.upv.android.model.quiz.AlphaPickerQuiz;
 import com.trivial.upv.android.model.quiz.FillBlankQuiz;
 import com.trivial.upv.android.model.quiz.FillTwoBlanksQuiz;
@@ -46,6 +44,8 @@ import com.trivial.upv.android.model.quiz.Quiz;
 import com.trivial.upv.android.model.quiz.SelectItemQuiz;
 import com.trivial.upv.android.model.quiz.ToggleTranslateQuiz;
 import com.trivial.upv.android.model.quiz.TrueFalseQuiz;
+import com.trivial.upv.android.model.txtquiz.QuestionTXT;
+import com.trivial.upv.android.model.txtquiz.QuestionsTXTHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -253,7 +253,6 @@ public class TopekaJSonHelper {
     }
 
 
-
     public static void sendBroadCastMessage(String msg) {
         Intent i = new Intent();
         i.setAction(ACTION_RESP);
@@ -286,6 +285,7 @@ public class TopekaJSonHelper {
         final String question = questionTXT.getEnunciado();
         final String answer = new JSONArray(questionTXT.getRespuestaCorrecta()).toString();
         final String options = new JSONArray(questionTXT.getRespuestas()).toString();
+        final String comments = new JSONArray(questionTXT.getComentariosRespuesta()).toString();
         final int min = 0;
         final int max = 0;
         final int step = 0;
@@ -302,7 +302,7 @@ public class TopekaJSonHelper {
                 return createFillTwoBlanksQuiz(question, answer, solved);
             }
             case JsonAttributes.QuizType.FOUR_QUARTER: {
-                return createFourQuarterQuiz(question, answer, options, solved);
+                return createFourQuarterQuiz(question, answer, options, comments, solved);
             }
             case JsonAttributes.QuizType.MULTI_SELECT: {
                 return createMultiSelectQuiz(question, answer, options, solved);
@@ -313,7 +313,7 @@ public class TopekaJSonHelper {
             case JsonAttributes.QuizType.SINGLE_SELECT:
                 //fall-through intended
             case JsonAttributes.QuizType.SINGLE_SELECT_ITEM: {
-                return createSelectItemQuiz(question, answer, options, solved);
+                return createSelectItemQuiz(question, answer, options, comments, solved);
             }
             case JsonAttributes.QuizType.TOGGLE_TRANSLATE: {
                 return createToggleTranslateQuiz(question, answer, options, solved);
@@ -344,6 +344,18 @@ public class TopekaJSonHelper {
         final String answer = object.get("mAnswer").getAsJsonArray().toString();
 
         final String options = object.get("mOptions").getAsJsonArray().toString();
+
+        final String comments;
+
+
+        if (!object.has("mComments")) {
+            Log.d("CAPTURADO", "AQUI");
+            final String[] optionsArray = JsonHelper.jsonArrayToStringArray(options);
+            List tmpComments = new ArrayList();
+            for (int i = 0; i < optionsArray.length; i++) tmpComments.add("");
+            comments = new JSONArray(tmpComments).toString();
+        } else comments = object.get("mComments").getAsJsonArray().toString();
+
         final int min = 0;
         final int max = 0;
         final int step = 0;
@@ -360,7 +372,7 @@ public class TopekaJSonHelper {
                 return createFillTwoBlanksQuiz(question, answer, solved);
             }
             case JsonAttributes.QuizType.FOUR_QUARTER: {
-                return createFourQuarterQuiz(question, answer, options, solved);
+                return createFourQuarterQuiz(question, answer, options, comments, solved);
             }
             case JsonAttributes.QuizType.MULTI_SELECT: {
                 return createMultiSelectQuiz(question, answer, options, solved);
@@ -371,7 +383,7 @@ public class TopekaJSonHelper {
             case JsonAttributes.QuizType.SINGLE_SELECT:
                 //fall-through intended
             case JsonAttributes.QuizType.SINGLE_SELECT_ITEM: {
-                return createSelectItemQuiz(question, answer, options, solved);
+                return createSelectItemQuiz(question, answer, options, comments, solved);
             }
             case JsonAttributes.QuizType.TOGGLE_TRANSLATE: {
                 return createToggleTranslateQuiz(question, answer, options, solved);
@@ -402,10 +414,11 @@ public class TopekaJSonHelper {
     }
 
     private static Quiz createFourQuarterQuiz(String question, String answer,
-                                              String options, boolean solved) {
+                                              String options, String comments, boolean solved) {
         final int[] answerArray = JsonHelper.jsonArrayToIntArray(answer);
         final String[] optionsArray = JsonHelper.jsonArrayToStringArray(options);
-        return new FourQuarterQuiz(question, answerArray, optionsArray, solved);
+        final String[] commentsArray = JsonHelper.jsonArrayToStringArray(comments);
+        return new FourQuarterQuiz(question, answerArray, optionsArray, commentsArray, solved);
     }
 
     private static Quiz createMultiSelectQuiz(String question, String answer,
@@ -416,10 +429,11 @@ public class TopekaJSonHelper {
     }
 
     private static Quiz createSelectItemQuiz(String question, String answer,
-                                             String options, boolean solved) {
+                                             String options, String comments, boolean solved) {
         final int[] answerArray = JsonHelper.jsonArrayToIntArray(answer);
         final String[] optionsArray = JsonHelper.jsonArrayToStringArray(options);
-        return new SelectItemQuiz(question, answerArray, optionsArray, solved);
+        final String[] commentsArray = JsonHelper.jsonArrayToStringArray(comments);
+        return new SelectItemQuiz(question, answerArray, optionsArray, commentsArray, solved);
     }
 
     private static Quiz createToggleTranslateQuiz(String question, String answer,
@@ -727,9 +741,11 @@ public class TopekaJSonHelper {
                 bw.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                sendBroadCastError("CACHE", "CARGA DE CACHE CON ERROR");
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            sendBroadCastError("CACHE", "CARGA DE CACHE CON ERROR NOT FOUND!");
         }
 
 //        Log.d("OBJECT", "TRAZA");

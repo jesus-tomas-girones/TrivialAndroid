@@ -16,6 +16,8 @@
 
 package com.trivial.upv.android.fragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,11 +28,11 @@ import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 import com.trivial.upv.android.R;
-import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.adapter.CategoryAdapterJSON;
 import com.trivial.upv.android.helper.TransitionHelper;
@@ -38,8 +40,6 @@ import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.OffsetDecoration;
-
-import java.util.List;
 
 public class CategorySelectionFragment extends Fragment {
 
@@ -61,7 +61,7 @@ public class CategorySelectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        setUpQuizGrid((RecyclerView) view.findViewById(R.id.categories));
+        setUpQuizGrid(view);
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -69,8 +69,13 @@ public class CategorySelectionFragment extends Fragment {
     public CategoryAdapterJSON getAdapter() {
         return mAdapter;
     }
+
+    private RecyclerView categoriesView;
+
     // JVG.E
-    private void setUpQuizGrid(final RecyclerView categoriesView) {
+    private void setUpQuizGrid(View view) {
+
+        categoriesView = (RecyclerView) view.findViewById(R.id.categories);
 
         final int spacing = getContext().getResources()
                 .getDimensionPixelSize(R.dimen.spacing_nano);
@@ -96,8 +101,7 @@ public class CategorySelectionFragment extends Fragment {
 
                             TopekaJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
 
-                            mAdapter.updateCategories();
-                            mAdapter.notifyDataSetChanged();
+                            animateTransitionSubcategories(v);
                         }
 
 
@@ -153,5 +157,74 @@ public class CategorySelectionFragment extends Fragment {
                 transitionBundle);
     }
 
+    // To reveal a previously invisible view using this effect:
+    private void showRecyclerView() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            View view = categoriesView;
+            // get the center for the clipping circle
+            int cx = (view.getLeft() + view.getRight()) / 2;
+            int cy = (view.getTop() + view.getBottom()) / 2;
+
+            // get the final radius for the clipping circle
+            int finalRadius = Math.max(view.getWidth(), view.getHeight());
+
+            // create the animator for this view (the start radius is zero)
+            Animator anim = null;
+
+            anim = ViewAnimationUtils.createCircularReveal(view, cx, cy,
+                    0, finalRadius);
+
+            anim.setDuration(500);
+
+            // make the view visible and start the animation
+            view.setVisibility(View.VISIBLE);
+            anim.start();
+        }
+    }
+
+    // To hide a previously visible view using this effect:
+    public void animateTransitionSubcategories(final View viewSelectedRecyclerView) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            final View view = categoriesView;
+            // get the center for the clipping circle
+
+            int cx;
+            int cy;
+
+            if (viewSelectedRecyclerView == null) {
+                cx = (view.getLeft() + view.getRight()) / 2;
+                cy = (view.getTop() + view.getBottom()) / 2;
+            } else {
+                cx = (viewSelectedRecyclerView.getLeft() + viewSelectedRecyclerView.getRight()) / 2;
+                cy = (viewSelectedRecyclerView.getTop() + viewSelectedRecyclerView.getBottom()) / 2;
+            }
+
+            // get the initial radius for the clipping circle
+            int initialRadius = view.getWidth();
+
+            // create the animation (the final radius is zero)
+            Animator anim = ViewAnimationUtils.createCircularReveal(view, cx, cy,
+                    initialRadius, 0);
+            anim.setDuration(500);
+
+            // make the view invisible when the animation is done
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    view.setVisibility(View.INVISIBLE);
+
+                    if (viewSelectedRecyclerView != null) {
+                        mAdapter.updateCategories();
+                        mAdapter.notifyDataSetChanged();
+                    }
+                    showRecyclerView();
+                }
+            });
+
+            // start the animation
+            anim.start();
+        }
+    }
 
 }

@@ -327,7 +327,11 @@ public class TopekaDatabaseHelper extends SQLiteOpenHelper {
                                               String options, boolean solved) {
         final int[] answerArray = JsonHelper.jsonArrayToIntArray(answer);
         final String[] optionsArray = JsonHelper.jsonArrayToStringArray(options);
-        return new FourQuarterQuiz(question, answerArray, optionsArray, solved);
+        //JVG.S
+        // Por que no cmplia
+//        return new FourQuarterQuiz(question, answerArray, optionsArray, solved);
+        return new FourQuarterQuiz(question, answerArray, optionsArray, null, solved);
+        //JVG.E
     }
 
     private static Quiz createMultiSelectQuiz(String question, String answer,
@@ -341,7 +345,11 @@ public class TopekaDatabaseHelper extends SQLiteOpenHelper {
                                              String options, boolean solved) {
         final int[] answerArray = JsonHelper.jsonArrayToIntArray(answer);
         final String[] optionsArray = JsonHelper.jsonArrayToStringArray(options);
-        return new SelectItemQuiz(question, answerArray, optionsArray, solved);
+        //JVG.S
+        // Por que no compila
+//        return new SelectItemQuiz(question, answerArray, optionsArray, solved);
+        return new SelectItemQuiz(question, answerArray, optionsArray, null, solved);
+        //JVG.E
     }
 
     private static Quiz createToggleTranslateQuiz(String question, String answer,

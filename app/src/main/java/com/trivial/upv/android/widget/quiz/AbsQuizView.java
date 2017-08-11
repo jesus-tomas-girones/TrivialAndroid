@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
@@ -45,12 +46,10 @@ import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.ViewUtils;
 import com.trivial.upv.android.model.Category;
+import com.trivial.upv.android.model.quiz.FourQuarterQuiz;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.widget.fab.CheckableFab;
-import com.trivial.upv.android.activity.QuizActivity;
-import com.trivial.upv.android.helper.ApiLevelHelper;
-import com.trivial.upv.android.helper.ViewUtils;
-import com.trivial.upv.android.model.quiz.Quiz;
+import com.trivial.upv.android.model.quiz.QuizType;
+import com.trivial.upv.android.model.quiz.SelectItemQuiz;
 import com.trivial.upv.android.widget.fab.CheckableFab;
 
 /**
@@ -65,7 +64,7 @@ import com.trivial.upv.android.widget.fab.CheckableFab;
  * </p>
  *
  * @param <Q> The type of {@link Quiz} you want to
- * display.
+ *            display.
  */
 public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
 
@@ -87,9 +86,9 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
     /**
      * Enables creation of views for quizzes.
      *
-     * @param context The context for this view.
+     * @param context  The context for this view.
      * @param category The {@link Category} this view is running in.
-     * @param quiz The actual {@link Quiz} that is going to be displayed.
+     * @param quiz     The actual {@link Quiz} that is going to be displayed.
      */
     public AbsQuizView(Context context, Category category, Q quiz) {
         super(context);
@@ -351,12 +350,67 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
         mMoveOffScreenRunnable = new Runnable() {
             @Override
             public void run() {
-                mCategory.setScore(getQuiz(), answerCorrect);
-                if (getContext() instanceof QuizActivity) {
-                    ((QuizActivity) getContext()).proceed();
+                // JVG.S
+                // Muestra mensaje con SnackBar si procede
+
+                int posAnswer = -1;
+                String comments = "0";
+                if (getQuiz().getType().equals(QuizType.SINGLE_SELECT) || getQuiz().getType().equals(QuizType.FOUR_QUARTER)) {
+                    Bundle userInput = getUserInput();
+                    for (String strings : userInput.keySet()) {
+                        if (userInput.get(strings) instanceof Integer)
+                            posAnswer = (int) userInput.get(strings);
+                        else if (userInput.get(strings) instanceof boolean[]) {
+                            boolean[] tmpAnswers = (boolean[]) userInput.get(strings);
+
+                            for (int j = 0; j < tmpAnswers.length; j++) {
+                                if (tmpAnswers[j]) {
+                                    posAnswer = j;
+                                    break;
+                                }
+
+                            }
+                        }
+                    }
+
+                    if (posAnswer >= 0) {
+                        Quiz quiz = getQuiz();
+                        if (quiz instanceof FourQuarterQuiz) {
+                            comments = ((FourQuarterQuiz) quiz).getComments()[posAnswer];
+                        } else if (quiz instanceof SelectItemQuiz) {
+                            comments = ((SelectItemQuiz) quiz).getComments()[posAnswer];
+                        }
+                    }
+
+                }
+
+                if (!answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
+
+                    Snackbar snackbar = Snackbar
+                            .make(findViewById(R.id.absQuizViewContainer), comments, Snackbar.LENGTH_INDEFINITE)
+                            .setAction("CONTINUAR ...", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    mCategory.setScore(getQuiz(), answerCorrect);
+                                    if (getContext() instanceof QuizActivity) {
+                                        ((QuizActivity) getContext()).proceed();
+                                    }
+                                }
+                            });
+                    View snackbarView = snackbar.getView();
+                    TextView tv= (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+                    tv.setMaxLines(25);
+                    snackbar.show();
+                } else {
+                    mCategory.setScore(getQuiz(), answerCorrect);
+                    if (getContext() instanceof QuizActivity) {
+                        ((QuizActivity) getContext()).proceed();
+                    }
                 }
             }
-        };
+        }
+
+        ;
         mHandler.postDelayed(mMoveOffScreenRunnable,
                 FOREGROUND_COLOR_CHANGE_DELAY * 2);
     }

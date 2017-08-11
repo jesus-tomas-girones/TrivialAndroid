@@ -85,6 +85,7 @@ public class QuestionsTXTHelper {
             else if (line.isEmpty()) {
                 questionsTXT.getQuestions().add(questionTXT);
                 questionTXT = new QuestionTXT();
+
             } else {
 
                 // Respuestas
@@ -110,8 +111,9 @@ public class QuestionsTXTHelper {
                 }
             }
         }
-        if (contador > 0 && questionTXT.getEnunciado() != null)
+        if (contador > 0 && questionTXT.getEnunciado() != null) {
             questionsTXT.getQuestions().add(questionTXT);
+        }
 
         category.setDescription(questionsTXT.getSubject());
         category.setCategory(questionsTXT.getSubject());
@@ -298,12 +300,14 @@ public class QuestionsTXTHelper {
             if (pendingRequests == 0) {
                 Log.d("CARGA", "CARGA_FINALIZADA");
 
-                sendBroadCastMessageRefresh(100);
-
-                TopekaJSonHelper.getInstance(mContext, false).setLoaded(true);
-                TopekaJSonHelper.getInstance(mContext, false).updateCategory();
-
-                sendBroadCastMessage("OK");
+                new Thread() {
+                    public void run() {
+                        TopekaJSonHelper.getInstance(mContext, false).updateCategory();
+                        TopekaJSonHelper.getInstance(mContext, false).setLoaded(true);
+                        sendBroadCastMessageRefresh(100);
+                        sendBroadCastMessage("OK");
+                    }
+                }.start();
             }
 //        Log.d("CARGA", "PENDING:" + pendingRequests);
             else {

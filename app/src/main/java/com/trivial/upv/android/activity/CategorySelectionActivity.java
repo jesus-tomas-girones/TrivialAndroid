@@ -113,7 +113,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
         }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        
+
         if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() || numCategorias ==0) {
             if (checkInternetAccess()) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
@@ -237,6 +237,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
                 TopekaJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
                 ((CategorySelectionFragment) fragment).getAdapter().updateCategories();
                 ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
+                ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
             }
         }
     }

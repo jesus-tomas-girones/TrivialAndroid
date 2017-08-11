@@ -25,15 +25,33 @@ import com.trivial.upv.android.helper.AnswerHelper;
 @SuppressLint("ParcelCreator")
 public final class SelectItemQuiz extends OptionsQuiz<String> {
 
-    public SelectItemQuiz(String question, int[] answer, String[] options, boolean solved) {
+    // JVG.S
+//    public SelectItemQuiz(String question, int[] answer, String[] options, boolean solved) {
+    public SelectItemQuiz(String question, int[] answer, String[] options, String[] comments, boolean solved) {
         super(question, answer, options, solved);
+        // JVG.S
+        mComments = comments;
     }
+
+    public String[] getComments() {
+        return mComments;
+    }
+
+    public void setComments(String[] mComments) {
+        this.mComments = mComments;
+    }
+
+    private String[] mComments;
+    //JVG.E
 
     @SuppressWarnings("unused")
     public SelectItemQuiz(Parcel in) {
         super(in);
         String[] options = in.createStringArray();
         setOptions(options);
+        // JVG.S
+        mComments = in.createStringArray();
+        // JVG.E
     }
 
     @Override
@@ -50,5 +68,8 @@ public final class SelectItemQuiz extends OptionsQuiz<String> {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeStringArray(getOptions());
+        // JVG.S
+        dest.writeStringArray(getComments());
+        // JVG.E
     }
 }
