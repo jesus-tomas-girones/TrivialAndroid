@@ -57,8 +57,13 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
     private List<Category> mCategories;
 
     private OnItemClickListener mOnItemClickListener;
+    private OnLongItemClickListener mOnLongItemClickListener;
 
     public interface OnItemClickListener {
+        void onClick(View view, int position);
+    }
+
+    public interface OnLongItemClickListener {
         void onClick(View view, int position);
     }
 
@@ -93,6 +98,13 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
             @Override
             public void onClick(View v) {
                 mOnItemClickListener.onClick(v, holder.getAdapterPosition());
+            }
+        });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mOnLongItemClickListener.onClick(v,  holder.getAdapterPosition());
+                return true;
             }
         });
     }
@@ -135,6 +147,10 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mOnItemClickListener = onItemClickListener;
+    }
+
+    public void setOnLongItemClickListener(OnLongItemClickListener onLongItemClickListener) {
+        mOnLongItemClickListener = onLongItemClickListener;
     }
 
     //JVG.S
