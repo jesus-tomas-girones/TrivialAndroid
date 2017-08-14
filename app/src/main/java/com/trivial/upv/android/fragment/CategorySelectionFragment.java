@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -115,10 +116,17 @@ public class CategorySelectionFragment extends Fragment {
                 });
         mAdapter.setOnLongItemClickListener(new CategoryAdapterJSON.OnLongItemClickListener() {
             @Override
-            public void onClick(View v, int position) {
-                (TopekaJSonHelper.getInstance(getContext(), false)).deleteProgressCategory(position);
-                mAdapter.updateCategories();
-                mAdapter.notifyItemChanged(position);
+            public void onClick(View v, final int position) {
+                Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.root_view), "¿Quieres eliminar los resultados obtenidos?", Snackbar.LENGTH_INDEFINITE).setAction("Eliminar Avance", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        (TopekaJSonHelper.getInstance(getContext(), false)).deleteProgressCategory(position);
+                        mAdapter.updateCategories();
+                        mAdapter.notifyItemChanged(position);
+                    }
+                });
+                snackbar.show();
+
 
             }
         });
