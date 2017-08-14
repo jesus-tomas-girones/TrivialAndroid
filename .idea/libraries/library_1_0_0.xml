@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="library-1.0.0">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/179e8015dd00f6aec8bc6995639fa07d920b797d/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/179e8015dd00f6aec8bc6995639fa07d920b797d/output/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.pixplicity.htmlcompat/library/1.0.0/75d45d62a1ba778452457986520cf6643dea8bb1/library-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
