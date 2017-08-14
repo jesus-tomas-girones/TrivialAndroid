@@ -18,8 +18,10 @@ package com.trivial.upv.android.widget.quiz;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -45,6 +47,8 @@ public class FourQuarterQuizView extends AbsQuizView<FourQuarterQuiz> {
         //JVG.S
 //        mAnswerView = new GridView(getContext());
         mAnswerView = new AutoGridView(getContext());
+        mAnswerView.setVerticalSpacing((int)convertDpToPixel(20, getContext()));
+        mAnswerView.setHorizontalSpacing((int)convertDpToPixel(20, getContext()));
         //JVG.E
         mAnswerView.setSelector(R.drawable.selector_button);
         mAnswerView.setNumColumns(2);
@@ -59,6 +63,23 @@ public class FourQuarterQuizView extends AbsQuizView<FourQuarterQuiz> {
         });
         return mAnswerView;
     }
+
+    //JVG.S
+    /**
+     * This method converts dp unit to equivalent pixels, depending on device density.
+     *
+     * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
+     * @param context Context to get resources and device specific display metrics
+     * @return A float value to represent px equivalent to dp depending on device density
+     */
+    private float convertDpToPixel(float dp, Context context){
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        float px = dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        return px;
+    }
+    //JVG.E
+
 
     @Override
     public Bundle getUserInput() {
