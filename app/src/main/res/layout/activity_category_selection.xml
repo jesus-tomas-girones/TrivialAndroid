@@ -42,34 +42,85 @@
             android:elevation="@dimen/elevation_header"
             tools:ignore="UnusedAttribute">
 
-            <com.trivial.upv.android.widget.AvatarView
-                android:id="@+id/avatar"
-                android:layout_width="@dimen/size_avatar_toolbar"
-                android:layout_height="@dimen/size_avatar_toolbar"
-                android:layout_marginEnd="@dimen/spacing_double"
-                android:layout_marginRight="@dimen/spacing_double"
-                android:transitionName="@string/transition_avatar"
-                app:avatar='@{player.avatar.drawableId}'
-                tools:ignore="UnusedAttribute" />
-
-            <TextView
-                android:id="@+id/title"
-                style="@style/Topeka.TextAppearance.Title.Inverse"
+            <RelativeLayout
+                android:id="@+id/login_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|start"
-                android:text='@{player.firstName + " " + player.lastInitial}'
-                tools:ignore="PrivateResource" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/score"
-                style="@style/Topeka.TextAppearance.Title.Inverse"
+                <com.trivial.upv.android.widget.AvatarView
+                    android:id="@+id/avatar"
+                    android:layout_width="@dimen/size_avatar_toolbar"
+                    android:layout_height="@dimen/size_avatar_toolbar"
+                    android:layout_marginEnd="@dimen/spacing_double"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:transitionName="@string/transition_avatar"
+                    app:avatar='@{player.avatar.drawableId}'
+                    tools:ignore="UnusedAttribute" />
+
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/Topeka.TextAppearance.Title.Inverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/avatar"
+                    android:text='@{player.firstName + " " + player.lastInitial}'
+                    tools:ignore="PrivateResource" />
+
+                <TextView
+                    android:id="@+id/score_main"
+                    style="@style/Topeka.TextAppearance.Title.Inverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:paddingEnd="@dimen/spacing_micro"
+                    android:paddingStart="@dimen/spacing_micro"
+                    tools:ignore="NewApi" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/subcategory_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical|end"
-                android:paddingEnd="@dimen/spacing_micro"
-                android:paddingStart="@dimen/spacing_micro"
-                tools:ignore="NewApi" />
+               >
+
+                <ImageButton
+                    android:id="@+id/back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="start|center_vertical"
+                    android:background="@drawable/selector_subtle"
+                    android:contentDescription="@string/back"
+                    android:paddingRight="@dimen/spacing_double"
+                    android:src="@drawable/ic_arrow_back"
+                    android:tint="?android:textColorPrimaryInverse" />
+                <TextView
+                    android:id="@+id/score"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    style="@style/Topeka.TextAppearance.Title.Inverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:paddingEnd="@dimen/spacing_micro"
+                    android:paddingStart="@dimen/spacing_micro"
+                    tools:ignore="NewApi" />
+                <TextView
+                    android:id="@+id/sub_category_title"
+                    style="@style/Topeka.TextAppearance.Title.Inverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_toRightOf="@id/back"
+                    android:layout_toLeftOf="@id/score"
+                    android:text=""
+                    tools:ignore="PrivateResource" />
+            </RelativeLayout>
+
         </android.support.v7.widget.Toolbar>
 
         <FrameLayout

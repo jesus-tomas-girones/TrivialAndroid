@@ -72,6 +72,7 @@ public class TopekaJSonHelper {
     private static Context mContext = null;
 
     private boolean isLoaded = false;
+    private ArrayList<String> categoriesName;
 
 
     private TopekaJSonHelper(final Context context) {
@@ -160,7 +161,7 @@ public class TopekaJSonHelper {
                 sendBroadCastError("FILE", "Error recuperando JsonURL");
             }
         });
-        VolleySingleton.getColaPeticiones().add(request);
+        VolleySingleton.getInstance(mContext).getColaPeticiones().add(request);
     }
 
     public void sendBroadCastError(String errorCode, String errorDescription) {
@@ -227,6 +228,7 @@ public class TopekaJSonHelper {
             categories = helper.readCategoriesFromJSON(response);
             categoriesCurrent = categories;
             categoriesPath = new ArrayList<>();
+            categoriesName = new ArrayList<>();
         } catch (IOException e) {
             e.printStackTrace();
             sendBroadCastError("Volley", "Error IO");
@@ -621,10 +623,12 @@ public class TopekaJSonHelper {
 
     public void navigatePreviusCategory() {
         categoriesCurrent = categoriesPath.remove(categoriesPath.size() - 1);
+        categoriesName.remove(categoriesName.size()-1);
     }
 
     public void navigateNextCategory(int position) {
         categoriesPath.add(categoriesCurrent);
+        categoriesName.add(categoriesCurrent.get(position).getCategory());
         categoriesCurrent = categoriesCurrent.get(position).getSubcategories();
 
     }
@@ -721,10 +725,14 @@ public class TopekaJSonHelper {
             mCategories.clear();
         }
 
+        if (categoriesName!=null)
+            categoriesName.clear();
+
         categories = null;
         categoriesCurrent = null;
         categoriesPath = null;
         mCategories = null;
+        categoriesName = null;
     }
 
     public void updateCategory() {
@@ -783,6 +791,7 @@ public class TopekaJSonHelper {
             categories = gson.fromJson(sb.toString(), type);
             categoriesCurrent = categories;
             categoriesPath = new ArrayList<>();
+            categoriesName = new ArrayList<>();
             isLoaded = true;
 
             sendBroadCastMessageRefresh(100);
@@ -809,7 +818,7 @@ public class TopekaJSonHelper {
     }
 
     public static void cancelRequests() {
-        VolleySingleton.getColaPeticiones().cancelAll(new RequestQueue.RequestFilter() {
+        VolleySingleton.getInstance(mContext).getColaPeticiones().cancelAll(new RequestQueue.RequestFilter() {
             @Override
             public boolean apply(Request<?> request) {
                 return true;
@@ -824,16 +833,14 @@ public class TopekaJSonHelper {
                 for (Quiz quiz : categoryJSON.getQuizzes()) {
                     quiz.setSolved(false);
                 }
-            }
-            else {
-                if (categoryJSON.getSubcategories()!=null) {
-                    for (CategoryJSON subcategory: categoryJSON.getSubcategories()) {
+            } else {
+                if (categoryJSON.getSubcategories() != null) {
+                    for (CategoryJSON subcategory : categoryJSON.getSubcategories()) {
                         if (categoryJSON.getQuizzes() != null) {
                             for (Quiz quiz : categoryJSON.getQuizzes()) {
                                 quiz.setSolved(false);
                             }
-                        }
-                        else {
+                        } else {
                             deleteProgressSubCategory(subcategory);
                         }
                     }
@@ -853,21 +860,30 @@ public class TopekaJSonHelper {
                 for (Quiz quiz : subcategory.getQuizzes()) {
                     quiz.setSolved(false);
                 }
-            }
-            else {
-                if (subcategory.getSubcategories()!=null) {
-                    for (CategoryJSON subsubcategory: subcategory.getSubcategories()) {
+            } else {
+                if (subcategory.getSubcategories() != null) {
+                    for (CategoryJSON subsubcategory : subcategory.getSubcategories()) {
                         if (subsubcategory.getQuizzes() != null) {
                             for (Quiz quiz : subsubcategory.getQuizzes()) {
                                 quiz.setSolved(false);
                             }
-                        }
-                        else {
+                        } else {
                             deleteProgressSubCategory(subsubcategory);
                         }
                     }
                 }
             }
         }
+    }
+
+    public boolean isInitCategory() {
+        return categoriesPath == null || categoriesPath.size() == 0;
+    }
+
+    public String getPreviousTitleCategory() {
+
+        if (categoriesName != null && categoriesName.size() > 0)
+            return categoriesName.get(categoriesName.size() - 1);
+        else return null;
     }
 }

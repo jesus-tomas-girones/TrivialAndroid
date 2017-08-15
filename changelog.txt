@@ -1,0 +1,43 @@
+Completed Tasks
+----------------------------------
+15/08/2017- Show comments just press submit button. 
+15/08/2017- List of categories: Add in the action bar the category path selected. Done
+    Phase 2: Y lo de la flecha volver depende de le tiempo. Done
+15/08/2017- The summary of the quizzes don't support HTML Tags (fixed)
+15/08/2017- Snackbar revisar key back press where removing progress of a a categor
+15/08/2017- < y > are converted to &lt; and &gt; when thay aren't a valid HTML tag.
+14/08/2017- TrivilAndroid.java eliminated.
+14/08/2017- Firebase package deleted (unnused)
+
+Pending task
+----------------------------------
+MODE REVIEW
+-----------
+- Class Category inheritance, adding new fields: img, theme and question comments
+
+- Cachear categorias por cabecera de modificación en lugar por comparación del fichero.
+
+- Las imagenes no se cargan en los txtview de preguntas
+
+MODO JUEGO:
+-----------
+1) Seleccionar atividad para seleccionar categorias
+2) Automáticamente seleccionar n preguntas (10 preguntas de tipo Quiz)
+    funtion:
+           in: categoria, numpreguntas
+           out: quizzies
+3) Arrancar una actividad reproductor de preguntas
+
+MORE FEATURES:
+---------------
+- AUTENTIFICACION DEL USUARIO
+
+- MODO JUGADOR (CON LAS MISMAS PREGUNTAS)
+
+
+
+
+
+
+
+

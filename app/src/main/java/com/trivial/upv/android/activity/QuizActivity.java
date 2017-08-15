@@ -419,7 +419,7 @@ public class QuizActivity extends AppCompatActivity {
 //                getApplicationContext().getPackageName());
 //        mIcon.setImageResource(resId);
 //        mIcon.setImageResource(resId);
-        VolleySingleton.getLectorImagenes().get(mCategory.getImg(), new ImageLoader.ImageListener() {
+        VolleySingleton.getInstance(getBaseContext()).getLectorImagenes().get(mCategory.getImg(), new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                 mIcon.setImageBitmap(response.getBitmap());

@@ -35,6 +35,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
@@ -42,6 +43,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.trivial.upv.android.R;
@@ -92,14 +94,10 @@ public class CategorySelectionActivity extends AppCompatActivity {
         setUpToolbar();
 
         initActivity(savedInstanceState);
-
-
     }
 
     // JVG.S
     private void loadCategories() {
-
-
         // RECEIVER PARA ACTUALIZAR PROGRESO Y CARGA DE LAS CATEGORIAS
         filtro = new IntentFilter(ACTION_RESP);
         filtro.addCategory(Intent.CATEGORY_DEFAULT);
@@ -147,6 +145,8 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
                 snackbar.show();
             }
+        } else {
+//            showToolbarSubcategories();
         }
     }
 
@@ -159,6 +159,27 @@ public class CategorySelectionActivity extends AppCompatActivity {
     IntentFilter filtro;
 
     ReceptorOperacion receiver = null;
+
+    private Snackbar snackbar = null;
+    public void showDeleteProgressConfirmation(final int position) {
+        snackbar = Snackbar.make(findViewById(R.id.root_view), "¿Quieres eliminar los resultados obtenidos?", Snackbar.LENGTH_INDEFINITE).setAction("Eliminar Avance", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                (TopekaJSonHelper.getInstance(getBaseContext(), false)).deleteProgressCategory(position);
+
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+                if (fragment instanceof CategorySelectionFragment) {
+                    ((CategorySelectionFragment) fragment).getAdapter().updateCategories();
+                    ((CategorySelectionFragment) fragment).getAdapter().notifyItemChanged(position);
+
+                }
+                snackbar.dismiss();
+                snackbar = null;
+            }
+        });
+
+        snackbar.show();
+    }
 
     public class ReceptorOperacion extends BroadcastReceiver {
 
@@ -228,16 +249,38 @@ public class CategorySelectionActivity extends AppCompatActivity {
     //JVG.S
     @Override
     public void onBackPressed() {
-        if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
+        if (snackbar!=null )
+        {
+            snackbar.dismiss();
+            snackbar = null;
+        }
+        else if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
             super.onBackPressed();
         } else {
-            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
-            if (fragment instanceof CategorySelectionFragment) {
-                TopekaJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
-                ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
-            }
+            goToPreviusCategory();
         }
     }
+
+    private void goToPreviusCategory() {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+        if (fragment instanceof CategorySelectionFragment) {
+            TopekaJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
+            ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
+            showToolbarSubcategories();
+        }
+    }
+
+    private void showToolbarSubcategories() {
+        if (TopekaJSonHelper.getInstance(getBaseContext(), false).isInitCategory()) {
+            animateToolbarNavigateCategories();
+        } else {
+            TextView viewSubcategoryText = (TextView) findViewById(R.id.sub_category_title);
+            viewSubcategoryText.setText(TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
+            Log.d("previus", "categoria_previa" + TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
+            animateToolbarNavigateToSubcategories();
+        }
+    }
+
 
     public ProgressDialog pDialog;
     //JVG.E
@@ -246,12 +289,15 @@ public class CategorySelectionActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         TextView scoreView = (TextView) findViewById(R.id.score);
+        TextView scoreViewMain = (TextView) findViewById(R.id.score_main);
+
 //      JVG.S
 //        final int score = TopekaDatabaseHelper.getScore(this);
         final int score = TopekaJSonHelper.getInstance(getBaseContext(), false).getScore();
 
 //      JVG.E
         scoreView.setText(getString(R.string.x_points, score));
+        scoreViewMain.setText(getString(R.string.x_points, score));
     }
 
     /*JVG.S*/
@@ -270,6 +316,13 @@ public class CategorySelectionActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        ImageButton back = (ImageButton) findViewById(R.id.back);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToPreviusCategory();
+            }
+        });
     }
 
     @Override
@@ -293,6 +346,11 @@ public class CategorySelectionActivity extends AppCompatActivity {
                 signOut();
                 return true;
             }
+//            case android.R.id.home:
+//                goToPreviusCategory();
+//                Log.d("BACK", "BACK PULSED");
+//                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -353,8 +411,62 @@ public class CategorySelectionActivity extends AppCompatActivity {
             pDialog = null;
         }
 
+        if (snackbar!=null) {
+            snackbar.dismiss();
+            snackbar = null;
+        }
+
 
         super.onStop();
+    }
+
+    // Scale in X and Y a view, with a duration and a start delay
+    private void animateViewFullScaleXY(View view, int startDelay, int duration) {
+        view.setScaleX(0f);
+        view.setScaleY(0f);
+
+        ViewCompat.animate(view)
+                .setDuration(duration)
+                .setStartDelay(startDelay)
+                .scaleX(1f)
+                .scaleY(1f)
+                .alpha(1f);
+    }
+
+    public void animateToolbarNavigateCategories() {
+        View viewSubcategoryData = findViewById(R.id.subcategory_data);
+        viewSubcategoryData.setVisibility(View.GONE);
+
+        View viewLoginData = findViewById(R.id.login_data);
+        viewLoginData.setVisibility(View.VISIBLE);
+
+        View avatar = findViewById(R.id.avatar);
+        animateViewFullScaleXY(avatar, 200, 300);
+
+        View textViewCategory = findViewById(R.id.title);
+        animateViewFullScaleXY(textViewCategory, 300, 300);
+
+        View score = findViewById(R.id.score_main);
+        animateViewFullScaleXY(score, 400, 300);
+    }
+    //JVG.E
+
+    public void animateToolbarNavigateToSubcategories() {
+        View viewSubcategoryData = findViewById(R.id.subcategory_data);
+        viewSubcategoryData.setVisibility(View.VISIBLE);
+
+        View viewLoginData = findViewById(R.id.login_data);
+        viewLoginData.setVisibility(View.GONE);
+
+        View back = findViewById(R.id.back);
+        animateViewFullScaleXY(back, 200, 300);
+
+        View textViewSubcategory = findViewById(R.id.sub_category_title);
+        animateViewFullScaleXY(textViewSubcategory, 300, 300);
+
+        View score = findViewById(R.id.score);
+        animateViewFullScaleXY(score, 400, 300);
+
     }
 }
 

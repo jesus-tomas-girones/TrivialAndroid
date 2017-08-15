@@ -278,7 +278,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 
     private ScoreAdapter getScoreAdapter() {
         if (null == mScoreAdapter) {
-            mScoreAdapter = new ScoreAdapter(mCategory);
+            mScoreAdapter = new ScoreAdapter(mCategory, getContext());
         }
         return mScoreAdapter;
     }

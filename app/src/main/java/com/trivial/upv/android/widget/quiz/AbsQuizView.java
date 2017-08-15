@@ -30,7 +30,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
-import android.text.Html;
 import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Property;
@@ -288,7 +287,13 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
     private void submitAnswer(final View v) {
         final boolean answerCorrect = isAnswerCorrect();
         mQuiz.setSolved(true);
-        performScoreAnimation(answerCorrect);
+
+        // JVG.S
+//        performScoreAnimation(answerCorrect);
+        // JVG.E
+        // Show comments about wrong answers if is the case
+        performScoreAnimationWithCheckCommentsAvailable(answerCorrect);
+        // JVG.S
     }
 
     /**
@@ -308,6 +313,57 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
         // This overlays all content within the current view.
         animateForegroundColor(backgroundColor);
     }
+
+    // JVG.S
+    private void performScoreAnimationWithCheckCommentsAvailable(final boolean answerCorrect) {
+        int posAnswer = -1;
+        String comments = "0";
+        if (getQuiz().getType().equals(QuizType.SINGLE_SELECT) || getQuiz().getType().equals(QuizType.FOUR_QUARTER)) {
+            Bundle userInput = getUserInput();
+            for (String strings : userInput.keySet()) {
+                if (userInput.get(strings) instanceof Integer)
+                    posAnswer = (int) userInput.get(strings);
+                else if (userInput.get(strings) instanceof boolean[]) {
+                    boolean[] tmpAnswers = (boolean[]) userInput.get(strings);
+
+                    for (int j = 0; j < tmpAnswers.length; j++) {
+                        if (tmpAnswers[j]) {
+                            posAnswer = j;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (posAnswer >= 0) {
+                Quiz quiz = getQuiz();
+                if (quiz instanceof FourQuarterQuiz) {
+                    comments = ((FourQuarterQuiz) quiz).getComments()[posAnswer];
+                } else if (quiz instanceof SelectItemQuiz) {
+                    comments = ((SelectItemQuiz) quiz).getComments()[posAnswer];
+                }
+            }
+        }
+
+        if (!answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
+
+            Snackbar snackbar = Snackbar
+                    .make(findViewById(R.id.absQuizViewContainer), comments, Snackbar.LENGTH_INDEFINITE)
+                    .setAction("CONTINUAR ...", new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            performScoreAnimation(answerCorrect);
+                        }
+                    });
+            View snackbarView = snackbar.getView();
+            TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+            tv.setMaxLines(25);
+            snackbar.show();
+        } else {
+            performScoreAnimation(answerCorrect);
+        }
+    }
+    // JVG.E
 
     @SuppressLint("NewApi")
     private void adjustFab(boolean answerCorrect, int backgroundColor) {
@@ -363,62 +419,9 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
         mMoveOffScreenRunnable = new Runnable() {
             @Override
             public void run() {
-                // JVG.S
-                // Muestra mensaje con SnackBar si procede
-
-                int posAnswer = -1;
-                String comments = "0";
-                if (getQuiz().getType().equals(QuizType.SINGLE_SELECT) || getQuiz().getType().equals(QuizType.FOUR_QUARTER)) {
-                    Bundle userInput = getUserInput();
-                    for (String strings : userInput.keySet()) {
-                        if (userInput.get(strings) instanceof Integer)
-                            posAnswer = (int) userInput.get(strings);
-                        else if (userInput.get(strings) instanceof boolean[]) {
-                            boolean[] tmpAnswers = (boolean[]) userInput.get(strings);
-
-                            for (int j = 0; j < tmpAnswers.length; j++) {
-                                if (tmpAnswers[j]) {
-                                    posAnswer = j;
-                                    break;
-                                }
-
-                            }
-                        }
-                    }
-
-                    if (posAnswer >= 0) {
-                        Quiz quiz = getQuiz();
-                        if (quiz instanceof FourQuarterQuiz) {
-                            comments = ((FourQuarterQuiz) quiz).getComments()[posAnswer];
-                        } else if (quiz instanceof SelectItemQuiz) {
-                            comments = ((SelectItemQuiz) quiz).getComments()[posAnswer];
-                        }
-                    }
-
-                }
-
-                if (!answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
-
-                    Snackbar snackbar = Snackbar
-                            .make(findViewById(R.id.absQuizViewContainer), comments, Snackbar.LENGTH_INDEFINITE)
-                            .setAction("CONTINUAR ...", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    mCategory.setScore(getQuiz(), answerCorrect);
-                                    if (getContext() instanceof QuizActivity) {
-                                        ((QuizActivity) getContext()).proceed();
-                                    }
-                                }
-                            });
-                    View snackbarView = snackbar.getView();
-                    TextView tv = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
-                    tv.setMaxLines(25);
-                    snackbar.show();
-                } else {
-                    mCategory.setScore(getQuiz(), answerCorrect);
-                    if (getContext() instanceof QuizActivity) {
-                        ((QuizActivity) getContext()).proceed();
-                    }
+                mCategory.setScore(getQuiz(), answerCorrect);
+                if (getContext() instanceof QuizActivity) {
+                    ((QuizActivity) getContext()).proceed();
                 }
             }
         }

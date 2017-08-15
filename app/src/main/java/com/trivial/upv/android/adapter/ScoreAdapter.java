@@ -23,6 +23,7 @@ import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Html;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.pixplicity.htmlcompat.HtmlCompat;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.quiz.Quiz;
@@ -45,14 +47,16 @@ public class ScoreAdapter extends BaseAdapter {
     private final Category mCategory;
     private final int count;
     private final List<Quiz> mQuizList;
+    private final Context mContext;
 
     private Drawable mSuccessIcon;
     private Drawable mFailedIcon;
 
-    public ScoreAdapter(Category category) {
+    public ScoreAdapter(Category category, Context context) {
         mCategory = category;
         mQuizList = mCategory.getQuizzes();
         count = mQuizList.size();
+        mContext = context;
     }
 
     @Override
@@ -84,8 +88,14 @@ public class ScoreAdapter extends BaseAdapter {
         //JVG.S
 //        viewHolder.mQuizView.setText(quiz.getQuestion());
 //        viewHolder.mAnswerView.setText(quiz.getStringAnswer());
-        viewHolder.mQuizView.setText(Html.fromHtml(quiz.getQuestion()));
-        viewHolder.mAnswerView.setText(Html.fromHtml(quiz.getStringAnswer()));
+        Spanned fromHtml = HtmlCompat.fromHtml(mContext, quiz.getQuestion(), 0);
+// You may want to provide an ImageGetter, TagHandler and SpanCallback:
+//Spanned fromHtml = HtmlCompat.fromHtml(context, source, 0,
+//        imageGetter, tagHandler, spanCallback);
+        //viewHolder.mQuizView.setMovementMethod(LinkMovementMethod.getInstance());
+        viewHolder.mQuizView.setText(fromHtml);
+        fromHtml = HtmlCompat.fromHtml(mContext, quiz.getStringAnswer(), 0);
+        viewHolder.mAnswerView.setText(fromHtml);
         //JVG.E
         setSolvedStateForQuiz(viewHolder.mSolvedState, position);
         return convertView;

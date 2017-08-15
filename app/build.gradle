@@ -85,5 +85,8 @@ dependencies {
     compile "com.google.firebase:firebase-database:${firebase}"
     compile 'com.google.code.gson:gson:2.7'
 
+    compile "com.pixplicity.htmlcompat:library:1.0.0"
+
+
 }
 apply plugin: 'com.google.gms.google-services'

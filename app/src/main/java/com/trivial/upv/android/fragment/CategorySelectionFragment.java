@@ -26,20 +26,25 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.trivial.upv.android.R;
+import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.adapter.CategoryAdapterJSON;
 import com.trivial.upv.android.helper.TransitionHelper;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.widget.AvatarView;
 import com.trivial.upv.android.widget.OffsetDecoration;
 
 public class CategorySelectionFragment extends Fragment {
@@ -99,9 +104,12 @@ public class CategorySelectionFragment extends Fragment {
                                     mAdapter.getItem(position));
                         } else {
                             // Mostrar Subcategorias
-
                             TopekaJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
                             animateTransitionSubcategories(v);
+
+                            TextView textViewSubcategory = (TextView) getActivity().findViewById(R.id.sub_category_title);
+                                textViewSubcategory.setText(mAdapter.getItem(position).getId());
+                            ((CategorySelectionActivity)getActivity()).animateToolbarNavigateToSubcategories();
                         }
 
 
@@ -117,19 +125,11 @@ public class CategorySelectionFragment extends Fragment {
         mAdapter.setOnLongItemClickListener(new CategoryAdapterJSON.OnLongItemClickListener() {
             @Override
             public void onClick(View v, final int position) {
-                Snackbar snackbar = Snackbar.make(getActivity().findViewById(R.id.root_view), "¿Quieres eliminar los resultados obtenidos?", Snackbar.LENGTH_INDEFINITE).setAction("Eliminar Avance", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        (TopekaJSonHelper.getInstance(getContext(), false)).deleteProgressCategory(position);
-                        mAdapter.updateCategories();
-                        mAdapter.notifyItemChanged(position);
-                    }
-                });
-                snackbar.show();
-
-
+                ((CategorySelectionActivity)getActivity()).showDeleteProgressConfirmation(position);
             }
         });
+
+
         //JVG.E
         categoriesView.setAdapter(mAdapter);
         categoriesView.getViewTreeObserver()
@@ -142,6 +142,8 @@ public class CategorySelectionFragment extends Fragment {
                     }
                 });
     }
+
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -240,5 +242,6 @@ public class CategorySelectionFragment extends Fragment {
             anim.start();
         }
     }
-    //JVG.E
+
+
 }
