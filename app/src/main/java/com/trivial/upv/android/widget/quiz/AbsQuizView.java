@@ -31,6 +31,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Property;
 import android.view.Gravity;
@@ -43,6 +44,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.pixplicity.htmlcompat.HtmlCompat;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.ApiLevelHelper;
@@ -129,7 +131,12 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
                 mCategory.getTheme().getPrimaryColor()));
 //JVG.S
 //        mQuestionView.setText(getQuiz().getQuestion());
-        mQuestionView.setText(Html.fromHtml(getQuiz().getQuestion()));
+        Spanned fromHtml = HtmlCompat.fromHtml(getContext(), getQuiz().getQuestion(), 0);
+// You may want to provide an ImageGetter, TagHandler and SpanCallback:
+//Spanned fromHtml = HtmlCompat.fromHtml(context, source, 0,
+//        imageGetter, tagHandler, spanCallback);
+        //viewHolder.mQuizView.setMovementMethod(LinkMovementMethod.getInstance());
+        mQuestionView.setText(fromHtml);
         mQuestionView.setMovementMethod(new ScrollingMovementMethod());
 //JVG.E
     }
