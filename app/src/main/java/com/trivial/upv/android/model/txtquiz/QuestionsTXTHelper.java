@@ -285,21 +285,60 @@ public class QuestionsTXTHelper {
         }
     }
 
+    // change < and > for &lt; and &gt where there aren't a tag HTML
+    private String substHtmlCharacters(String str)
+    {
+        StringBuilder sBuilder = new StringBuilder();
+        for (int i = 0 ; i < str.length() ; i++)
+        {
+            char ch = str.charAt(i);
+            if (ch == '>' && i != 0)
+            {
+                char c = str.charAt( i - 1);
+                if (Character.isWhitespace(c) || !Character.isLetter(c))
+                {
+                    sBuilder.append("&gt;");
+                }
+                else
+                    sBuilder.append(ch);
+            }
+            else if (ch == '>' && i==0)
+            {
+                sBuilder.append("&gt;");
+            }
+            else if (ch == '<' && i < str.length() - 1)
+            {
+                char c = str.charAt( i + 1);
+                if (!(c=='/' || Character.isLetter(c)))
+                {
+                    sBuilder.append("&lt;");
+                }
+                else
+                    sBuilder.append(ch);
+            }
+            else if (ch == '<' && i == str.length() - 1)
+            {
+                sBuilder.append("&lt;");
+            }
+            else
+            {
+                sBuilder.append(ch);
+            }
+        }
+        return sBuilder.toString();
+    }
+
+    // Process de strings and remove 2 continuous \n. Also change < and > for &lt; and &gt where there aren't a tag HTML
     private String removeWordsUnWanted(String line) {
-
         String lineTmp = line.replaceAll("<br><br>", "<br>");
-//        String lineTmp = line.replaceAll("<code>", "");
-//        lineTmp = lineTmp.replaceAll("</code>", "");
         lineTmp = lineTmp.replaceAll("</br>", "<br>");
-//        lineTmp = lineTmp.replaceAll("<br/ >", "</br>");
-//        lineTmp = lineTmp.replaceAll("<br>", "<br>");
-//        lineTmp = lineTmp.replaceAll("&nbsp;", "");
-//        lineTmp = lineTmp.replaceAll("&lt;", "<");
-
-//        return removeTags(lineTmp);
+        lineTmp = lineTmp.replaceAll("<br/>", "<br>");
+        lineTmp = substHtmlCharacters(lineTmp);
         return lineTmp;
     }
 
+
+    // Auxiliary functions to remove TAGS
     private static final Pattern REMOVE_TAGS = Pattern.compile("<.+?>");
 
     public static String removeTags(String string) {
@@ -554,7 +593,7 @@ public class QuestionsTXTHelper {
             }
         });
 
-        VolleySingleton.getColaPeticiones().add(request);
+        VolleySingleton.getInstance(mContext).getColaPeticiones().add(request);
 
         addRequest();
     }
