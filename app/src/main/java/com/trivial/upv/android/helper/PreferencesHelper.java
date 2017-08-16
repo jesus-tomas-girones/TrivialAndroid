@@ -33,6 +33,7 @@ public class PreferencesHelper {
     private static final String PREFERENCE_FIRST_NAME = PLAYER_PREFERENCES + ".firstName";
     private static final String PREFERENCE_LAST_INITIAL = PLAYER_PREFERENCES + ".lastInitial";
     private static final String PREFERENCE_AVATAR = PLAYER_PREFERENCES + ".avatar";
+    private static final String PREFERENCE_LAST_MODIFIED_CATEGORIES_JSON = "last_modified_categories_json";
 
     private PreferencesHelper() {
         //no instance
@@ -51,6 +52,20 @@ public class PreferencesHelper {
         editor.putString(PREFERENCE_AVATAR, player.getAvatar().name());
         editor.apply();
     }
+
+    //JVG.S
+    public static void writeLastModifiedPreferences(Context context, long lastModified) {
+        SharedPreferences.Editor editor = getEditor(context);
+        editor.putLong(PREFERENCE_LAST_MODIFIED_CATEGORIES_JSON, lastModified);
+        editor.apply();
+    }
+    //JVG.S
+    public static long getLastModifiedPreferences(Context context) {
+        SharedPreferences preferences = getSharedPreferences(context);
+        long lastModified = preferences.getLong(PREFERENCE_LAST_MODIFIED_CATEGORIES_JSON, -1);
+        return lastModified;
+    }
+    //JVG.E
 
     /**
      * Retrieves a {@link Player} from preferences.
