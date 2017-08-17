@@ -12,34 +12,40 @@ public class CategoryJSON {
     /*@SerializedName("id")
     @Expose
     private String id;
-    @SerializedName("category")*/
+    */
+    @SerializedName("category")
     @Expose
     private String category;
-    @SerializedName("access")
-    @Expose
-    private Long access;
-    @SerializedName("success")
-    @Expose
-    private Long success;
+
     @SerializedName("description")
     @Expose
     private String description;
+
     @SerializedName("theme")
     @Expose
     private String theme;
+
     @SerializedName("img")
     @Expose
     private String img;
+
     @SerializedName("moreinfo")
     @Expose
     private String moreinfo;
+
     @SerializedName("subcategories")
     @Expose
     private List<CategoryJSON> subcategories = null;
     /*@SerializedName("quizzes")
     @Expose
     private List<String> quizzes = null;*/
+
+    @SerializedName("quizzes")
+    @Expose
     private List<Quiz> quizzes = null;
+
+    @SerializedName("score")
+    @Expose
     private int[] score= null;
 
     /*public String getId() {
@@ -56,22 +62,6 @@ public class CategoryJSON {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public Long getAccess() {
-        return access;
-    }
-
-    public void setAccess(Long access) {
-        this.access = access;
-    }
-
-    public Long getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Long success) {
-        this.success = success;
     }
 
     public String getDescription() {
