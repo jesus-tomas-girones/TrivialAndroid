@@ -1,15 +1,13 @@
 package com.trivial.upv.android.model.txtquiz;
 
 import android.content.Context;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.trivial.upv.android.R;
+import com.trivial.upv.android.helper.singleton.StringRequestHeaders;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.json.CategoryJSON;
@@ -25,12 +23,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,8 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.createArrayIntFromNumQuizzes;
-import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessage;
-import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCastMessageRefresh;
 
 
 /**
@@ -48,7 +40,9 @@ import static com.trivial.upv.android.persistence.TopekaJSonHelper.sendBroadCast
 
 public class QuestionsTXTHelper {
 
-    public static String JsonURL = "https://trivialandroid-d2b33.firebaseio.com/.json";
+    //    public static String JsonURL = "https://trivialandroid-d2b33.firebaseio.com/.json";
+//    public static String JsonURL = "http://eventosjvg.esy.es/categories_upv.json";
+    public static String JsonURL = "http://mmoviles.upv.es/trivial/trivialandroid.json";
 
     Context mContext;
 
@@ -64,21 +58,21 @@ public class QuestionsTXTHelper {
      * @param preguntasTXT
      * @throws UnsupportedEncodingException
      */
-    public void getQuizzesFromString(CategoryJSON category, String preguntasTXT) throws UnsupportedEncodingException {
+    public void getQuizzesFromString(CategoryJSON category, String preguntasTXT, String url) throws UnsupportedEncodingException {
         String line;
-
-        String utf8 = URLDecoder.decode(URLEncoder.encode(preguntasTXT, "iso8859-1"), "UTF-8");
 
         QuestionTXT questionTXT = null;
         QuestionsTXT questionsTXT = new QuestionsTXT();
-
         List<Quiz> quizzes = new ArrayList<>();
 
-        String[] preguntas = utf8.split("\\r?\\n");
+
+        String tmpPreguntasTXT = preguntasTXT.replaceAll("(\\r?\\n\\r?\\n)(\\r?\\n)*","$1");
+
+        String[] preguntas = tmpPreguntasTXT.split("\\r?\\n");
         int contador = 0;
+
         for (; contador < preguntas.length; contador++) {
-            line = removeWordsUnWanted(preguntas[contador]);
-            // Primera linea: Temática
+            line = removeWordsUnWanted(preguntas[contador], url); // Primera linea: Temática
             if (contador == 0) {
                 questionTXT = new QuestionTXT();
                 questionsTXT.setSubject(line);
@@ -144,184 +138,28 @@ public class QuestionsTXTHelper {
     int pendingRequests = 0;
     int maxPendingRequests = 0;
 
-    public void getQuizzesAsyncTask(CategoryJSON category, String url) {
-
-        addRequest();
-
-        EnviarMensajeEnServidorWebTask tarea = new EnviarMensajeEnServidorWebTask();
-        tarea.url = url;
-        tarea.category = category;
-        tarea.execute();
-    }
-
-
-    private class EnviarMensajeEnServidorWebTask extends AsyncTask<Void, Void, String> {
-
-        public String response = "ok";
-        public String url;
-        public CategoryJSON category;
-
-        @Override
-        public void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(Void... arg0) {
-            //for (int i = 0; i < mensaje.size() && "ok".equals(response); i++) {
-            try {
-                // Añadir parametros;
-                Uri.Builder constructorParametros = new Uri.Builder();
-                //.appendQueryParameter("mensaje", mensaje).
-                //        appendQueryParameter("idapp", ID_PROYECTO).appendQueryParameter("apiKey", API_KEY);
-                String parametros = constructorParametros.build().getEncodedQuery();
-
-                URL direccion = new URL(url);
-                HttpURLConnection conexion = (HttpURLConnection) direccion.openConnection();
-                conexion.setRequestMethod("GET");
-                conexion.setRequestProperty("Accept-Language", "UTF-8");
-                conexion.setDoOutput(false);
-                    /*OutputStreamWriter outputStreamWriter = new OutputStreamWriter(conexion.getOutputStream());
-                    outputStreamWriter.write("");
-                    outputStreamWriter.flush();*/
-                int respuesta = conexion.getResponseCode();
-                if (respuesta == 200) {
-                    response = "ok";
-
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conexion.getInputStream()));
-                    String line = null;
-
-                    StringBuilder responseData = new StringBuilder();
-
-
-                    QuestionTXT questionTXT = null;
-                    QuestionsTXT questionsTXT = new QuestionsTXT();
-
-                    List<Quiz> quizzes = new ArrayList<>();
-
-                    while ((line = in.readLine()) != null) {
-                        responseData.append(line + "\n");
-                    }
-
-                    in.close();
-                    conexion.disconnect();
-
-                    String[] preguntas = responseData.toString().split("\\n");
-
-                    int contador = 0;
-
-                    for (; contador < preguntas.length; contador++) {
-                        line = removeWordsUnWanted(preguntas[contador]);
-                        // Primera linea: Temática
-                        if (contador == 0) {
-                            questionTXT = new QuestionTXT();
-                            questionsTXT.setSubject(line);
-                        }
-                        // Si linea en blanco. Nueva pregunta
-                        else if (line.isEmpty()) {
-                            questionsTXT.getQuestions().add(questionTXT);
-                            questionTXT = new QuestionTXT();
-                        } else {
-
-                            // Respuestas
-                            if (questionTXT.getEnunciado() != null) {
-                                String[] datos = line.split("#");
-                                // Hay Comentario
-                                if (datos.length > 1) {
-                                    questionTXT.getComentariosRespuesta().add(datos[1]);
-                                } else {
-                                    questionTXT.getComentariosRespuesta().add("");
-                                }
-
-                                if (datos[0].charAt(0) == '*') {
-                                    questionTXT.getRespuestaCorrecta().add(questionTXT.getRespuestas().size());
-                                    questionTXT.getRespuestas().add(datos[0].substring(1));
-                                } else {
-                                    questionTXT.getRespuestas().add(datos[0]);
-                                }
-                            }
-                            // Enunciados
-                            else {
-                                questionTXT.setEnunciado(line);
-                            }
-                        }
-
-                    }
-                    if (contador > 0 && questionTXT.getEnunciado() != null)
-                        questionsTXT.getQuestions().add(questionTXT);
-
-
-                    category.setDescription(questionsTXT.getSubject());
-                    category.setCategory(questionsTXT.getSubject());
-                    category.setMoreinfo(questionsTXT.getSubject());
-
-                    Quiz quizz;
-                    for (QuestionTXT question : questionsTXT.getQuestions()) {
-                        if (question.getRespuestaCorrecta().size() > 1) {
-                            quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.MULTI_SELECT);
-                        } else if (question.getRespuestas().size() == 4) {
-                            quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.FOUR_QUARTER);
-                        } else {
-                            quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.SINGLE_SELECT);
-                        }
-
-                        quizzes.add(quizz);
-                    }
-                    category.setQuizzes(quizzes);
-
-                } else {
-                    response = "error";
-                }
-            } catch (IOException e) {
-                response = "error";
-            }
-            return response;
-        }
-
-        public void onPostExecute(String res) {
-            if (res == "ok") {
-                updateProgress();
-            }
-        }
-    }
-
     // change < and > for &lt; and &gt where there aren't a tag HTML
-    private String substHtmlCharacters(String str)
-    {
+    private String substHtmlCharacters(String str) {
         StringBuilder sBuilder = new StringBuilder();
-        for (int i = 0 ; i < str.length() ; i++)
-        {
+        for (int i = 0; i < str.length(); i++) {
             char ch = str.charAt(i);
-            if (ch == '>' && i != 0)
-            {
-                char c = str.charAt( i - 1);
-                if (Character.isWhitespace(c) || !Character.isLetter(c))
-                {
+            if (ch == '>' && i != 0) {
+                char c = str.charAt(i - 1);
+                if (Character.isWhitespace(c) || !Character.isLetter(c)) {
                     sBuilder.append("&gt;");
-                }
-                else
+                } else
                     sBuilder.append(ch);
-            }
-            else if (ch == '>' && i==0)
-            {
+            } else if (ch == '>' && i == 0) {
                 sBuilder.append("&gt;");
-            }
-            else if (ch == '<' && i < str.length() - 1)
-            {
-                char c = str.charAt( i + 1);
-                if (!(c=='/' || Character.isLetter(c)))
-                {
+            } else if (ch == '<' && i < str.length() - 1) {
+                char c = str.charAt(i + 1);
+                if (!(c == '/' || Character.isLetter(c))) {
                     sBuilder.append("&lt;");
-                }
-                else
+                } else
                     sBuilder.append(ch);
-            }
-            else if (ch == '<' && i == str.length() - 1)
-            {
+            } else if (ch == '<' && i == str.length() - 1) {
                 sBuilder.append("&lt;");
-            }
-            else
-            {
+            } else {
                 sBuilder.append(ch);
             }
         }
@@ -329,12 +167,38 @@ public class QuestionsTXTHelper {
     }
 
     // Process de strings and remove 2 continuous \n. Also change < and > for &lt; and &gt where there aren't a tag HTML
-    private String removeWordsUnWanted(String line) {
+    private String removeWordsUnWanted(String line, String url) {
         String lineTmp = line.replaceAll("<br><br>", "<br>");
         lineTmp = lineTmp.replaceAll("</br>", "<br>");
         lineTmp = lineTmp.replaceAll("<br/>", "<br>");
         lineTmp = substHtmlCharacters(lineTmp);
+
+        lineTmp = addPathToUrlImg(lineTmp, url);
+
+
         return lineTmp;
+    }
+
+    private String addPathToUrlImg(String input, String url) {
+
+        String regex = "(<img\\s+src=[\"'])([^\"']+)";
+
+        String replace = "$1" + url.substring(0, url.lastIndexOf("/") + 1) + "$2";
+
+        Pattern p = Pattern.compile(regex);
+
+        // get a matcher object
+        Matcher m = p.matcher(input);
+        StringBuffer sb = new StringBuffer();
+
+        while (m.find()) {
+            if (!input.substring(m.start(), m.end()).contains("http"))
+                m.appendReplacement(sb, replace);
+        }
+
+        m.appendTail(sb);
+
+        return sb.toString();
     }
 
 
@@ -362,14 +226,14 @@ public class QuestionsTXTHelper {
                     public void run() {
                         TopekaJSonHelper.getInstance(mContext, false).updateCategory();
                         TopekaJSonHelper.getInstance(mContext, false).setLoaded(true);
-                        sendBroadCastMessageRefresh(100);
-                        sendBroadCastMessage("OK");
+                        TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh(100);
+                        TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessage("OK");
                     }
                 }.start();
             }
 //        Log.d("CARGA", "PENDING:" + pendingRequests);
             else {
-                sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
+                TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
             }
         }
 
@@ -398,7 +262,7 @@ public class QuestionsTXTHelper {
         if (DEBUG) {
             String line;
             StringBuilder categoriesJson = new StringBuilder();
-            InputStream rawCategories = mContext.getResources().openRawResource(R.raw.categories_upv);
+            InputStream rawCategories = mContext.getResources().openRawResource(R.raw.trivialandroidv4);
             BufferedReader reader = new BufferedReader(new InputStreamReader(rawCategories));
 
             // Crear una cadena con el Fichero JSON completo
@@ -432,8 +296,7 @@ public class QuestionsTXTHelper {
 
             //mCategory.setId(category.getString("id"));
             mCategory.setCategory(category.getString("category"));
-            mCategory.setAccess(category.getLong("access"));
-            mCategory.setSuccess(category.getLong("success"));
+
             mCategory.setDescription(category.getString("description"));
             mCategory.setImg(category.getString("img"));
             mCategory.setMoreinfo(category.getString("moreinfo"));
@@ -459,8 +322,6 @@ public class QuestionsTXTHelper {
                 for (int j = 0; j < preguntasJSon.length(); j++) {
                     sub_subcategory = new CategoryJSON();
                     //sub_subcategory.setCategory(subcategory.getString("category"));
-                    sub_subcategory.setAccess(category.getLong("access"));
-                    sub_subcategory.setSuccess(category.getLong("success"));
                     //sub_subcategory.setDescription(subcategory.getString("description"));
                     sub_subcategory.setImg(category.getString("img"));
                     //sub_subcategory.setMoreinfo(subcategory.getString("moreinfo"));
@@ -500,8 +361,7 @@ public class QuestionsTXTHelper {
 
             /// pregunta.setId(subcategory.getString("id"));
             pregunta.setCategory(subcategory.getString("category"));
-            pregunta.setAccess(subcategory.getLong("access"));
-            pregunta.setSuccess(subcategory.getLong("success"));
+
             pregunta.setDescription(subcategory.getString("description"));
             pregunta.setImg(subcategory.getString("img"));
             pregunta.setMoreinfo(subcategory.getString("moreinfo"));
@@ -524,8 +384,7 @@ public class QuestionsTXTHelper {
 
                         sub_subcategory = new CategoryJSON();
                         //sub_subcategory.setCategory(subcategory.getString("category"));
-                        sub_subcategory.setAccess(subcategory.getLong("access"));
-                        sub_subcategory.setSuccess(subcategory.getLong("success"));
+
                         //sub_subcategory.setDescription(subcategory.getString("description"));
                         sub_subcategory.setImg(subcategory.getString("img"));
                         //sub_subcategory.setMoreinfo(subcategory.getString("moreinfo"));
@@ -548,10 +407,6 @@ public class QuestionsTXTHelper {
         return preguntas;
     }
 
-    private void localizaPreguntasTXT(CategoryJSON sub_subcategory, String url) {
-        getQuizzesAsyncTask(sub_subcategory, url.replace(" ", "%20"));
-    }
-
     /**
      * Get Quizzes from a plain text in Internet
      *
@@ -559,12 +414,8 @@ public class QuestionsTXTHelper {
      * @param urlStr
      */
     private void getQuizzesTXTFromInternetVolley(final CategoryJSON sub_subcategory, final String urlStr) throws MalformedURLException, URISyntaxException {
-//        URL url = new URL(urlStr);
-//        URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
-//        String urlVolley = uri.toASCIIString();
-
-
-        StringRequest request = new StringRequest(Request.Method.GET, urlStr.replace(" ", "%20"), new Response.Listener<String>() {
+//        StringRequestHeaders request = new StringRequestHeaders(Request.Method.GET, "http://mmoviles.upv.es/test/OpenCV/3.2_OpenCV-Segmentacion.txt".replace(" ", "%20"), new Response.Listener<String>() {
+        StringRequestHeaders request = new StringRequestHeaders(Request.Method.GET, urlStr.replace(" ", "%20"), new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
 
@@ -572,11 +423,12 @@ public class QuestionsTXTHelper {
                     public void run() {
 
                         try {
-                            getQuizzesFromString(sub_subcategory, response);
+                            getQuizzesFromString(sub_subcategory, response, urlStr.replace(" ", "%20"));
+//                            getQuizzesFromString(sub_subcategory, response, "http://mmoviles.upv.es/test/OpenCV/3.2_OpenCV-Segmentacion.txt".replace(" ", "%20"));
                             updateProgress();
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
-                            sendBroadCastMessage("ERROR");
+                            TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessage("ERROR");
                         }
 
                     }
@@ -591,9 +443,9 @@ public class QuestionsTXTHelper {
 
                 TopekaJSonHelper.cancelRequests();
             }
-        });
+        }, true);
 
-        VolleySingleton.getInstance(mContext).getColaPeticiones().add(request);
+        VolleySingleton.getInstance(mContext).addToRequestQueue(request);
 
         addRequest();
     }
