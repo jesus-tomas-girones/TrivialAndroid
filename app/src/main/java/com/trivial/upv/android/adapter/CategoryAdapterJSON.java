@@ -171,7 +171,7 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
             //JVG.S
             /// icon.setImageResource(categoryImageResource);
             //JVG.E
-            VolleySingleton.getLectorImagenes().get(category.getImg(), new ImageLoader.ImageListener() {
+            VolleySingleton.getInstance(mActivity.getBaseContext()).getImageLoader().get(category.getImg(), new ImageLoader.ImageListener() {
                 @Override
                 public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                     icon.setImageBitmap(response.getBitmap());
@@ -245,7 +245,7 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
                 .getDrawable(mActivity, categoryImageResource).mutate();*/
         //JVG.E
         final Drawable[] categoryIcon = new Drawable[1];
-        VolleySingleton.getLectorImagenes().get(category.getImg(), new ImageLoader.ImageListener() {
+        VolleySingleton.getInstance(mActivity.getBaseContext()).getImageLoader().get(category.getImg(), new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
                 categoryIcon[0] = new BitmapDrawable(mActivity.getResources(), response.getBitmap());
