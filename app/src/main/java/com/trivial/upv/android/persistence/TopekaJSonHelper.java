@@ -24,12 +24,13 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.trivial.upv.android.helper.JsonHelper;
+import com.trivial.upv.android.helper.PreferencesHelper;
+import com.trivial.upv.android.helper.singleton.StringRequestHeaders;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.Theme;
@@ -81,10 +82,10 @@ public class TopekaJSonHelper {
     }
 
 
-    //1) Obtiene json de Firebase:
+    //1) Obtiene json de Internet:
 //    https://trivialandroid-d2b33.firebaseio.com/ (FireBase del Proyecto)
-//2) Compara la versión almacenada en local con la versión descargada
-//	2.1) Si son iguales, búsca si la información está cacheada (fichero json deserializada) con las puntuaciones, quizzes resueltos, etc
+    //2) Compara la fecha de modificación de la versión almacenada en local con la versión descargada en remoto
+//	2.1) Si son iguales  o no hay fecha de modificación o , búsca si la información está cacheada (fichero json deserializada) con las puntuaciones, quizzes resueltos, etc
 //		2.1.1) Si la información esta cacheada la carga en POJO: List<Category>
 //		2.1.2) Si no,
 //			2.1.2.1) carga List<Category> con los Quizzes a partir de los ficheros txt ubicados en internet, y lo complementa con el ficher .json de categorias
@@ -93,75 +94,87 @@ public class TopekaJSonHelper {
 //		2.2.1) carga List<Category> con los Quizzes a partir de los ficheros txt ubicados en internet, y lo complementa con el ficher .json de categorias
 //		2.2.2) Cachéa la información una vez finalizado
 //3) Devueve el control a la aplicación.
+
+    private long mLastModifiedJSON = -1;
+
+    private StringRequestHeaders request = null;
+
     private void isSameFileJSON() {
-        StringRequest request = new StringRequest(Request.Method.GET, QuestionsTXTHelper.JsonURL, new Response.Listener<String>() {
+        request = new StringRequestHeaders(Request.Method.GET, QuestionsTXTHelper.JsonURL, new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
-                new Thread() {
-                    public void run() {
-                        String[] preguntas = response.split("\\r?\\n");
 
-                        try {
-                            BufferedReader br = new BufferedReader(new InputStreamReader(mContext.openFileInput("categories.json")));
+                mLastModifiedJSON = request.getDateLastModified();
+                long dateLastModifiedPreferences = PreferencesHelper.getLastModifiedPreferences(mContext);
+                final String[] preguntas = response.split("\\r?\\n");
 
-                            // Line JSON saved
-                            String line = null;
-
-                            boolean iguales = true;
-                            int contador = 0;
-                            while ((line = br.readLine()) != null && contador < preguntas.length && iguales) {
-                                if (!preguntas[contador].equals(line)) {
-                                    iguales = false;
-                                    break;
-                                }
-                                contador++;
-                            }
-                            br.close();
-
-                            if (contador > 0 && iguales && contador == preguntas.length && line == null) {
-                            /* The same file  Take information from cache*/
-                                Log.d("TRAZA", "fichero no se ha modificado");
-                                readCategoriesFromCache(response, preguntas);
-                                return;
-                            } else {
-                                // New File categories readed. Update
-                                readNewFileJson(response, preguntas, true);
-
-                                return;
-                            }
-
-                        } catch (FileNotFoundException e1) {
-                            e1.printStackTrace();
-                            Log.d("TRAZA", "nuevo fichero");
+                if (mLastModifiedJSON == -1 || dateLastModifiedPreferences == -1 || mLastModifiedJSON > dateLastModifiedPreferences) {
+                    // Comparo si son iguales los ficheros local y remoto)
+                    new Thread() {
+                        public void run() {
                             try {
-                                readNewFileJson(response, preguntas, true);
+                                BufferedReader br = new BufferedReader(new InputStreamReader(mContext.openFileInput("categories.json")));
+
+                                // Line JSON saved
+                                String line = null;
+
+                                boolean iguales = true;
+                                int contador = 0;
+                                while ((line = br.readLine()) != null && contador < preguntas.length && iguales) {
+                                    if (!preguntas[contador].equals(line)) {
+                                        iguales = false;
+                                        break;
+                                    }
+                                    contador++;
+                                }
+                                br.close();
+
+                                if (contador > 0 && iguales && contador == preguntas.length && line == null) {
+                            /* The same file  Take information from cache*/
+                                    Log.d("TRAZA", "fichero no se ha modificado");
+                                    readCategoriesFromCache(response, preguntas);
+                                    return;
+                                } else {
+                                    // New File categories readed. Update
+                                    readNewFileJson(response, preguntas, true);
+
+                                    return;
+                                }
+
+                            } catch (FileNotFoundException e1) {
+                                e1.printStackTrace();
+                                Log.d("TRAZA", "nuevo fichero");
+                                try {
+                                    readNewFileJson(response, preguntas, true);
+                                    return;
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                    sendBroadCastError("FILE", "Error creando fichero IO");
+                                }
+
+                                // continuar carga
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+
+                                sendBroadCastError("FILE", "Error comparando IO");
+
                                 return;
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                                sendBroadCastError("FILE", "Error creando fichero IO");
                             }
 
-                            // continuar carga
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-
-                            sendBroadCastError("FILE", "Error comparando IO");
-
-                            return;
                         }
-
-                    }
-                }.start();
+                    }.start();
+                } else {
+                    Log.d("TRAZA", "fecha <= ultima fecha");
+                    readCategoriesFromCache(response, preguntas);
+                }
             }
-        }, new Response.ErrorListener()
-
-        {
+        }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 sendBroadCastError("FILE", "Error recuperando JsonURL");
             }
-        });
-        VolleySingleton.getInstance(mContext).getColaPeticiones().add(request);
+        }, false);
+        VolleySingleton.getInstance(mContext).addToRequestQueue(request);
     }
 
     public void sendBroadCastError(String errorCode, String errorDescription) {
@@ -210,14 +223,18 @@ public class TopekaJSonHelper {
     }
 
 
-    public List<CategoryJSON> categories;
+    public List<CategoryJSON> getCategoriesJSON() {
+        return categoriesJSON;
+    }
+
+    private List<CategoryJSON> categoriesJSON;
 
     public List<CategoryJSON> getCategoriesCurrent() {
         return categoriesCurrent;
     }
 
-    public List<CategoryJSON> categoriesCurrent;
-    public ArrayList<List<CategoryJSON>> categoriesPath;
+    private List<CategoryJSON> categoriesCurrent;
+    private ArrayList<List<CategoryJSON>> categoriesPath;
 
 
     private void readCategoriesFromJSON(final JSONObject response) {
@@ -225,8 +242,8 @@ public class TopekaJSonHelper {
         QuestionsTXTHelper helper = new QuestionsTXTHelper(mContext);
         try {
             resetData();
-            categories = helper.readCategoriesFromJSON(response);
-            categoriesCurrent = categories;
+            categoriesJSON = helper.readCategoriesFromJSON(response);
+            categoriesCurrent = categoriesJSON;
             categoriesPath = new ArrayList<>();
             categoriesName = new ArrayList<>();
         } catch (IOException e) {
@@ -255,15 +272,18 @@ public class TopekaJSonHelper {
     }
 
 
-    public static void sendBroadCastMessage(String msg) {
+    public void sendBroadCastMessage(String msg) {
         Intent i = new Intent();
         i.setAction(ACTION_RESP);
         i.addCategory(Intent.CATEGORY_DEFAULT);
         i.putExtra("RESULT", msg);
+
+        PreferencesHelper.writeLastModifiedPreferences(mContext, mLastModifiedJSON);
+
         mContext.sendBroadcast(i);
     }
 
-    public static void sendBroadCastMessageRefresh(int val) {
+    public void sendBroadCastMessageRefresh(int val) {
         Intent i = new Intent();
         i.setAction(ACTION_RESP);
         i.addCategory(Intent.CATEGORY_DEFAULT);
@@ -342,6 +362,10 @@ public class TopekaJSonHelper {
 //        final int step = cursor.getInt(8);
 //        final boolean solved = getBooleanFromDatabase(cursor.getString(11));
 
+
+        if (!object.has("mQuestion")) {
+            Log.d("TRAZA", "ERROR");
+        }
         final String question = object.get("mQuestion").getAsString();
         final String answer = object.get("mAnswer").getAsJsonArray().toString();
 
@@ -545,11 +569,12 @@ public class TopekaJSonHelper {
         int numQuizzes = 0;
 
 
-        if (categoryTXT.getQuizzes() == null)
+        if (categoryTXT.getQuizzes() == null && categoryTXT.getSubcategories() != null) {
             for (CategoryJSON subcategoryTXT : categoryTXT.getSubcategories())
                 numQuizzes += getNumQuizzesForCategory(subcategoryTXT);
-        else return categoryTXT.getQuizzes().size();
-
+        } else if (categoryTXT.getQuizzes() != null) {
+            return categoryTXT.getQuizzes().size();
+        }
         return numQuizzes;
     }
 
@@ -578,8 +603,8 @@ public class TopekaJSonHelper {
     public int getScore() {
         int tmpScore = 0;
 
-        if (categories != null && isLoaded) {
-            for (CategoryJSON category : categories) {
+        if (categoriesJSON != null && isLoaded) {
+            for (CategoryJSON category : categoriesJSON) {
                 if (category.getQuizzes() == null) {
 
                     tmpScore += getScore2(category.getSubcategories());
@@ -623,7 +648,7 @@ public class TopekaJSonHelper {
 
     public void navigatePreviusCategory() {
         categoriesCurrent = categoriesPath.remove(categoriesPath.size() - 1);
-        categoriesName.remove(categoriesName.size()-1);
+        categoriesName.remove(categoriesName.size() - 1);
     }
 
     public void navigateNextCategory(int position) {
@@ -711,8 +736,8 @@ public class TopekaJSonHelper {
     public void resetData() {
         isLoaded = false;
 
-        if (categories != null) {
-            categories.clear();
+        if (categoriesJSON != null) {
+            categoriesJSON.clear();
         }
         if (categoriesCurrent != null) {
             categoriesCurrent.clear();
@@ -725,10 +750,10 @@ public class TopekaJSonHelper {
             mCategories.clear();
         }
 
-        if (categoriesName!=null)
+        if (categoriesName != null)
             categoriesName.clear();
 
-        categories = null;
+        categoriesJSON = null;
         categoriesCurrent = null;
         categoriesPath = null;
         mCategories = null;
@@ -736,11 +761,13 @@ public class TopekaJSonHelper {
     }
 
     public void updateCategory() {
-        Gson gson = new Gson();
         Type type = new TypeToken<List<CategoryJSON>>() {
         }.getType();
 
-        String json = gson.toJson(categories, type);
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+
+        String json = gson.toJson(categoriesJSON, type);
 
         try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(mContext.openFileOutput("cache.json", Context.MODE_PRIVATE)));
@@ -788,8 +815,8 @@ public class TopekaJSonHelper {
 
             resetData();
 
-            categories = gson.fromJson(sb.toString(), type);
-            categoriesCurrent = categories;
+            categoriesJSON = gson.fromJson(sb.toString(), type);
+            categoriesCurrent = categoriesJSON;
             categoriesPath = new ArrayList<>();
             categoriesName = new ArrayList<>();
             isLoaded = true;
@@ -818,7 +845,7 @@ public class TopekaJSonHelper {
     }
 
     public static void cancelRequests() {
-        VolleySingleton.getInstance(mContext).getColaPeticiones().cancelAll(new RequestQueue.RequestFilter() {
+        VolleySingleton.getInstance(mContext).getRequestQueue().cancelAll(new RequestQueue.RequestFilter() {
             @Override
             public boolean apply(Request<?> request) {
                 return true;
