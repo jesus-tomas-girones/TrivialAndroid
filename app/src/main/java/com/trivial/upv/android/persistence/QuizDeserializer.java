@@ -1,5 +1,7 @@
 package com.trivial.upv.android.persistence;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -25,6 +27,8 @@ class QuizDeserializer implements JsonDeserializer<Quiz> {
             throws JsonParseException {
         JsonObject quiz = json.getAsJsonObject();
 
+        if (!quiz.has("mQuizType"))
+            Log.d("ACTIVO","ERROR");
         String type = quiz.get("mQuizType").getAsString();
 
         Quiz tmpQuiz = null;
