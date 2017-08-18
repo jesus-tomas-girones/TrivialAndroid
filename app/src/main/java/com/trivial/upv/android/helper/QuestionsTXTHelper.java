@@ -1,4 +1,4 @@
-package com.trivial.upv.android.model.txtquiz;
+package com.trivial.upv.android.helper;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,6 +12,8 @@ import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.model.quiz.Quiz;
+import com.trivial.upv.android.model.txtquiz.QuestionTXT;
+import com.trivial.upv.android.model.txtquiz.QuestionsTXT;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 
 import org.json.JSONArray;
@@ -244,7 +246,7 @@ public class QuestionsTXTHelper {
     }
 
 
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
 
     /**
      * Partiendo de un fichero JSON generar la estructura recursiva de Categorias, Subcategorias, Sub-Subcategorias, ...
