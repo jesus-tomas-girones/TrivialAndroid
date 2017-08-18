@@ -246,7 +246,7 @@ public class QuestionsTXTHelper {
     }
 
 
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     /**
      * Partiendo de un fichero JSON generar la estructura recursiva de Categorias, Subcategorias, Sub-Subcategorias, ...
