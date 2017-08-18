@@ -28,4 +28,8 @@
     <string name="sign_out">Sign out</string>
     <string name="x_points">%1$d pts</string>
     <string name="back">back</string>
+
+    <!--JVG.S-->
+    <string name="activity_treeview">Selección Categorías</string>
+    <!--JVG.E-->
 </resources>

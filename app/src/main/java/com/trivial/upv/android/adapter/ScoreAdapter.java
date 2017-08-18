@@ -17,13 +17,18 @@
 package com.trivial.upv.android.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
+import android.os.Build;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,17 +37,24 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.pixplicity.htmlcompat.HtmlCompat;
 import com.trivial.upv.android.R;
+import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.quiz.Quiz;
 
+import org.xml.sax.Attributes;
+
 import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 /**
  * Adapter for displaying score cards.
  */
-public class ScoreAdapter extends BaseAdapter {
+public class ScoreAdapter extends BaseAdapter  implements HtmlCompat.ImageGetter{
 
     private final Category mCategory;
     private final int count;
@@ -88,13 +100,15 @@ public class ScoreAdapter extends BaseAdapter {
         //JVG.S
 //        viewHolder.mQuizView.setText(quiz.getQuestion());
 //        viewHolder.mAnswerView.setText(quiz.getStringAnswer());
-        Spanned fromHtml = HtmlCompat.fromHtml(mContext, quiz.getQuestion(), 0);
+        tmpImg = viewHolder.mQuizView;
+        Spanned fromHtml = HtmlCompat.fromHtml(mContext, quiz.getQuestion(),0, this);
 // You may want to provide an ImageGetter, TagHandler and SpanCallback:
 //Spanned fromHtml = HtmlCompat.fromHtml(context, source, 0,
 //        imageGetter, tagHandler, spanCallback);
         //viewHolder.mQuizView.setMovementMethod(LinkMovementMethod.getInstance());
         viewHolder.mQuizView.setText(fromHtml);
-        fromHtml = HtmlCompat.fromHtml(mContext, quiz.getStringAnswer(), 0);
+        tmpImg = viewHolder.mQuizView;
+        fromHtml = HtmlCompat.fromHtml(mContext, quiz.getStringAnswer(), 0, this);
         viewHolder.mAnswerView.setText(fromHtml);
         //JVG.E
         setSolvedStateForQuiz(viewHolder.mSolvedState, position);
@@ -155,6 +169,48 @@ public class ScoreAdapter extends BaseAdapter {
         convertView.setTag(holder);
         return convertView;
     }
+
+    private TextView tmpImg;
+
+    @Override
+    public Drawable getDrawable(String source, Attributes attr) {
+        final LevelListDrawable drawableTmp = new LevelListDrawable();
+        Drawable empty;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            empty = mContext.getResources().getDrawable(R.drawable.ic_cross, mContext.getTheme());
+        } else {
+            empty = mContext.getResources().getDrawable(R.drawable.ic_cross);
+        }
+        drawableTmp.addLevel(0, 0, empty);
+        drawableTmp.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
+
+        VolleySingleton.getInstance(mContext).getImageLoader().get(source, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                Bitmap bitmap = response.getBitmap();
+                if (response.getBitmap() != null) {
+                    BitmapDrawable drawable = new BitmapDrawable(mContext.getResources(), bitmap);
+                    drawableTmp.addLevel(1, 1, drawable);
+                    drawableTmp.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                    drawableTmp.setLevel(1);
+                    // i don't know yet a better way to refresh TextView
+                    // mTv.invalidate() doesn't work as expected
+                    CharSequence t = tmpImg.getText();
+                    tmpImg.setText(t);
+                    //mTv.invalidate();
+                }
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("VOLLEY", "Error cargando icon!");
+            }
+        });
+
+        return drawableTmp;
+    }
+
 
     private class ViewHolder {
 

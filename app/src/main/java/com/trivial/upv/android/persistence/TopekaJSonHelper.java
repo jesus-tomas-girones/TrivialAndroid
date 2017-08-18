@@ -26,7 +26,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import com.trivial.upv.android.helper.JsonHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
@@ -46,7 +50,7 @@ import com.trivial.upv.android.model.quiz.SelectItemQuiz;
 import com.trivial.upv.android.model.quiz.ToggleTranslateQuiz;
 import com.trivial.upv.android.model.quiz.TrueFalseQuiz;
 import com.trivial.upv.android.model.txtquiz.QuestionTXT;
-import com.trivial.upv.android.model.txtquiz.QuestionsTXTHelper;
+import com.trivial.upv.android.helper.QuestionsTXTHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -361,11 +365,6 @@ public class TopekaJSonHelper {
 //        final int max = cursor.getInt(7);
 //        final int step = cursor.getInt(8);
 //        final boolean solved = getBooleanFromDatabase(cursor.getString(11));
-
-
-        if (!object.has("mQuestion")) {
-            Log.d("TRAZA", "ERROR");
-        }
         final String question = object.get("mQuestion").getAsString();
         final String answer = object.get("mAnswer").getAsJsonArray().toString();
 
@@ -375,7 +374,6 @@ public class TopekaJSonHelper {
 
 
         if (!object.has("mComments")) {
-            Log.d("CAPTURADO", "AQUI");
             final String[] optionsArray = JsonHelper.jsonArrayToStringArray(options);
             List tmpComments = new ArrayList();
             for (int i = 0; i < optionsArray.length; i++) tmpComments.add("");
@@ -912,5 +910,25 @@ public class TopekaJSonHelper {
         if (categoriesName != null && categoriesName.size() > 0)
             return categoriesName.get(categoriesName.size() - 1);
         else return null;
+    }
+
+    class QuizDeserializer implements JsonDeserializer<Quiz> {
+        @Override
+        public Quiz deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            JsonObject quiz = json.getAsJsonObject();
+
+            if (!quiz.has("mQuizType"))
+                Log.d("ACTIVO","ERROR");
+            String type = quiz.get("mQuizType").getAsString();
+
+            Quiz tmpQuiz = null;
+
+            tmpQuiz = TopekaJSonHelper.createQuizDueToTypeJson(quiz, type);
+
+            return tmpQuiz;
+        }
+
+
     }
 }

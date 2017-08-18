@@ -21,7 +21,11 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +36,7 @@ import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.util.Property;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -43,17 +48,22 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.pixplicity.htmlcompat.HtmlCompat;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.ViewUtils;
+import com.trivial.upv.android.helper.singleton.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.quiz.FourQuarterQuiz;
 import com.trivial.upv.android.model.quiz.Quiz;
 import com.trivial.upv.android.model.quiz.QuizType;
 import com.trivial.upv.android.model.quiz.SelectItemQuiz;
 import com.trivial.upv.android.widget.fab.CheckableFab;
+
+import org.xml.sax.Attributes;
 
 /**
  * This is the base class for displaying a {@link Quiz}.
@@ -69,7 +79,7 @@ import com.trivial.upv.android.widget.fab.CheckableFab;
  * @param <Q> The type of {@link Quiz} you want to
  *            display.
  */
-public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
+public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements HtmlCompat.ImageGetter {
 
     private static final int ANSWER_HIDE_DELAY = 500;
     private static final int FOREGROUND_COLOR_CHANGE_DELAY = 750;
@@ -86,6 +96,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
     private Runnable mHideFabRunnable;
     private Runnable mMoveOffScreenRunnable;
 
+
     /**
      * Enables creation of views for quizzes.
      *
@@ -93,7 +104,9 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
      * @param category The {@link Category} this view is running in.
      * @param quiz     The actual {@link Quiz} that is going to be displayed.
      */
-    public AbsQuizView(Context context, Category category, Q quiz) {
+    public AbsQuizView(Context context, Category category, Q quiz)
+
+    {
         super(context);
         mQuiz = quiz;
         mCategory = category;
@@ -121,6 +134,45 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
         });
     }
 
+    @Override
+    public Drawable getDrawable(String source, Attributes attr) {
+        final LevelListDrawable drawableTmp = new LevelListDrawable();
+        Drawable empty;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            empty = getResources().getDrawable(R.drawable.ic_cross, getContext().getTheme());
+        } else {
+            empty = getResources().getDrawable(R.drawable.ic_cross);
+        }
+        drawableTmp.addLevel(0, 0, empty);
+        drawableTmp.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
+
+        VolleySingleton.getInstance(getContext()).getImageLoader().get(source, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                Bitmap bitmap = response.getBitmap();
+                if (response.getBitmap() != null) {
+                    BitmapDrawable drawable = new BitmapDrawable(getResources(), bitmap);
+                    drawableTmp.addLevel(1, 1, drawable);
+                    drawableTmp.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                    drawableTmp.setLevel(1);
+                    // i don't know yet a better way to refresh TextView
+                    // mTv.invalidate() doesn't work as expected
+                    CharSequence t = mQuestionView.getText();
+                    mQuestionView.setText(t);
+                    //mTv.invalidate();
+                }
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("VOLLEY", "Error cargando icon!");
+            }
+        });
+
+        return drawableTmp;
+    }
+
     /**
      * Sets the behaviour for all question views.
      */
@@ -130,12 +182,16 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout {
                 mCategory.getTheme().getPrimaryColor()));
 //JVG.S
 //        mQuestionView.setText(getQuiz().getQuestion());
-        Spanned fromHtml = HtmlCompat.fromHtml(getContext(), getQuiz().getQuestion(), 0);
+        //        Spanned spanned = Html.fromHtml(imgs, this, null);
+//        mTv.setText(spanned);
+        Spanned fromHtml = HtmlCompat.fromHtml(getContext(), getQuiz().getQuestion(), 0,this);
 // You may want to provide an ImageGetter, TagHandler and SpanCallback:
 //Spanned fromHtml = HtmlCompat.fromHtml(context, source, 0,
 //        imageGetter, tagHandler, spanCallback);
         //viewHolder.mQuizView.setMovementMethod(LinkMovementMethod.getInstance());
         mQuestionView.setText(fromHtml);
+
+
         mQuestionView.setMovementMethod(new ScrollingMovementMethod());
 //JVG.E
     }

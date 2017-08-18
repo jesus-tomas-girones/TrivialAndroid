@@ -99,9 +99,14 @@ public class CategorySelectionActivity extends AppCompatActivity {
     // JVG.S
     private void loadCategories() {
         // RECEIVER PARA ACTUALIZAR PROGRESO Y CARGA DE LAS CATEGORIAS
-        filtro = new IntentFilter(ACTION_RESP);
-        filtro.addCategory(Intent.CATEGORY_DEFAULT);
-        receiver = new ReceptorOperacion();
+
+        if (filtro == null) {
+            filtro = new IntentFilter(ACTION_RESP);
+            filtro.addCategory(Intent.CATEGORY_DEFAULT);
+        }
+
+        if (receiver == null)
+            receiver = new ReceptorOperacion();
 
         // Carga categorias
         int numCategorias = 0;
@@ -127,19 +132,21 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
                 new Thread() {
                     public void run() {
-
+                        // Aprovisiona el modelo con las categorías
                         TopekaJSonHelper.getInstance(CategorySelectionActivity.this, true);
 
                     }
                 }.start();
 
             } else {
-                Snackbar snackbar = Snackbar
+                snackbar = Snackbar
                         .make(findViewById(R.id.category_container), "No hay conexión de Internet.", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("CERRAR", new View.OnClickListener() {
+                        .setAction("REINTENTAR", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                finish();
+                                dismissSnackbar();
+
+                                loadCategories();
                             }
                         });
 
@@ -161,6 +168,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
     ReceptorOperacion receiver = null;
 
     private Snackbar snackbar = null;
+
     public void showDeleteProgressConfirmation(final int position) {
         snackbar = Snackbar.make(findViewById(R.id.root_view), "¿Quieres eliminar los resultados obtenidos?", Snackbar.LENGTH_INDEFINITE).setAction("Eliminar Avance", new View.OnClickListener() {
             @Override
@@ -173,8 +181,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
                     ((CategorySelectionFragment) fragment).getAdapter().notifyItemChanged(position);
 
                 }
-                snackbar.dismiss();
-                snackbar = null;
+                dismissSnackbar();
             }
         });
 
@@ -209,11 +216,13 @@ public class CategorySelectionActivity extends AppCompatActivity {
                         pDialog.setProgress(intent.getExtras().getInt("REFRESH", 0));
                     }
                 } else if ("ERROR".equals(result)) {
-                    Snackbar snackbar = Snackbar
+                    snackbar = Snackbar
                             .make(findViewById(R.id.root_view), "Ha ocurrido un error cargando las categorías", Snackbar.LENGTH_INDEFINITE)
                             .setAction("CERRAR", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+                                    dismissSnackbar();
+
                                     finish();
                                 }
                             });
@@ -249,12 +258,9 @@ public class CategorySelectionActivity extends AppCompatActivity {
     //JVG.S
     @Override
     public void onBackPressed() {
-        if (snackbar!=null )
-        {
-            snackbar.dismiss();
-            snackbar = null;
-        }
-        else if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
+        if (snackbar != null) {
+            dismissSnackbar();
+        } else if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
             super.onBackPressed();
         } else {
             goToPreviusCategory();
@@ -346,6 +352,10 @@ public class CategorySelectionActivity extends AppCompatActivity {
                 signOut();
                 return true;
             }
+//            case R.id.activity_treeview: {
+//                showActivityTreeView();
+//                return true;
+//            }
 //            case android.R.id.home:
 //                goToPreviusCategory();
 //                Log.d("BACK", "BACK PULSED");
@@ -355,6 +365,10 @@ public class CategorySelectionActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void showActivityTreeView() {
+        ActivityCompat.startActivity(this, new Intent(this, CategorySelectionTreeViewActivity.class), null  );
+    }
+
     @SuppressLint("NewApi")
     private void signOut() {
         PreferencesHelper.signOut(this);
@@ -362,6 +376,13 @@ public class CategorySelectionActivity extends AppCompatActivity {
 //        TopekaDatabaseHelper.reset(this);
         TopekaJSonHelper.getInstance(this, false).signOut(getBaseContext());
 
+        dissmissDialogs();
+
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+        if (fragment instanceof CategorySelectionFragment) {
+            ((CategorySelectionFragment) fragment).getAdapter();
+            ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
+        }
 //        JVG.E
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
             getWindow().setExitTransition(TransitionInflater.from(this)
@@ -369,6 +390,28 @@ public class CategorySelectionActivity extends AppCompatActivity {
         }
         SignInActivity.start(this, false);
         finish();
+    }
+
+    private void dissmissDialogs() {
+
+        dismissSnackbar();
+
+        dismissProgressDialog();
+    }
+
+    private void dismissSnackbar() {
+        if (snackbar != null) {
+            snackbar.dismiss();
+            snackbar = null;
+        }
+    }
+
+
+    private void dismissProgressDialog() {
+        if (pDialog != null) {
+            pDialog.dismiss();
+            pDialog = null;
+        }
     }
 
     private void attachCategoryGridFragment() {
@@ -406,16 +449,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
             receiver = null;
         }
 
-        if (pDialog != null) {
-            pDialog.dismiss();
-            pDialog = null;
-        }
-
-        if (snackbar!=null) {
-            snackbar.dismiss();
-            snackbar = null;
-        }
-
+        dissmissDialogs();
 
         super.onStop();
     }

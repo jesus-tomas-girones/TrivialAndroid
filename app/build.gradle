@@ -26,7 +26,8 @@ android {
 
     defaultConfig {
         applicationId "com.trivial.upv.android"
-        minSdkVersion 14
+//        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -86,7 +87,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
 
     compile "com.pixplicity.htmlcompat:library:1.0.0"
-
+    compile 'me.texy.treeview:treeview_lib:1.0.3'
 
 }
 apply plugin: 'com.google.gms.google-services'

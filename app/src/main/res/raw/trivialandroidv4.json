@@ -429,40 +429,33 @@
           "img": "http://mmoviles.upv.es/trivial/img/edx.png",
           "moreinfo": "https://www.edx.org/course/android-introduccion-la-programacion-upvalenciax-aip201x-1",
           "subcategories": {
-            "0_java": {
-              "category": "Java y POO",
-              "description": "Comprueba tus conocimientos sobre Java y Programación Orientada a Objetos.",
-              "theme": "blue",
-              "img": "http://mmoviles.upv.es/trivial/img/java.png",
-              "moreinfo": "http://www.androidcurso.com/index.php/21",
-              "quizzes": [
-                "http://mmoviles.upv.es/test_fundamentos/0_0%20Conocimientos%20previos%20en%20C%20Java%20y%20POO.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_1%20caracteristicas%20de%20Java.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_2%20Instalacion%20y%20entorno%20de%20desarrollo.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_3%20Creacion%20de%20clases%20en%20Java.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_4%20Creacion%20y%20utilizaci%C3%B3n%20de%20objetos.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_5%20Encapsulamiento%20y%20visibilidad.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_6%20Herencia%20en%20Java.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_7%20Polimorfismo.txt",
-                "http://mmoviles.upv.es/test_fundamentos/0_8%20Tipos%20de%20enumerados%20en%20Java.txt"
-              ]
-            },
-            "1_intro": {
-              "category": "Introducción a Android y entorno de desarrollo",
-              "description": "Introducción a la plataforma android y al entorno de desarrollo Android Studio.",
+            "1_fundamentos": {
+              "category": "Android Fundamentos",
+              "description": "Preguntas relacionadas con el curso \"Android: Fundamentos\" o El Gran Libro de Amdroid",
               "theme": "green",
-              "img": "http://mmoviles.upv.es/trivial/img/Android_Studio.png",
-              "moreinfo": "http://www.androidcurso.com/index.php/96",
-              "quizzes": [
-                "http://mmoviles.upv.es/test_fundamentos/1_1 Que hace de_ y Origenes.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_2 Comparativa.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_3 Arquitectura.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_4 Instalacion.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_5 Plataformas de desarrollo.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_6 Elegir una version de Android.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_7 Componentes de una aplicacion.txt",
-                "http://mmoviles.upv.es/test_fundamentos/1_8 Elementos de un proyecto.txt"
-              ]
+              "img": "http://mmoviles.upv.es/trivial/img/android.png",
+              "moreinfo": "http://www.androidcurso.com/index.php/modulo-avanzado/programa-fundamentos",
+              "subcategories": {
+                "1_intro": {
+                  "category": "La plataforma Android",
+                  "description": "Introducción a la plataforma android y al entorno de desarrollo Android Studio.",
+                  "theme": "green",
+                  "img": "http://mmoviles.upv.es/trivial/img/Android_Studio.png",
+                  "moreinfo": "http://www.androidcurso.com/index.php/96",
+                  "quizzes": [
+                    "http://mmoviles.upv.es/test_fundamentos/1_1%20Que%20hace%20de_%20y%20Origenes.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_2 Comparativa.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_1 Que hace de_ y Origenes.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_2 Comparativa.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_3 Arquitectura.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_4 Instalacion.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_5 Plataformas de desarrollo.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_6 Elegir una version de Android.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_7 Componentes de una aplicacion.txt",
+                    "http://mmoviles.upv.es/test_fundamentos/1_8 Elementos de un proyecto.txt"
+                  ]
+                }
+              }
             }
           }
         },
