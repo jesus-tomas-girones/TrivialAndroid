@@ -1,13 +1,34 @@
 Completed Tasks
 ----------------------------------
-15/08/2017- Show comments just press submit button. 
+18/06/2017-Se implementa la carga de imágenes (tanto en Summary como en Quizzes)
+
+17/06/2017-Se elimina de la clase CategoryJSON "access" y "success" (Done)
+17/06/2017-Cachear categorias por cabecera de modificación en lugar por comparación del fichero.
+	Se modifica la carga del fichero json (ahora se carga desde un servidor no FireBase (mmoviles.upv.es/trivial/trivialandroid.json)
+		1) Obtiene json de Firebase:
+			https://trivialandroid-d2b33.firebaseio.com/ (FireBase del Proyecto)
+		2) Compara la cabecera de última modificación y en caso de ser más moderna o es la primera vez que se arranca la aplicación:
+			2.1) Carga nuevo fichero de categorías
+				2.1.1) carga List<Category> con los Quizzes a partir de los ficheros txt ubicados en internet, y lo complementa con el fichero .json de categorias
+				2.1.2) Cachéa la información una vez finalizado
+				2.1.3) Lla versión almacenada en local con la versión descargada	
+			2.2) Busca si la información está cacheada (fichero json deserializada) con las puntuaciones, quizzes resueltos, etc
+				2.2.1) Si la información esta cacheada la carga en POJO: List<CategoryJSON>
+				2.2.2) Si no, 2.1)
+		3) Devueve el control a la aplicación mediante un mensaje BroadCast de OK si no se ha producido ningún fallo. En otro caso informa de que ha habido algún error
+		(Done)
+
+16/06/2017-Carga de ficheros txt en modo ANSI y en modo UTF-8. Por ejemplo en esta url la codificación es ANSI y por eso no se veen bien (http://mmoviles.upv.es/test/OpenCV/examen.php?s=1.1_OpenCV-Instalacion.txt)
+	Done
+16/08/2017- Show comments just press submit button.  (done)
 15/08/2017- List of categories: Add in the action bar the category path selected. Done
     Phase 2: Y lo de la flecha volver depende de le tiempo. Done
 15/08/2017- The summary of the quizzes don't support HTML Tags (fixed)
 15/08/2017- Snackbar revisar key back press where removing progress of a a categor
 15/08/2017- < y > are converted to &lt; and &gt; when thay aren't a valid HTML tag.
 14/08/2017- TrivilAndroid.java eliminated.
-14/08/2017- Firebase package deleted (unnused)
+14/08/2017- Firebase package deleted (unused)
+
 
 Pending task
 ----------------------------------
@@ -15,9 +36,7 @@ MODE REVIEW
 -----------
 - Class Category inheritance, adding new fields: img, theme and question comments
 
-- Cachear categorias por cabecera de modificación en lugar por comparación del fichero.
-
-- Las imagenes no se cargan en los txtview de preguntas
+- Show moreinfo in the categories when mouse 
 
 MODO JUEGO:
 -----------
