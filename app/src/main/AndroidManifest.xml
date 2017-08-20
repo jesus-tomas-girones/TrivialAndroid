@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2015 Google Inc.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +12,7 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.trivial.upv.android">
@@ -28,37 +27,33 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Topeka"
-        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute"
-        >
-
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
         <activity
             android:name=".activity.SignInActivity"
             android:theme="@style/Topeka.SignInActivity"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activity.CategorySelectionActivity"
             android:theme="@style/Topeka.CategorySelectionActivity" />
-
         <activity
             android:name=".activity.QuizActivity"
             android:launchMode="singleTop"
             android:theme="@style/Topeka.QuizActivity"
             android:windowSoftInputMode="adjustPan" />
-        <!--<activity android:name=".activity.CategorySelectionTreeViewActivity"-->
-            <!--android:configChanges="orientation|keyboardHidden"-->
-            <!--android:screenOrientation="portrait">-->
-            <!--&lt;!&ndash;<intent-filter>&ndash;&gt;-->
-                <!--&lt;!&ndash;<action android:name="android.intent.action.MAIN" />&ndash;&gt;-->
-                <!--&lt;!&ndash;<category android:name="android.intent.category.LAUNCHER" />&ndash;&gt;-->
-            <!--&lt;!&ndash;</intent-filter>&ndash;&gt;-->
-        <!--</activity>-->
-        <!--<activity android:name=".activity.QuizPlayOffLineActivity" />-->
+        <activity
+            android:theme="@style/Topeka.CategorySelectionTreeViewActivity"
+            android:label="@string/activity_treeview_label"
+            android:name=".activity.CategorySelectionTreeViewActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+        </activity>
 
     </application>
+
 </manifest>
