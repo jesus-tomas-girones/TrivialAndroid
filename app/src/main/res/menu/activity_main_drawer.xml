@@ -5,9 +5,11 @@
         <item
             android:id="@+id/nav_category_selection"
             android:checked="true"
-            android:title="Mode Review" />
+            android:icon="@drawable/ic_folder_multiple"
+            android:title="Review" />
         <item
             android:id="@+id/nav_tree_view_category"
+            android:icon="@drawable/ic_playlist_check"
             android:title="Play Offline" />
         <!--<item-->
             <!--android:id="@+id/nav_slideshow"-->
