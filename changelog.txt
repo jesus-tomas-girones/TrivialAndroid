@@ -1,12 +1,22 @@
 Completed Tasks
-----------------------------------
-18/06/2017-Se implementa la carga de imágenes (tanto en Summary como en Quizzes)
 
-17/06/2017-Se elimina de la clase CategoryJSON "access" y "success" (Done)
-17/06/2017-Cachear categorias por cabecera de modificación en lugar por comparación del fichero.
+Main Acitivity: 
+---------------
+22/08/2017 Integration MODE REVIEW and PLAY GAME OFFLINE with the Navigation Drawer
+
+
+MODE REVIEW
+-----------	-----------------------
+22/08/2017-Prepare activities to integrate with Fragments. Navigation Drawer (Fixed)
+20/08/2017-Minor visuals effects: FabButton on Quizzes doesn't position correctly. (Fixed)
+			Application crash if it is pushed back several fast times.             (Fixed)
+20/08/2017-Se implementa la carga de imágenes (tanto en Summary como en Quizzes)
+17/08/2017-Se comprueba si hay conexión en Internet al cargar las categorías.
+17/08/2017-Se elimina de la clase CategoryJSON "access" y "success" (Done)
+17/08/2017-Cachear categorias por cabecera de modificación en lugar por comparación del fichero. (done)
 	Se modifica la carga del fichero json (ahora se carga desde un servidor no FireBase (mmoviles.upv.es/trivial/trivialandroid.json)
 		1) Obtiene json de Firebase:
-			https://trivialandroid-d2b33.firebaseio.com/ (FireBase del Proyecto)
+			mmoviles.upv.es/trivial/trivialandroid.json
 		2) Compara la cabecera de última modificación y en caso de ser más moderna o es la primera vez que se arranca la aplicación:
 			2.1) Carga nuevo fichero de categorías
 				2.1.1) carga List<Category> con los Quizzes a partir de los ficheros txt ubicados en internet, y lo complementa con el fichero .json de categorias
@@ -18,7 +28,7 @@ Completed Tasks
 		3) Devueve el control a la aplicación mediante un mensaje BroadCast de OK si no se ha producido ningún fallo. En otro caso informa de que ha habido algún error
 		(Done)
 
-16/06/2017-Carga de ficheros txt en modo ANSI y en modo UTF-8. Por ejemplo en esta url la codificación es ANSI y por eso no se veen bien (http://mmoviles.upv.es/test/OpenCV/examen.php?s=1.1_OpenCV-Instalacion.txt)
+16/08/2017-Carga de ficheros txt en modo ANSI y en modo UTF-8. Por ejemplo en esta url la codificación es ANSI y por eso no se veen bien (http://mmoviles.upv.es/test/OpenCV/examen.php?s=1.1_OpenCV-Instalacion.txt)
 	Done
 16/08/2017- Show comments just press submit button.  (done)
 15/08/2017- List of categories: Add in the action bar the category path selected. Done
@@ -29,34 +39,20 @@ Completed Tasks
 14/08/2017- TrivilAndroid.java eliminated.
 14/08/2017- Firebase package deleted (unused)
 
-
-Pending task
-----------------------------------
-MODE REVIEW
------------
-- Class Category inheritance, adding new fields: img, theme and question comments
-
-- Show moreinfo in the categories when mouse 
-
 MODO JUEGO:
 -----------
-1) Seleccionar atividad para seleccionar categorias
-2) Automáticamente seleccionar n preguntas (10 preguntas de tipo Quiz)
+19/08/2017 
+	1) Seleccionar atividad para seleccionar categorias. Se utiliza un API TreeView (se incorpora al proyecto aunque se puede utilizar como librería:
+	 //    compile 'me.texy.treeview:treeview_lib:1.0.3'
+	 
+21/08/2017
+	2) Automáticamente seleccionar n preguntas (10 preguntas de tipo Quiz) (done)
     funtion:
            in: categoria, numpreguntas
-           out: quizzies
-3) Arrancar una actividad reproductor de preguntas
+           out: quizzies	
 
-MORE FEATURES:
----------------
-- AUTENTIFICACION DEL USUARIO
-
-- MODO JUGADOR (CON LAS MISMAS PREGUNTAS)
-
-
-
-
-
-
-
-
+22/08/2017-Prepare activities to integrate with Fragments. Navigation Drawer (Fixed)		   
+23/08/2017
+	3) Arrancar una actividad reproductor de preguntas
+		--> Realizado 22/08 (done)
+			Mejoras: Temporizador (Done)

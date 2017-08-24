@@ -33,10 +33,18 @@
         <item name="android:buttonStyle">@style/Topeka.CompoundButton</item>
         <item name="android:windowBackground">@color/light_grey</item>
         <item name="android:colorBackground">@color/light_grey</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
+        <item name="spinBars">true</item>
+        <item name="color">@color/text_light</item>
     </style>
 
     <style name="Topeka.CategorySelectionActivity" />
+
     <style name="Topeka.QuizActivity" />
+
     <style name="Topeka.SignInActivity" />
 
     <style name="Topeka.Blue">
@@ -134,6 +142,15 @@
     </style>
 
     <style name="Topeka.TextAppearance.ListItem" parent="TextAppearance.AppCompat.Subhead" />
+
     <style name="Topeka.TextAppearance.ListItemSecondary" parent="TextAppearance.AppCompat.Body1" />
 
+    <!--JVG.S-->
+    <style name="Topeka.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+
+    <style name="Topeka.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!--<style name="Topeka.CategorySelectionTreeViewActivity" />-->
+    <!--JVG.E-->
 </resources>

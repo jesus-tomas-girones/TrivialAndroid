@@ -32,6 +32,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.trivial.upv.android.R;
+import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.adapter.QuizAdapter;
 import com.trivial.upv.android.adapter.ScoreAdapter;
 import com.trivial.upv.android.helper.ApiLevelHelper;
@@ -46,6 +47,9 @@ import com.trivial.upv.android.widget.quiz.AbsQuizView;
 
 import java.util.List;
 
+import static com.trivial.upv.android.activity.QuizActivity.ARG_PLAY_OFFLINE;
+import static com.trivial.upv.android.activity.QuizActivity.TIME_TO_ANSWER_PLAY_GAME;
+
 /**
  * Encapsulates Quiz solving and displays it to the user.
  */
@@ -56,6 +60,14 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     private int mQuizSize;
     private ProgressBar mProgressBar;
     private Category mCategory;
+    //JVG.S
+    private TextView mTimeLeftText;
+
+    public AdapterViewAnimator getQuizView() {
+        return mQuizView;
+    }
+
+    //JVG.E
     private AdapterViewAnimator mQuizView;
     private ScoreAdapter mScoreAdapter;
     private QuizAdapter mQuizAdapter;
@@ -81,7 +93,11 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         String categoryId = getArguments().getString(Category.TAG);
         //JVG.S
         //mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
-        mCategory = TopekaJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
+        if (categoryId.equals(ARG_PLAY_OFFLINE)) {
+            mCategory = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
+        } else {
+            mCategory = TopekaJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
+        }
         //JVG.E
         super.onCreate(savedInstanceState);
     }
@@ -101,6 +117,9 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         mQuizView = (AdapterViewAnimator) view.findViewById(R.id.quiz_view);
+        // JVG.S
+        mTimeLeftText = (TextView) view.findViewById(R.id.time_left);
+        // JVG.E
         decideOnViewToDisplay();
         setQuizViewAnimations();
         final AvatarView avatar = (AvatarView) view.findViewById(R.id.avatar);
@@ -126,6 +145,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         mProgressBar = ((ProgressBar) view.findViewById(R.id.progress));
         mProgressBar.setMax(mQuizSize);
 
+
         setProgress(firstUnsolvedQuizPosition);
     }
 
@@ -150,6 +170,11 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                 .start();
     }
 
+
+    public void setTimeLeftText(int time) {
+        this.mTimeLeftText.setText(String.valueOf(time / 1000));
+    }
+
     private void decideOnViewToDisplay() {
         final boolean isSolved = mCategory.isSolved();
         if (isSolved) {
@@ -160,6 +185,16 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         } else {
             mQuizView.setAdapter(getQuizAdapter());
             mQuizView.setSelection(mCategory.getFirstUnsolvedQuizPosition());
+            //JVG.S
+            // Play game offline
+            if (mCategory.getId().equals(ARG_PLAY_OFFLINE)) {
+
+                ((QuizActivity) getActivity()).setTimeToNextItem(TIME_TO_ANSWER_PLAY_GAME);
+                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
+                ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
+
+            }
+            //JVG.E
         }
     }
 
@@ -226,14 +261,22 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         if (nextItem < count) {
             mQuizView.showNext();
             //JVG.S
-            /// Actualizar el estado de los test
-            //TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
-            new Thread() {
-                @Override
-                public void run() {
-                    TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+            if (mCategory.getId().equals(ARG_PLAY_OFFLINE)) {
+                ((QuizActivity) getActivity()).setTimeToNextItem((TIME_TO_ANSWER_PLAY_GAME));
+                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
+                ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
+
+                /// Actualizar el estado de los test
+                //TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
+                if (!mCategory.getId().equals(ARG_PLAY_OFFLINE)) {
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+                        }
+                    }.start();
                 }
-            }.start();
+            }
             //JVG.E
             return true;
         }
@@ -247,12 +290,14 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         //JVG.S
         ///TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
         /// Actualizar el estado de los test
-        new Thread() {
-            @Override
-            public void run() {
-                TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
-            }
-        }.start();
+        if (!mCategory.getId().equals(ARG_PLAY_OFFLINE)) {
+            new Thread() {
+                @Override
+                public void run() {
+                    TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+                }
+            }.start();
+        }
         //JVG.E
     }
 
@@ -263,6 +308,9 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         scorecardView.setAdapter(mScoreAdapter);
         scorecardView.setVisibility(View.VISIBLE);
         mQuizView.setVisibility(View.GONE);
+        //JVG.E
+        mTimeLeftText.setVisibility(View.INVISIBLE);
+        //JVG.E
     }
 
     public boolean hasSolvedStateListener() {

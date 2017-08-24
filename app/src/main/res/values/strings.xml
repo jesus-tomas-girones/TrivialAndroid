@@ -30,6 +30,12 @@
     <string name="back">back</string>
 
     <!--JVG.S-->
-    <string name="activity_treeview">Selección Categorías</string>
+    <string name="activity_treeview_label">Play Offline (Check a Category)</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
     <!--JVG.E-->
 </resources>

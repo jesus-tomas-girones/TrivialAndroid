@@ -44,4 +44,11 @@
         <item name="android:tint">@color/light_grey</item>
     </style>
 
+
+    <!--<style name="Topeka.CategorySelectionTreeViewActivity">-->
+        <!--<item name="android:windowEnterTransition">@android:transition/explode</item>-->
+        <!--<item name="android:windowExitTransition">@android:transition/slide_left</item>-->
+        <!--&lt;!&ndash;<item name="android:windowBackground">@color/topeka_blank</item>&ndash;&gt;-->
+    <!--</style>-->
+
 </resources>

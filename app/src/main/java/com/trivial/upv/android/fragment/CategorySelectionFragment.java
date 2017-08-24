@@ -26,6 +26,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -63,8 +64,8 @@ public class CategorySelectionFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        setUpQuizGrid(view);
         super.onViewCreated(view, savedInstanceState);
+        setUpQuizGrid(view);
     }
 
     // JVG.S
@@ -104,8 +105,8 @@ public class CategorySelectionFragment extends Fragment {
                             animateTransitionSubcategories(v);
 
                             TextView textViewSubcategory = (TextView) getActivity().findViewById(R.id.sub_category_title);
-                                textViewSubcategory.setText(mAdapter.getItem(position).getId());
-                            ((CategorySelectionActivity)getActivity()).animateToolbarNavigateToSubcategories();
+                            textViewSubcategory.setText(mAdapter.getItem(position).getId());
+                            ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories();
                         }
                         // JVG.S
                         /*
@@ -119,24 +120,34 @@ public class CategorySelectionFragment extends Fragment {
         mAdapter.setOnLongItemClickListener(new CategoryAdapterJSON.OnLongItemClickListener() {
             @Override
             public void onClick(View v, final int position) {
-                ((CategorySelectionActivity)getActivity()).showDeleteProgressConfirmation(position);
+                ((CategorySelectionActivity) getActivity()).showDeleteProgressConfirmation(position);
             }
         });
 
 
         //JVG.E
         categoriesView.setAdapter(mAdapter);
-        categoriesView.getViewTreeObserver()
-                .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        categoriesView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        getActivity().supportStartPostponedEnterTransition();
-                        return true;
-                    }
-                });
-    }
+        //JVG.S
+        categoriesView.getViewTreeObserver()               .
 
+                        addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                            @Override
+                            public boolean onPreDraw() {
+                                categoriesView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                //        JVG.S
+//                                getActivity().supportStartPostponedEnterTransition();
+                                if (TopekaJSonHelper.getInstance(getActivity().getApplicationContext(), false).isLoaded()) {
+                                    Log.d("TRAZA", "" + mAdapter.getItemCount());
+
+                                    animateTransitionSubcategories(null);
+                                    ((CategorySelectionActivity) getActivity()).showToolbarSubcategories();
+                                }
+                                //        JVG.E
+                                return true;
+                            }
+                        });
+
+    }
 
 
     @Override
@@ -192,7 +203,7 @@ public class CategorySelectionFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    ((CategorySelectionActivity)getActivity()).setInitBlockAnimation(false);
+                    ((CategorySelectionActivity) getActivity()).setInitBlockAnimation(false);
                 }
             });
 
@@ -204,8 +215,8 @@ public class CategorySelectionFragment extends Fragment {
 
     // To hide a previously visible view using this effect:
     public void animateTransitionSubcategories(final View viewSelectedRecyclerView) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP && !((CategorySelectionActivity)getActivity()).getInitBlockAnimation()) {
-            ((CategorySelectionActivity)getActivity()).setInitBlockAnimation(true);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP && !((CategorySelectionActivity) getActivity()).getInitBlockAnimation()) {
+            ((CategorySelectionActivity) getActivity()).setInitBlockAnimation(true);
             final View view = categoriesView;
             // get the center for the clipping circle
 

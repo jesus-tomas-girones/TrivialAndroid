@@ -16,6 +16,12 @@
 
 package com.trivial.upv.android.activity;
 
+//-----------------------------------------------------------------------------------------------
+//JVG.S
+//UNUSED CLASS
+//JVG.E
+//-----------------------------------------------------------------------------------------------
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -30,16 +36,23 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
 import android.transition.TransitionInflater;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,16 +62,26 @@ import android.widget.TextView;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ActivityCategorySelectionBinding;
 import com.trivial.upv.android.fragment.CategorySelectionFragment;
+import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
 import com.trivial.upv.android.model.Player;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.widget.AvatarView;
 
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.ACTION_RESP;
 
-public class CategorySelectionActivity extends AppCompatActivity {
+public class CategorySelectionActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String EXTRA_PLAYER = "player";
+    private TextView scoreView;
+    private ImageButton backButton;
+    private AvatarView avatar;
+    private TextView title;
+    private TextView subcategory_title;
+    private String fragmentNameSaved = "";
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle toggle;
 
     public static void start(Activity activity, Player player, ActivityOptionsCompat options) {
         Intent starter = getStartIntent(activity, player);
@@ -80,6 +103,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        setContentView(R.layout.activity_category_selection);
         ActivityCategorySelectionBinding binding = DataBindingUtil
                 .setContentView(this, R.layout.activity_category_selection);
         Player player = getIntent().getParcelableExtra(EXTRA_PLAYER);
@@ -93,31 +117,25 @@ public class CategorySelectionActivity extends AppCompatActivity {
         binding.setPlayer(player);
         setUpToolbar();
 
+        if (savedInstanceState != null)
+            fragmentNameSaved = savedInstanceState.getString("fragment", "");
+
         initActivity(savedInstanceState);
     }
 
     // JVG.S
     private void loadCategories() {
         // RECEIVER PARA ACTUALIZAR PROGRESO Y CARGA DE LAS CATEGORIAS
-
         if (filtro == null) {
             filtro = new IntentFilter(ACTION_RESP);
             filtro.addCategory(Intent.CATEGORY_DEFAULT);
         }
-
         if (receiver == null)
             receiver = new ReceptorOperacion();
 
-        // Carga categorias
-        int numCategorias = 0;
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
-        if (fragment instanceof CategorySelectionFragment) {
-            numCategorias = ((CategorySelectionFragment) fragment).getAdapter().getItemCount();
-
-        }
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
-        if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() || numCategorias == 0) {
+        if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
             if (checkInternetAccess()) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
@@ -152,8 +170,6 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
                 snackbar.show();
             }
-        } else {
-//            showToolbarSubcategories();
         }
     }
 
@@ -162,6 +178,7 @@ public class CategorySelectionActivity extends AppCompatActivity {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
+
 
     IntentFilter filtro;
 
@@ -188,6 +205,16 @@ public class CategorySelectionActivity extends AppCompatActivity {
         snackbar.show();
     }
 
+    public synchronized void setInitBlockAnimation(boolean initBlockAnimation) {
+        this.initBlockAnimation = initBlockAnimation;
+    }
+
+    public synchronized boolean getInitBlockAnimation() {
+        return initBlockAnimation;
+    }
+
+    boolean initBlockAnimation = false;
+
     public class ReceptorOperacion extends BroadcastReceiver {
 
         @Override
@@ -205,10 +232,13 @@ public class CategorySelectionActivity extends AppCompatActivity {
                     }
 
                     // Carga categorias
-                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
-                    if (fragment instanceof CategorySelectionFragment) {
-                        ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
-                    }
+//                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+//                    if (fragment instanceof CategorySelectionFragment) {
+//                        ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
+
+//                    }
+                    attachCategoryGridFragment();
+
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
 
                 } else if ("REFRESH".equals(result)) {
@@ -248,23 +278,48 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
     private void initActivity(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            attachCategoryGridFragment();
-        } else {
-            setProgressBarVisibility(View.GONE);
+//            attachCategoryGridFragment();
+            //JVG.S
         }
-        supportPostponeEnterTransition();
+//      else {
+//            setProgressBarVisibility(View.GONE);
+        //JVG.E
+//      }
+        //JVG.S
+//        supportPostponeEnterTransition();
+        scoreView = (TextView) findViewById(R.id.score_main);
+        backButton = (ImageButton) findViewById(R.id.back);
+        avatar = (AvatarView) findViewById(R.id.avatar);
+        title = (TextView) findViewById(R.id.title);
+        subcategory_title = (TextView) findViewById(R.id.sub_category_title);
+        //JVG.E
+
     }
 
     //JVG.S
     @Override
     public void onBackPressed() {
+
         if (snackbar != null) {
             dismissSnackbar();
-        } else if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
-            super.onBackPressed();
+        } else if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+
         } else {
-            goToPreviusCategory();
+            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+            if (fragment instanceof CategorySelectionFragment) {
+                if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
+                    if (!getInitBlockAnimation())
+                        super.onBackPressed();
+
+                } else {
+                    goToPreviusCategory();
+                }
+            } else {
+                super.onBackPressed();
+            }
         }
+
     }
 
     private void goToPreviusCategory() {
@@ -276,9 +331,10 @@ public class CategorySelectionActivity extends AppCompatActivity {
         }
     }
 
-    private void showToolbarSubcategories() {
+    public void showToolbarSubcategories() {
         if (TopekaJSonHelper.getInstance(getBaseContext(), false).isInitCategory()) {
             animateToolbarNavigateCategories();
+
         } else {
             TextView viewSubcategoryText = (TextView) findViewById(R.id.sub_category_title);
             viewSubcategoryText.setText(TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
@@ -294,34 +350,42 @@ public class CategorySelectionActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        TextView scoreView = (TextView) findViewById(R.id.score);
-        TextView scoreViewMain = (TextView) findViewById(R.id.score_main);
 
-//      JVG.S
-//        final int score = TopekaDatabaseHelper.getScore(this);
-        final int score = TopekaJSonHelper.getInstance(getBaseContext(), false).getScore();
-
-//      JVG.E
-        scoreView.setText(getString(R.string.x_points, score));
-        scoreViewMain.setText(getString(R.string.x_points, score));
+        // Load a freme (restore activity)
+        if (TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() && getSupportFragmentManager().findFragmentById(R.id.category_container) == null && fragmentNameSaved.isEmpty()) {
+            attachCategoryGridFragment();
+        }
+        showScore();
     }
 
-    /*JVG.S*/
+    private void showScore() {
+        final int score = TopekaJSonHelper.getInstance(getBaseContext(), false).getScore();
+        if (scoreView != null) {
+            scoreView.setText(getString(R.string.x_points, score));
+        }
+    }
+
+    private boolean isFragmentCategorySelection() {
+        return (getSupportFragmentManager().findFragmentById(R.id.category_container)) instanceof CategorySelectionFragment;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-
         // JVG.S
+        Log.d("TRAZA", "onStart");
         loadCategories();
-        // JVG.E
         registerReceiver(receiver, filtro);
-    } //JVG.E
+        //JVG.E
+    }
 
     private void setUpToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_player);
         setSupportActionBar(toolbar);
         //noinspection ConstantConditions
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+
+        //JVG.S
         ImageButton back = (ImageButton) findViewById(R.id.back);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -329,6 +393,23 @@ public class CategorySelectionActivity extends AppCompatActivity {
                 goToPreviusCategory();
             }
         });
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+//        toggle.setDrawerSlideAnimationEnabled(false);
+        toggle.setDrawerIndicatorEnabled(false);
+//        toggle.setHomeAsUpIndicator(R.drawable.avatar_1);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.theme_blue_text));
+        //JVG.E
     }
 
     @Override
@@ -348,26 +429,27 @@ public class CategorySelectionActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.sign_out: {
-                signOut();
-                return true;
-            }
-//            case R.id.activity_treeview: {
-//                showActivityTreeView();
+//            case R.id.sign_out: {
+//
 //                return true;
 //            }
-//            case android.R.id.home:
-//                goToPreviusCategory();
-//                Log.d("BACK", "BACK PULSED");
-//                return true;
-
+            //JVG.E
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void showActivityTreeView() {
-        ActivityCompat.startActivity(this, new Intent(this, CategorySelectionTreeViewActivity.class), null  );
-    }
+//    //JVG.S
+//    private void showActivityTreeView() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            ActivityCompat.startActivity(this, new Intent(this, CategorySelectionTreeViewActivity.class),
+//                    ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+//        } else {
+//
+//            ActivityCompat.startActivity(this, new Intent(this, CategorySelectionTreeViewActivity.class),
+//                    null);
+//        }
+//    }
+//    //JVG.E
 
     @SuppressLint("NewApi")
     private void signOut() {
@@ -380,10 +462,9 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
         if (fragment instanceof CategorySelectionFragment) {
-            ((CategorySelectionFragment) fragment).getAdapter();
             ((CategorySelectionFragment) fragment).getAdapter().notifyDataSetChanged();
         }
-//        JVG.E
+//      JVG.E
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
             getWindow().setExitTransition(TransitionInflater.from(this)
                     .inflateTransition(R.transition.category_enter));
@@ -392,10 +473,9 @@ public class CategorySelectionActivity extends AppCompatActivity {
         finish();
     }
 
+    // JVG.S
     private void dissmissDialogs() {
-
         dismissSnackbar();
-
         dismissProgressDialog();
     }
 
@@ -406,50 +486,91 @@ public class CategorySelectionActivity extends AppCompatActivity {
         }
     }
 
-
     private void dismissProgressDialog() {
         if (pDialog != null) {
             pDialog.dismiss();
             pDialog = null;
         }
     }
+    // JVG.E
 
-    private void attachCategoryGridFragment() {
+    public void attachCategoryGridFragment() {
+        if (TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
+            TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).moveCurrentCategoryToInit();
+            FragmentManager supportFragmentManager = getSupportFragmentManager();
+            Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
+            if (!(fragment instanceof CategorySelectionFragment)) {
+                fragment = CategorySelectionFragment.newInstance();
+            }
+            supportFragmentManager
+                    .beginTransaction().replace(R.id.category_container, fragment)
+                    .commit();
+
+            backButton.setVisibility(View.GONE);
+            subcategory_title.setVisibility(View.GONE);
+            avatar.setVisibility(View.VISIBLE);
+            scoreView.setVisibility(View.VISIBLE);
+            title.setVisibility(View.VISIBLE);
+            showScore();
+        }
+    }
+
+    public void attachTreeViewFragment() {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
-        if (!(fragment instanceof CategorySelectionFragment)) {
-            fragment = CategorySelectionFragment.newInstance();
+        if (!(fragment instanceof CategorySelectionTreeViewFragment)) {
+            fragment = CategorySelectionTreeViewFragment.newInstance();
+        }
+
+        // Animate
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            fragment.setEnterTransition(new Slide(Gravity.RIGHT));
+            fragment.setExitTransition(new Slide(Gravity.LEFT));
         }
         supportFragmentManager.beginTransaction()
                 .replace(R.id.category_container, fragment)
                 .commit();
-        setProgressBarVisibility(View.GONE);
+
+        scoreView.setVisibility(View.GONE);
+        backButton.setVisibility(View.GONE);
+        subcategory_title.setVisibility(View.GONE);
+        avatar.setVisibility(View.VISIBLE);
+        title.setVisibility(View.VISIBLE);
     }
 
-    private void setProgressBarVisibility(int visibility) {
-        /// JVG.S
-        /// findViewById(R.id.progress).setVisibility(visibility);
-        /// JVG.E
-    }
+//        /// JVG.S
+//    private void setProgressBarVisibility(int visibility) {
+//        /// findViewById(R.id.progress).setVisibility(visibility);
+//    }
+//        /// JVG.E
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+
+        fragmentNameSaved = savedInstanceState.getString("fragment", "");
+        Log.d("TRAZA", "onRestore");
+
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        Log.d("TRAZA", "onSave");
+        Fragment tmpFragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+        if (tmpFragment != null)
+            outState.putString("fragment", tmpFragment.getClass().getName().toString());
     }
 
     @Override
     protected void onStop() {
+        //  JVG.S
         if (receiver != null) {
             unregisterReceiver(receiver);
             receiver = null;
         }
-
         dissmissDialogs();
+        //  JVG.E
 
         super.onStop();
     }
@@ -467,12 +588,13 @@ public class CategorySelectionActivity extends AppCompatActivity {
                 .alpha(1f);
     }
 
+    // JVG.S
     public void animateToolbarNavigateCategories() {
-        View viewSubcategoryData = findViewById(R.id.subcategory_data);
-        viewSubcategoryData.setVisibility(View.GONE);
-
-        View viewLoginData = findViewById(R.id.login_data);
-        viewLoginData.setVisibility(View.VISIBLE);
+        avatar.setVisibility(View.VISIBLE);
+        title.setVisibility(View.VISIBLE);
+        subcategory_title.setVisibility(View.GONE);
+        backButton.setVisibility(View.GONE);
+        scoreView.setVisibility(View.VISIBLE);
 
         View avatar = findViewById(R.id.avatar);
         animateViewFullScaleXY(avatar, 200, 300);
@@ -482,15 +604,17 @@ public class CategorySelectionActivity extends AppCompatActivity {
 
         View score = findViewById(R.id.score_main);
         animateViewFullScaleXY(score, 400, 300);
+
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        toggle.setDrawerIndicatorEnabled(true);
     }
-    //JVG.E
 
     public void animateToolbarNavigateToSubcategories() {
-        View viewSubcategoryData = findViewById(R.id.subcategory_data);
-        viewSubcategoryData.setVisibility(View.VISIBLE);
-
-        View viewLoginData = findViewById(R.id.login_data);
-        viewLoginData.setVisibility(View.GONE);
+        avatar.setVisibility(View.GONE);
+        title.setVisibility(View.GONE);
+        subcategory_title.setVisibility(View.VISIBLE);
+        backButton.setVisibility(View.VISIBLE);
+        scoreView.setVisibility(View.VISIBLE);
 
         View back = findViewById(R.id.back);
         animateViewFullScaleXY(back, 200, 300);
@@ -498,9 +622,36 @@ public class CategorySelectionActivity extends AppCompatActivity {
         View textViewSubcategory = findViewById(R.id.sub_category_title);
         animateViewFullScaleXY(textViewSubcategory, 300, 300);
 
-        View score = findViewById(R.id.score);
+        View score = findViewById(R.id.score_main);
         animateViewFullScaleXY(score, 400, 300);
 
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        toggle.setDrawerIndicatorEnabled(false);
+
+    }
+    //JVG.E
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_category_selection) {
+            // Handle the camera action
+            attachCategoryGridFragment();
+        } else if (id == R.id.nav_tree_view_category) {
+            attachTreeViewFragment();
+
+//        } else if (id == R.id.nav_share) {
+//
+//
+        } else if (id == R.id.nav_signout) {
+            signOut();
+        }
+
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }
 

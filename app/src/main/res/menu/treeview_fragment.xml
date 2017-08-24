@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/select_all"
+        android:orderInCategory="200"
+        android:title="Seleccionar Todo ..."
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/expand_all"
+        android:orderInCategory="200"
+        android:title="Expandir Todo ..."
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/collapse_all"
+        android:orderInCategory="200"
+        android:title="Contraer Todo ..."
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/deselect_all"
+        android:orderInCategory="200"
+        android:title="Deseleccionar Todo ..."
+        app:showAsAction="never" />
+    <!--<item-->
+    <!--android:id="@+id/expand_level"-->
+    <!--android:orderInCategory="200"-->
+    <!--android:title="Expand Level 1"-->
+    <!--app:showAsAction="never" />-->
+    <!--<item-->
+    <!--android:id="@+id/collapse_level"-->
+    <!--android:orderInCategory="200"-->
+    <!--android:title="Collapse Level 1"-->
+    <!--app:showAsAction="never" />-->
+    <!--<item-->
+    <!--android:id="@+id/play_game_offline"-->
+    <!--android:orderInCategory="200"-->
+    <!--android:title="Show Selections"-->
+    <!--app:showAsAction="never" />-->
+</menu>

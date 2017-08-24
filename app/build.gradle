@@ -81,13 +81,15 @@ dependencies {
 
     androidTestCompile "org.hamcrest:hamcrest-core:${hamcrestVersion}"
 
-    compile 'com.android.volley:volley:1.0.0'
     compile "com.google.firebase:firebase-auth:${firebase}"
     compile "com.google.firebase:firebase-database:${firebase}"
-    compile 'com.google.code.gson:gson:2.7'
 
-    compile "com.pixplicity.htmlcompat:library:1.0.0"
     compile 'me.texy.treeview:treeview_lib:1.0.3'
+//    compile project(':treeview_lib')
 
+    compile 'com.android.volley:volley:1.0.0'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.pixplicity.htmlcompat:library:1.0.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 apply plugin: 'com.google.gms.google-services'

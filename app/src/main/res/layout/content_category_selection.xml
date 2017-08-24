@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="player"
+            type="com.trivial.upv.android.model.Player" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="com.trivial.upv.android.activity.MainActivity"
+        tools:showIn="@layout/app_bar_category_selection">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/root_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/topeka_blank"
+            android:orientation="vertical"
+            android:transitionGroup="false"
+            tools:ignore="Overdraw,UnusedAttribute">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar_player"
+                style="@style/Topeka.TextAppearance.Title"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                android:background="@color/topeka_primary"
+                android:elevation="@dimen/elevation_header"
+                tools:ignore="UnusedAttribute">
+
+                <RelativeLayout
+                    android:id="@+id/login_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.trivial.upv.android.widget.AvatarView
+                        android:id="@+id/avatar"
+                        android:layout_width="@dimen/size_avatar_toolbar"
+                        android:layout_height="@dimen/size_avatar_toolbar"
+                        android:layout_marginEnd="@dimen/spacing_double"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:transitionName="@string/transition_avatar"
+                        app:avatar='@{player.avatar.drawableId}'
+                        tools:ignore="UnusedAttribute" />
+
+                    <ImageButton
+                        android:id="@+id/back"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_gravity="start|center_vertical"
+                        android:background="@drawable/selector_subtle"
+                        android:contentDescription="@string/back"
+                        android:paddingRight="@dimen/spacing_double"
+                        android:src="@drawable/ic_arrow_back"
+                        android:tint="?android:textColorPrimaryInverse"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/title"
+                        style="@style/Topeka.TextAppearance.Title.Inverse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@id/avatar"
+                        android:text='@{player.firstName + " " + player.lastInitial}'
+                        tools:ignore="PrivateResource" />
+
+                    <TextView
+                        android:id="@+id/score_main"
+                        style="@style/Topeka.TextAppearance.Title.Inverse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/spacing_double"
+                        android:layout_centerVertical="true"
+                        android:paddingEnd="@dimen/spacing_micro"
+                        android:paddingStart="@dimen/spacing_micro"
+                        android:text=""
+                        tools:ignore="NewApi" />
+
+
+                    <TextView
+                        android:id="@+id/sub_category_title"
+                        style="@style/Topeka.TextAppearance.Title.Inverse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center_vertical|start"
+                        android:layout_toLeftOf="@id/score_main"
+                        android:layout_toRightOf="@id/back"
+                        android:text=""
+                        android:visibility="gone"
+                        tools:ignore="PrivateResource" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/subcategory_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.Toolbar>
+
+            <FrameLayout
+                android:id="@+id/category_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="activity.QuizSelectionActivity"
+                tools:ignore="MergeRootFrame">
+                <!--JVG.S-->
+                <!--ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="@dimen/size_fab"
+                    android:layout_height="@dimen/size_fab"
+                    android:layout_gravity="center"
+                    android:indeterminateOnly="true" /-->
+                <!--JVG.E-->
+
+            </FrameLayout>
+
+        </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
+</layout>

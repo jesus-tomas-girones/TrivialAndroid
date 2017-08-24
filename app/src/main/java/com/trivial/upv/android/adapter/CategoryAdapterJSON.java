@@ -74,7 +74,8 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
         mLayoutInflater = LayoutInflater.from(activity.getApplicationContext());
 
         // JVG.S
-        updateCategories();
+//        updateCategories();
+        mCategories = new ArrayList<>();
         // JVG.E
     }
 

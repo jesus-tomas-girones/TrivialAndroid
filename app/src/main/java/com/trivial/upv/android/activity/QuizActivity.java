@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.FloatingActionButton;
@@ -45,11 +46,9 @@ import android.view.ViewAnimationUtils;
 import android.view.Window;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.fragment.QuizFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
@@ -68,13 +67,16 @@ public class QuizActivity extends AppCompatActivity {
     private static final String IMAGE_CATEGORY = "image_category_";
     private static final String STATE_IS_PLAYING = "isPlaying";
     private static final String FRAGMENT_TAG = "Quiz";
-
+    // JVG.S
+    public static final String ARG_PLAY_OFFLINE = "PLAY_OFFLINE";
+    public static final int TIME_TO_ANSWER_PLAY_GAME = 30000;
+    // JVG.E
     private Interpolator mInterpolator;
     private Category mCategory;
     private QuizFragment mQuizFragment;
     private FloatingActionButton mQuizFab;
     private boolean mSavedStateIsPlaying;
-    private ImageView mIcon;
+    private NetworkImageView mIcon;
     private Animator mCircularReveal;
     private ObjectAnimator mColorChange;
     private CountingIdlingResource mCountingIdlingResource;
@@ -104,6 +106,7 @@ public class QuizActivity extends AppCompatActivity {
             }
         }
     };
+
 
     public static Intent getStartIntent(Context context, Category category) {
         Intent starter = new Intent(context, QuizActivity.class);
@@ -153,6 +156,11 @@ public class QuizActivity extends AppCompatActivity {
                                 .alpha(1f);
                     }
                 });
+
+        // JVG.S
+//        Handler to control the time for answer a quiz
+        mHandlerPlayGame = new Handler();
+        // JVG.E
     }
 
     @Override
@@ -378,14 +386,15 @@ public class QuizActivity extends AppCompatActivity {
         mCountingIdlingResource.increment();
     }
 
-    private void submitAnswer() {
+    public boolean submitAnswer() {
         mCountingIdlingResource.decrement();
         if (!mQuizFragment.showNextPage()) {
             mQuizFragment.showSummary();
             setResultSolved();
-            return;
+            return false;
         }
         setToolbarElevation(false);
+        return true;
     }
 
     @SuppressLint("NewApi")
@@ -396,10 +405,13 @@ public class QuizActivity extends AppCompatActivity {
         }
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
-        mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
-
-
+        if (categoryId.equals(ARG_PLAY_OFFLINE)) {
+            mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryPlayGameOffLine();
+        } else {
+            mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
+        }
         // JVG.E
+
         setTheme(mCategory.getTheme().getStyleId());
         if (ApiLevelHelper.isAtLeast(Build.VERSION_CODES.LOLLIPOP)) {
             Window window = getWindow();
@@ -413,23 +425,14 @@ public class QuizActivity extends AppCompatActivity {
     private void initLayout(String categoryId) {
         setContentView(R.layout.activity_quiz);
         //noinspection PrivateResource
-        mIcon = (ImageView) findViewById(R.id.icon);
+        mIcon = (NetworkImageView) findViewById(R.id.icon);
         //JVG.S
 //        int resId = getResources().getIdentifier(IMAGE_CATEGORY + categoryId, DRAWABLE,
 //                getApplicationContext().getPackageName());
 //        mIcon.setImageResource(resId);
 //        mIcon.setImageResource(resId);
-        VolleySingleton.getInstance(getBaseContext()).getImageLoader().get(mCategory.getImg(), new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                mIcon.setImageBitmap(response.getBitmap());
-            }
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
+        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(getBaseContext()).getImageLoader());
         //JVG.E
         ViewCompat.animate(mIcon)
                 .scaleX(1)
@@ -465,5 +468,69 @@ public class QuizActivity extends AppCompatActivity {
     @VisibleForTesting
     public CountingIdlingResource getCountingIdlingResource() {
         return mCountingIdlingResource;
+    }
+
+
+    //JVG.S
+    public synchronized int getTimeToNextItem() {
+        return timeToNextItem;
+    }
+
+    public synchronized void setTimeToNextItem(int timeToNextItem) {
+        this.timeToNextItem = timeToNextItem;
+    }
+
+    private int timeToNextItem = 0;
+
+
+    private Runnable mRunnablePlayGame = new Runnable() {
+        @Override
+        public void run() {
+            if (timeToNextItem <= 0) {
+                mQuizFragment.getQuizView().getCurrentView().findViewById(R.id.submitAnswer).callOnClick();
+            } else {
+                timeToNextItem -= 1000;
+                mQuizFragment.setTimeLeftText(timeToNextItem);
+                postDelayHandlerPlayGame();
+            }
+            // EJECUTO
+        }
+    };
+
+    public void postDelayHandlerPlayGame() {
+
+        final int nextItem = mQuizFragment.getQuizView().getDisplayedChild() + 1;
+        final int count = mQuizFragment.getQuizView().getAdapter().getCount();
+        if (nextItem < count || (nextItem == count && timeToNextItem >= 0)) {
+            mHandlerPlayGame.postDelayed(mRunnablePlayGame,
+                    1000);
+//            Log.d("HANDLER", "PROGRAMO_EJECUCIÓN: " + timeToNextItem + "-" + (contador++) + "; nextItem=" + nextItem + "; count=" + count);
+        } else {
+//            Log.d("HANDLER", "YA NO PROGRAMO MÁS EJECUCIONES");
+        }
+    }
+
+    private Handler mHandlerPlayGame;
+    //JVG.E
+
+    @Override
+    protected void onStop() {
+        //JVG.E
+        cancelPostDelayHandlerPlayGame();
+        if (mHandlerPlayGame != null) {
+            mHandlerPlayGame = null;
+        }
+        //JVG.E
+        super.onStop();
+    }
+
+    public void cancelPostDelayHandlerPlayGame() {
+        if (mHandlerPlayGame != null)
+            mHandlerPlayGame.removeCallbacks(mRunnablePlayGame);
+//        Log.d("HANDLER", "DESPROGRAMO_EJECUCIÓN");
+    }
+
+    public QuizFragment getQuizFragment() {
+        return mQuizFragment;
     }
 }

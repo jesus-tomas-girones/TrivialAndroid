@@ -46,13 +46,12 @@
             android:launchMode="singleTop"
             android:theme="@style/Topeka.QuizActivity"
             android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:theme="@style/Topeka.CategorySelectionTreeViewActivity"
-            android:label="@string/activity_treeview_label"
-            android:name=".activity.CategorySelectionTreeViewActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait">
-        </activity>
+        <!--<activity-->
+            <!--android:name=".activity.CategorySelectionTreeViewActivity"-->
+            <!--android:configChanges="orientation|keyboardHidden"-->
+            <!--android:label="@string/activity_treeview_label"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--android:theme="@style/Topeka.CategorySelectionTreeViewActivity"></activity>-->
 
     </application>
 

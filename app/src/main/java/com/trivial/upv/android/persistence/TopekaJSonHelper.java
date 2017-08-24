@@ -18,6 +18,7 @@ package com.trivial.upv.android.persistence;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -32,10 +33,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.JsonHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
+import com.trivial.upv.android.helper.QuestionsTXTHelper;
 import com.trivial.upv.android.helper.singleton.StringRequestHeaders;
 import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.json.CategoryJSON;
@@ -50,7 +54,6 @@ import com.trivial.upv.android.model.quiz.SelectItemQuiz;
 import com.trivial.upv.android.model.quiz.ToggleTranslateQuiz;
 import com.trivial.upv.android.model.quiz.TrueFalseQuiz;
 import com.trivial.upv.android.model.txtquiz.QuestionTXT;
-import com.trivial.upv.android.helper.QuestionsTXTHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,6 +66,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -196,10 +201,10 @@ public class TopekaJSonHelper {
             newFileJson(preguntas);
 
 
-        JSONObject categoriesJSON = null;
+        JSONObject tmpCategoriesJSON = null;
         try {
-            categoriesJSON = new JSONObject(response);
-            readCategoriesFromJSON(categoriesJSON);
+            tmpCategoriesJSON = new JSONObject(response);
+            readCategoriesFromJSON(tmpCategoriesJSON);
         } catch (JSONException e) {
             sendBroadCastError("JSON", "Error comparando JSON IO");
             e.printStackTrace();
@@ -502,8 +507,6 @@ public class TopekaJSonHelper {
 
     private List<com.trivial.upv.android.model.Category> loadCategories() {
 
-        int i = 0;
-
         List<com.trivial.upv.android.model.Category> tmpCategories = new ArrayList<>();
 
         if (categoriesCurrent != null) {
@@ -514,7 +517,6 @@ public class TopekaJSonHelper {
                 category.setSolved(isSolvedCategory(category));
 
                 tmpCategories.add(category);
-
             }
         }
         return tmpCategories;
@@ -536,7 +538,7 @@ public class TopekaJSonHelper {
     /**
      * Gets a category from the given position of the cursor provided.
      */
-    private static com.trivial.upv.android.model.Category getCategory(CategoryJSON categoryTXT) {
+    private static Category getCategory(CategoryJSON categoryTXT) {
 // "magic numbers" based on CategoryTable#PROJECTION
         final String id = categoryTXT.getCategory();
         final String name = categoryTXT.getCategory();
@@ -548,7 +550,7 @@ public class TopekaJSonHelper {
         final List<Quiz> quizzes = categoryTXT.getQuizzes();
         final String img = categoryTXT.getImg();
 
-        return new com.trivial.upv.android.model.Category(name, id, theme, quizzes, scores, solved, img);
+        return new Category(name, id, theme, quizzes, scores, solved, img);
     }
 
     public static int[] createArrayIntFromNumQuizzes(CategoryJSON categoryTXT) {
@@ -657,7 +659,7 @@ public class TopekaJSonHelper {
     }
 
     public boolean isSolvedCurrentCategory(int id) {
-        if (categoriesCurrent != null) {
+        if (TopekaJSonHelper.getInstance(mContext, false).isLoaded()) {
             int numQuizzes = getNumQuizzesForCategory(categoriesCurrent.get(id));
             int getNumSolvedByCategory = getScoreCategory(categoriesCurrent.get(id));
 
@@ -751,11 +753,16 @@ public class TopekaJSonHelper {
         if (categoriesName != null)
             categoriesName.clear();
 
+        if (categoryPlayGameOffLine != null) {
+            categoryPlayGameOffLine.getQuizzes().clear();
+        }
+
         categoriesJSON = null;
         categoriesCurrent = null;
         categoriesPath = null;
         mCategories = null;
         categoriesName = null;
+        categoryPlayGameOffLine = null;
     }
 
     public void updateCategory() {
@@ -912,6 +919,117 @@ public class TopekaJSonHelper {
         else return null;
     }
 
+    public Category getCategoryPlayGameOffLine() {
+        return categoryPlayGameOffLine;
+    }
+
+    private Category categoryPlayGameOffLine;
+
+    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img,String themeName) {
+
+        if (categoryPlayGameOffLine != null) {
+            categoryPlayGameOffLine.getQuizzes().clear();
+        }
+
+        final String id = QuizActivity.ARG_PLAY_OFFLINE;
+        final String name = "Juego Offline";
+        final Theme theme = Theme.valueOf(themeName);
+        final boolean solved = false;
+        final int[] scores = new int[quizzes.size()];
+
+        final int min = 0;
+        final int max = 0;
+        final int step = 0;
+
+        for (int i = 0; i < scores.length; i++) {
+            scores[i] = 0;
+        }
+
+        List<Quiz> tmpQuizzes = new ArrayList<>();
+
+        for (Quiz quiz : quizzes) {
+            Object objAnswer = quiz.getAnswer();
+            String answer = "";
+
+            if (objAnswer instanceof int[]) {
+                int[] tmpAnswer = (int[]) objAnswer;
+
+                List<Integer>lstAnswer = new ArrayList<>();
+
+                for (int i = 0; i < tmpAnswer.length; i++) {
+                    lstAnswer.add(tmpAnswer[i]);
+                }
+
+                answer = new JSONArray(lstAnswer).toString();
+
+            }
+
+            Quiz tmpQuiz = null;
+            switch (quiz.getType().getJsonName()) {
+
+                case JsonAttributes.QuizType.FOUR_QUARTER:
+
+                    tmpQuiz = createFourQuarterQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), getOptionsOrCommentsFromQuiz("getComments", quiz), solved);
+                    break;
+
+                case JsonAttributes.QuizType.MULTI_SELECT:
+
+                    tmpQuiz = createMultiSelectQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), solved);
+                    break;
+
+
+                case JsonAttributes.QuizType.SINGLE_SELECT:
+                    //fall-through intended
+                case JsonAttributes.QuizType.SINGLE_SELECT_ITEM:
+                    tmpQuiz = createSelectItemQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), getOptionsOrCommentsFromQuiz("getComments", quiz), solved);
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Quiz type " + quiz.getType().getJsonName() + " is not supported");
+
+            }
+
+            tmpQuizzes.add(tmpQuiz);
+        }
+
+        categoryPlayGameOffLine = new Category(name, id, theme, tmpQuizzes, scores, solved, img);
+    }
+
+    @NonNull
+    private String getOptionsOrCommentsFromQuiz(String method, Quiz quiz) {
+        String[] tmpOptions;
+
+        Method methodToFind = null;
+        try {
+            methodToFind = quiz.getClass().getMethod(method, (Class<?>[]) null);
+
+            tmpOptions = (String[]) methodToFind.invoke(quiz, (Object[]) null);
+        } catch (NoSuchMethodException e1) {
+            return "";
+        } catch (IllegalAccessException e1) {
+            return "";
+        } catch (InvocationTargetException e1) {
+            return "";
+        }
+
+
+        List<String> options = new ArrayList<>();
+
+        for (String option : tmpOptions) {
+            options.add(option);
+        }
+
+        return new JSONArray(options).toString();
+    }
+
+    // Ponint current categories to init categories
+    public void moveCurrentCategoryToInit() {
+        categoriesCurrent = categoriesJSON;
+        categoriesPath.clear();
+        categoriesName.clear();
+    }
+
+
     class QuizDeserializer implements JsonDeserializer<Quiz> {
         @Override
         public Quiz deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
@@ -919,7 +1037,7 @@ public class TopekaJSonHelper {
             JsonObject quiz = json.getAsJsonObject();
 
             if (!quiz.has("mQuizType"))
-                Log.d("ACTIVO","ERROR");
+                Log.d("ACTIVO", "ERROR");
             String type = quiz.get("mQuizType").getAsString();
 
             Quiz tmpQuiz = null;
@@ -928,7 +1046,5 @@ public class TopekaJSonHelper {
 
             return tmpQuiz;
         }
-
-
     }
 }

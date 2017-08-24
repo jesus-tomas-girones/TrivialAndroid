@@ -65,6 +65,9 @@ import com.trivial.upv.android.widget.fab.CheckableFab;
 
 import org.xml.sax.Attributes;
 
+import static com.trivial.upv.android.activity.QuizActivity.ARG_PLAY_OFFLINE;
+import static com.trivial.upv.android.activity.QuizActivity.TIME_TO_ANSWER_PLAY_GAME;
+
 /**
  * This is the base class for displaying a {@link Quiz}.
  * <p>
@@ -112,7 +115,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
         mCategory = category;
         mSpacingDouble = getResources().getDimensionPixelSize(R.dimen.spacing_double);
         mLayoutInflater = LayoutInflater.from(context);
-        mSubmitAnswer = getSubmitButton();
+//        mSubmitAnswer = getSubmitButton();
         mLinearOutSlowInInterpolator = new LinearOutSlowInInterpolator();
         mHandler = new Handler();
         mInputMethodManager = (InputMethodManager) context.getSystemService
@@ -129,6 +132,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
                                        int oldLeft,
                                        int oldTop, int oldRight, int oldBottom) {
                 removeOnLayoutChangeListener(this);
+                mSubmitAnswer = getSubmitButton();
                 addFloatingActionButton();
             }
         });
@@ -145,7 +149,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
             empty = getResources().getDrawable(R.drawable.ic_cross);
         }
         drawableTmp.addLevel(0, 0, empty);
-        drawableTmp.setBounds(0, 0, empty.getIntrinsicWidth(), empty.getIntrinsicHeight());
+        drawableTmp.setBounds(0, 0, 300, 300);
 
         VolleySingleton.getInstance(getContext()).getImageLoader().get(source, new ImageLoader.ImageListener() {
             @Override
@@ -184,14 +188,12 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
 //        mQuestionView.setText(getQuiz().getQuestion());
         //        Spanned spanned = Html.fromHtml(imgs, this, null);
 //        mTv.setText(spanned);
-        Spanned fromHtml = HtmlCompat.fromHtml(getContext(), getQuiz().getQuestion(), 0,this);
+        Spanned fromHtml = HtmlCompat.fromHtml(getContext(), getQuiz().getQuestion(), 0, this);
 // You may want to provide an ImageGetter, TagHandler and SpanCallback:
 //Spanned fromHtml = HtmlCompat.fromHtml(context, source, 0,
 //        imageGetter, tagHandler, spanCallback);
         //viewHolder.mQuizView.setMovementMethod(LinkMovementMethod.getInstance());
         mQuestionView.setText(fromHtml);
-
-
         mQuestionView.setMovementMethod(new ScrollingMovementMethod());
 //JVG.E
     }
@@ -249,6 +251,12 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
             mSubmitAnswer.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //JVG.S
+                    if (mCategory.getId().equals(ARG_PLAY_OFFLINE)) {
+                        ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
+
+                    }
+                    //JVG.E
                     submitAnswer(v);
                     if (mInputMethodManager.isAcceptingText()) {
                         mInputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);

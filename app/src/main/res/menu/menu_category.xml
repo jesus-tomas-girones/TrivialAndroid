@@ -16,12 +16,9 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-            android:id="@+id/sign_out"
-            app:showAsAction="never"
-            android:title="@string/sign_out" />
     <!--<item-->
-            <!--android:id="@+id/activity_treeview"-->
+            <!--android:id="@+id/sign_out"-->
             <!--app:showAsAction="never"-->
-            <!--android:title="@string/activity_treeview" />-->
+            <!--android:title="@string/sign_out" />-->
+
 </menu>
