@@ -620,6 +620,26 @@ public class TopekaJSonHelper {
         return tmpScore;
     }
 
+//    public int getScorePlayOffLine() {
+//        int tmpScore = 0;
+//
+//        if (categoryPlayGameOffLine != null && isLoaded) {
+//            for (CategoryJSON category : categoriesJSON) {
+//                if (category.getQuizzes() == null) {
+//
+//                    tmpScore += getScore2(category.getSubcategories());
+//
+//                } else {
+//                    if (category.getScore() != null) {
+//                        for (int score : category.getScore())
+//                            tmpScore += score;
+//                    }
+//                }
+//            }
+//        }
+//        return tmpScore;
+//    }
+
     private static int getScore2(List<CategoryJSON> subcategories) {
         int tmpScore = 0;
 
@@ -865,12 +885,20 @@ public class TopekaJSonHelper {
                 for (Quiz quiz : categoryJSON.getQuizzes()) {
                     quiz.setSolved(false);
                 }
+
+                for (int pos = 0; pos < categoryJSON.getScore().length; pos++) {
+                    categoryJSON.getScore()[pos]=0;
+                }
             } else {
                 if (categoryJSON.getSubcategories() != null) {
                     for (CategoryJSON subcategory : categoryJSON.getSubcategories()) {
                         if (categoryJSON.getQuizzes() != null) {
                             for (Quiz quiz : categoryJSON.getQuizzes()) {
                                 quiz.setSolved(false);
+                            }
+
+                            for (int pos = 0; pos < categoryJSON.getScore().length; pos++) {
+                                categoryJSON.getScore()[pos]=0;
                             }
                         } else {
                             deleteProgressSubCategory(subcategory);
@@ -892,12 +920,18 @@ public class TopekaJSonHelper {
                 for (Quiz quiz : subcategory.getQuizzes()) {
                     quiz.setSolved(false);
                 }
+                for (int pos = 0; pos < subcategory.getScore().length; pos++) {
+                    subcategory.getScore()[pos]=0;
+                }
             } else {
                 if (subcategory.getSubcategories() != null) {
                     for (CategoryJSON subsubcategory : subcategory.getSubcategories()) {
                         if (subsubcategory.getQuizzes() != null) {
                             for (Quiz quiz : subsubcategory.getQuizzes()) {
                                 quiz.setSolved(false);
+                            }
+                            for (int pos = 0; pos < subsubcategory.getScore().length; pos++) {
+                                subsubcategory.getScore()[pos]=0;
                             }
                         } else {
                             deleteProgressSubCategory(subsubcategory);
@@ -925,7 +959,7 @@ public class TopekaJSonHelper {
 
     private Category categoryPlayGameOffLine;
 
-    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img,String themeName) {
+    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img, String themeName) {
 
         if (categoryPlayGameOffLine != null) {
             categoryPlayGameOffLine.getQuizzes().clear();
@@ -954,7 +988,7 @@ public class TopekaJSonHelper {
             if (objAnswer instanceof int[]) {
                 int[] tmpAnswer = (int[]) objAnswer;
 
-                List<Integer>lstAnswer = new ArrayList<>();
+                List<Integer> lstAnswer = new ArrayList<>();
 
                 for (int i = 0; i < tmpAnswer.length; i++) {
                     lstAnswer.add(tmpAnswer[i]);
@@ -1028,7 +1062,6 @@ public class TopekaJSonHelper {
         categoriesPath.clear();
         categoriesName.clear();
     }
-
 
     class QuizDeserializer implements JsonDeserializer<Quiz> {
         @Override
