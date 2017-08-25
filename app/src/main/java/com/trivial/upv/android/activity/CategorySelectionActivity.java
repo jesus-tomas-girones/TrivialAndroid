@@ -61,6 +61,7 @@ import android.widget.TextView;
 
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ActivityCategorySelectionBinding;
+import com.trivial.upv.android.databinding.NavHeaderCategorySelectionBinding;
 import com.trivial.upv.android.fragment.CategorySelectionFragment;
 import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
@@ -114,7 +115,11 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                 PreferencesHelper.writeToPreferences(this, player);
             }
         }
-        binding.setPlayer(player);
+//        binding.setPlayer(player);
+        View headerView = binding.navView.getHeaderView(0);
+        NavHeaderCategorySelectionBinding.bind(headerView).setPlayer(player);
+//        binding.bind(headerView);
+
         setUpToolbar();
 
         if (savedInstanceState != null)
@@ -198,6 +203,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                     ((CategorySelectionFragment) fragment).getAdapter().notifyItemChanged(position);
 
                 }
+
+                showScore();
                 dismissSnackbar();
             }
         });
@@ -289,8 +296,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 //        supportPostponeEnterTransition();
         scoreView = (TextView) findViewById(R.id.score_main);
         backButton = (ImageButton) findViewById(R.id.back);
-        avatar = (AvatarView) findViewById(R.id.avatar);
-        title = (TextView) findViewById(R.id.title);
+//        title = (TextView) findViewById(R.id.title);
         subcategory_title = (TextView) findViewById(R.id.sub_category_title);
         //JVG.E
 
@@ -336,8 +342,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             animateToolbarNavigateCategories();
 
         } else {
-            TextView viewSubcategoryText = (TextView) findViewById(R.id.sub_category_title);
-            viewSubcategoryText.setText(TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
+//            TextView viewSubcategoryText = (TextView) findViewById(R.id.sub_category_title);
+            subcategory_title.setText(TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
             Log.d("previus", "categoria_previa" + TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
             animateToolbarNavigateToSubcategories();
         }
@@ -409,6 +415,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.theme_blue_text));
+        avatar = (AvatarView) (navigationView.getHeaderView(0).findViewById(R.id.avatar));
+        title = (TextView) (navigationView.getHeaderView(0).findViewById(R.id.title));
         //JVG.E
     }
 
@@ -596,14 +604,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         backButton.setVisibility(View.GONE);
         scoreView.setVisibility(View.VISIBLE);
 
-        View avatar = findViewById(R.id.avatar);
+//        View avatar = findViewById(R.id.avatar);
         animateViewFullScaleXY(avatar, 200, 300);
 
-        View textViewCategory = findViewById(R.id.title);
-        animateViewFullScaleXY(textViewCategory, 300, 300);
+//        View textViewCategory = findViewById(R.id.title);
+        animateViewFullScaleXY(title, 300, 300);
 
-        View score = findViewById(R.id.score_main);
-        animateViewFullScaleXY(score, 400, 300);
+//        View score = findViewById(R.id.score_main);
+        animateViewFullScaleXY(scoreView, 400, 300);
 
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         toggle.setDrawerIndicatorEnabled(true);
@@ -616,14 +624,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         backButton.setVisibility(View.VISIBLE);
         scoreView.setVisibility(View.VISIBLE);
 
-        View back = findViewById(R.id.back);
-        animateViewFullScaleXY(back, 200, 300);
+//        View back = findViewById(R.id.back);
+        animateViewFullScaleXY(backButton, 200, 300);
 
-        View textViewSubcategory = findViewById(R.id.sub_category_title);
-        animateViewFullScaleXY(textViewSubcategory, 300, 300);
+//        View textViewSubcategory = findViewById(R.id.sub_category_title);
+        animateViewFullScaleXY(subcategory_title, 300, 300);
 
-        View score = findViewById(R.id.score_main);
-        animateViewFullScaleXY(score, 400, 300);
+//        View score = findViewById(R.id.score_main);
+        animateViewFullScaleXY(scoreView, 400, 300);
 
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         toggle.setDrawerIndicatorEnabled(false);

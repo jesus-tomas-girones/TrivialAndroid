@@ -29,7 +29,6 @@
         tools:openDrawer="start">
 
         <include
-            bind:player="@{player}"
             layout="@layout/app_bar_category_selection"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
