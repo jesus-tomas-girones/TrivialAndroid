@@ -309,7 +309,10 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         scorecardView.setVisibility(View.VISIBLE);
         mQuizView.setVisibility(View.GONE);
         //JVG.E
-        mTimeLeftText.setVisibility(View.INVISIBLE);
+        if (mCategory.getId().equals(QuizActivity.ARG_PLAY_OFFLINE)) {
+            mTimeLeftText.setText(getString(R.string.x_points, mCategory.getScore()));
+//            mTimeLeftText.setVisibility(View.INVISIBLE);
+        }
         //JVG.E
     }
 
