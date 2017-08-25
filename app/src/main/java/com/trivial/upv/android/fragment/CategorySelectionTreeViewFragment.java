@@ -247,8 +247,6 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     }
 
     public void buildTree() {
-
-
         root = TreeNode.root();
         buildTreeNodes();
 
@@ -264,14 +262,10 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         });
         treeView = new TreeView(root, getActivity(), treeViewFactoryNode);
 
-
         View tmpView = treeView.getView();
-
         tmpView.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
         viewGroup.addView(tmpView);
-
     }
 
     private void buildTreeNodes() {
