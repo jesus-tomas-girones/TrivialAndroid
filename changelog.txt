@@ -2,7 +2,9 @@ Completed Tasks
 
 Main Acitivity: 
 ---------------
-22/08/2017 Integration MODE REVIEW and PLAY GAME OFFLINE with the Navigation Drawer
+25/08/2017 Move user icon and name to the header view of navigation drawer. (done)
+25/08/2017 Fix review mode when reseting a Category completed, it doesn't restart de current score. (fixed)
+22/08/2017 Integration MODE REVIEW and PLAY GAME OFFLINE with the Navigation Drawer (done)
 
 
 MODE REVIEW
@@ -56,3 +58,4 @@ MODO JUEGO:
 	3) Arrancar una actividad reproductor de preguntas
 		--> Realizado 22/08 (done)
 			Mejoras: Temporizador (Done)
+25/08/2017 Show score after finishing quizzes.
