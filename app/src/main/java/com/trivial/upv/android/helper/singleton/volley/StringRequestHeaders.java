@@ -1,4 +1,4 @@
-package com.trivial.upv.android.helper.singleton;
+package com.trivial.upv.android.helper.singleton.volley;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;

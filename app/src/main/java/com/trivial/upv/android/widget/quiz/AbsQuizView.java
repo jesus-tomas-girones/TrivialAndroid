@@ -55,7 +55,7 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.ViewUtils;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.quiz.FourQuarterQuiz;
 import com.trivial.upv.android.model.quiz.Quiz;

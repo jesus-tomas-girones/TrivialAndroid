@@ -26,7 +26,6 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,15 +40,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.pixplicity.htmlcompat.HtmlCompat;
 import com.trivial.upv.android.R;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.quiz.Quiz;
 
 import org.xml.sax.Attributes;
 
 import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 /**
  * Adapter for displaying score cards.

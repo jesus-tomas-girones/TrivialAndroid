@@ -53,7 +53,7 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.fragment.QuizFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.ViewUtils;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;

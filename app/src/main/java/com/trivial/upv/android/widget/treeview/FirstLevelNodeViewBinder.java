@@ -11,7 +11,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.json.CategoryJSON;
 
 import me.texy.treeview.TreeNode;

@@ -39,7 +39,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ItemCategoryBinding;
 import com.trivial.upv.android.helper.ApiLevelHelper;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 

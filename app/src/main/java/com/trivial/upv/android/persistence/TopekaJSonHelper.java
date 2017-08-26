@@ -37,8 +37,8 @@ import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.JsonHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
 import com.trivial.upv.android.helper.QuestionsTXTHelper;
-import com.trivial.upv.android.helper.singleton.StringRequestHeaders;
-import com.trivial.upv.android.helper.singleton.VolleySingleton;
+import com.trivial.upv.android.helper.singleton.volley.StringRequestHeaders;
+import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.Theme;
@@ -887,7 +887,7 @@ public class TopekaJSonHelper {
                 }
 
                 for (int pos = 0; pos < categoryJSON.getScore().length; pos++) {
-                    categoryJSON.getScore()[pos]=0;
+                    categoryJSON.getScore()[pos] = 0;
                 }
             } else {
                 if (categoryJSON.getSubcategories() != null) {
@@ -898,7 +898,7 @@ public class TopekaJSonHelper {
                             }
 
                             for (int pos = 0; pos < categoryJSON.getScore().length; pos++) {
-                                categoryJSON.getScore()[pos]=0;
+                                categoryJSON.getScore()[pos] = 0;
                             }
                         } else {
                             deleteProgressSubCategory(subcategory);
@@ -921,7 +921,7 @@ public class TopekaJSonHelper {
                     quiz.setSolved(false);
                 }
                 for (int pos = 0; pos < subcategory.getScore().length; pos++) {
-                    subcategory.getScore()[pos]=0;
+                    subcategory.getScore()[pos] = 0;
                 }
             } else {
                 if (subcategory.getSubcategories() != null) {
@@ -931,7 +931,7 @@ public class TopekaJSonHelper {
                                 quiz.setSolved(false);
                             }
                             for (int pos = 0; pos < subsubcategory.getScore().length; pos++) {
-                                subsubcategory.getScore()[pos]=0;
+                                subsubcategory.getScore()[pos] = 0;
                             }
                         } else {
                             deleteProgressSubCategory(subsubcategory);
