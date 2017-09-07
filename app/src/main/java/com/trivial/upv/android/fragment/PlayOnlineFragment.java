@@ -511,9 +511,9 @@ public class PlayOnlineFragment extends Fragment
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.btnInvitar:
-                btnInvitar_Click();
-                break;
+//            case R.id.btnInvitar:
+//                btnInvitar_Click();
+//                break;
             case R.id.btnNewGame:
                 newGame(v);
                 break;

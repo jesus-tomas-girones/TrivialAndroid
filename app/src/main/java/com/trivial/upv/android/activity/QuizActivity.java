@@ -1027,7 +1027,7 @@ public class QuizActivity extends AppCompatActivity implements
 //        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem)).show();
 //        switchToMainScreen();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + "Oops! Something wrong happened!</BR>" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + "Oops! Something wrong happened!" + "\n" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
                 if (exit)

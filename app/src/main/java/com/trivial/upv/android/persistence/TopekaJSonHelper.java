@@ -1045,8 +1045,8 @@ public class TopekaJSonHelper {
         // Choose n random quizzes
 
         final String id = QuizActivity.ARG_ONLINE;
-        final String name = "QuickPlay";
-        final Theme theme = Theme.valueOf("purple");
+        final String name = mContext.getResources().getString(R.string.menu_nd_multi_player);
+        final Theme theme = Theme.valueOf("topeka");
         final int[] scores = new int[numQuizzes];
 
         final int min = 0;
@@ -1057,7 +1057,7 @@ public class TopekaJSonHelper {
             scores[i] = 0;
         }
 
-        String img = "http://mmoviles.upv.es/trivial/img/java.png";
+        String img = "http://mmoviles.upv.es/trivial/img/gpgames.png";
 
         return new Category(name, id, theme, tmpQuizzes, scores, solved, img);
     }
@@ -1138,6 +1138,8 @@ public class TopekaJSonHelper {
         } else if (mode.equals(QuizActivity.ARG_ONLINE))  {
             id = QuizActivity.ARG_ONLINE;
             name  = mContext.getResources().getString(R.string.menu_nd_multi_player);
+            themeName="topeka";
+            img="http://mmoviles.upv.es/trivial/img/gpgames.png";
         }
         else {
             id = name = "Undefined";
