@@ -18,6 +18,8 @@ package com.trivial.upv.android.persistence;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -33,6 +35,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.JsonHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
@@ -72,6 +75,9 @@ import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import static com.trivial.upv.android.helper.singleton.SharedPreferencesStorage.PREF_URL_CATEGORIES;
 
 /**
  * Database for storing and retrieving info for subtemas and quizzes
@@ -108,8 +114,13 @@ public class TopekaJSonHelper {
 
     private StringRequestHeaders request = null;
 
+
     private void isSameFileJSON() {
-        request = new StringRequestHeaders(Request.Method.GET, QuestionsTXTHelper.JsonURL, new Response.Listener<String>() {
+        SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+        String url = sPref.getString(PREF_URL_CATEGORIES, "http://mmoviles.upv.es/trivial/trivialandroid.json");
+
+        request = new StringRequestHeaders(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
 
@@ -506,16 +517,11 @@ public class TopekaJSonHelper {
     }
 
     private List<com.trivial.upv.android.model.Category> loadCategories() {
-
         List<com.trivial.upv.android.model.Category> tmpCategories = new ArrayList<>();
-
         if (categoriesCurrent != null) {
             for (CategoryJSON categoryTXT : categoriesCurrent) {
-
                 com.trivial.upv.android.model.Category category = getCategory(categoryTXT);
-
                 category.setSolved(isSolvedCategory(category));
-
                 tmpCategories.add(category);
             }
         }
@@ -957,16 +963,185 @@ public class TopekaJSonHelper {
         return categoryPlayGameOffLine;
     }
 
+    public Category createCategoryPlayTimeReal(int numQuizzes) {
+        ArrayList<Quiz> allQuizzes = new ArrayList<>();
+        final boolean solved = false;
+
+        if (categoriesJSON != null) {
+            for (CategoryJSON category : categoriesJSON) {
+                if (category != null) {
+                    if (category.getSubcategories() != null) {
+                        getCategoryPlayTimeRealSubcategories(allQuizzes, category.getSubcategories());
+                    } else {
+                        if (category.getQuizzes() != null) {
+                            // Add quizzes
+                            for (Quiz quiz : category.getQuizzes()) {
+                                Object objAnswer = quiz.getAnswer();
+                                String answer = "";
+
+                                if (objAnswer instanceof int[]) {
+                                    int[] tmpAnswer = (int[]) objAnswer;
+
+                                    List<Integer> lstAnswer = new ArrayList<>();
+
+                                    for (int i = 0; i < tmpAnswer.length; i++) {
+                                        lstAnswer.add(tmpAnswer[i]);
+                                    }
+
+                                    answer = new JSONArray(lstAnswer).toString();
+
+                                }
+
+                                Quiz tmpQuiz = null;
+                                switch (quiz.getType().getJsonName()) {
+
+                                    case JsonAttributes.QuizType.FOUR_QUARTER:
+
+                                        tmpQuiz = createFourQuarterQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), getOptionsOrCommentsFromQuiz("getComments", quiz), solved);
+                                        break;
+
+                                    case JsonAttributes.QuizType.MULTI_SELECT:
+
+                                        tmpQuiz = createMultiSelectQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), solved);
+                                        break;
+
+
+                                    case JsonAttributes.QuizType.SINGLE_SELECT:
+                                        //fall-through intended
+                                    case JsonAttributes.QuizType.SINGLE_SELECT_ITEM:
+                                        tmpQuiz = createSelectItemQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), getOptionsOrCommentsFromQuiz("getComments", quiz), solved);
+                                        break;
+
+                                    default:
+                                        throw new IllegalArgumentException("Quiz type " + quiz.getType().getJsonName() + " is not supported");
+
+                                }
+
+                                allQuizzes.add(tmpQuiz);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        List<Quiz> tmpQuizzes = new ArrayList<>();
+
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        for (int i = 0; i < numQuizzes; i++) {
+            list.add(new Integer(i));
+        }
+
+        Random r = new Random();
+        for (int i = numQuizzes - 1; i >= 0; i--) {
+            int t = 0;
+            t = r.nextInt(allQuizzes.size());
+            Quiz tmpQuizz = allQuizzes.remove(t);
+
+            tmpQuizzes.add(tmpQuizz);
+        }
+
+        allQuizzes.clear();
+        // Choose n random quizzes
+
+        final String id = QuizActivity.ARG_ONLINE;
+        final String name = "QuickPlay";
+        final Theme theme = Theme.valueOf("purple");
+        final int[] scores = new int[numQuizzes];
+
+        final int min = 0;
+        final int max = 0;
+        final int step = 0;
+
+        for (int i = 0; i < scores.length; i++) {
+            scores[i] = 0;
+        }
+
+        String img = "http://mmoviles.upv.es/trivial/img/java.png";
+
+        return new Category(name, id, theme, tmpQuizzes, scores, solved, img);
+    }
+
+
+    private void getCategoryPlayTimeRealSubcategories(ArrayList<Quiz> allQuizzes, List<CategoryJSON> subcategories) {
+        final boolean solved = false;
+        for (CategoryJSON subsubcategory : subcategories) {
+            if (subsubcategory != null) {
+                if (subsubcategory.getSubcategories() != null) {
+                    getCategoryPlayTimeRealSubcategories(allQuizzes, subsubcategory.getSubcategories());
+                } else {
+                    if (subsubcategory.getQuizzes() != null) {
+                        // Add quizzes
+                        for (Quiz quiz : subsubcategory.getQuizzes()) {
+                            Object objAnswer = quiz.getAnswer();
+                            String answer = "";
+
+                            if (objAnswer instanceof int[]) {
+                                int[] tmpAnswer = (int[]) objAnswer;
+
+                                List<Integer> lstAnswer = new ArrayList<>();
+
+                                for (int i = 0; i < tmpAnswer.length; i++) {
+                                    lstAnswer.add(tmpAnswer[i]);
+                                }
+
+                                answer = new JSONArray(lstAnswer).toString();
+
+                            }
+
+                            Quiz tmpQuiz = null;
+                            switch (quiz.getType().getJsonName()) {
+
+                                case JsonAttributes.QuizType.FOUR_QUARTER:
+
+                                    tmpQuiz = createFourQuarterQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), getOptionsOrCommentsFromQuiz("getComments", quiz), solved);
+                                    break;
+
+                                case JsonAttributes.QuizType.MULTI_SELECT:
+
+                                    tmpQuiz = createMultiSelectQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), solved);
+                                    break;
+
+
+                                case JsonAttributes.QuizType.SINGLE_SELECT:
+                                    //fall-through intended
+                                case JsonAttributes.QuizType.SINGLE_SELECT_ITEM:
+                                    tmpQuiz = createSelectItemQuiz(quiz.getQuestion(), answer, getOptionsOrCommentsFromQuiz("getOptions", quiz), getOptionsOrCommentsFromQuiz("getComments", quiz), solved);
+                                    break;
+
+                                default:
+                                    throw new IllegalArgumentException("Quiz type " + quiz.getType().getJsonName() + " is not supported");
+
+                            }
+                            allQuizzes.add(tmpQuiz);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private Category categoryPlayGameOffLine;
 
-    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img, String themeName) {
+    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img, String themeName, String mode) {
 
         if (categoryPlayGameOffLine != null) {
             categoryPlayGameOffLine.getQuizzes().clear();
         }
 
-        final String id = QuizActivity.ARG_PLAY_OFFLINE;
-        final String name = "Juego Offline";
+        final String id;
+        final String name;
+
+        if (mode.equals(QuizActivity.ARG_ONE_PLAYER)) {
+            id = QuizActivity.ARG_ONE_PLAYER;
+            name  = mContext.getResources().getString(R.string.menu_nd_one_player);
+        } else if (mode.equals(QuizActivity.ARG_ONLINE))  {
+            id = QuizActivity.ARG_ONLINE;
+            name  = mContext.getResources().getString(R.string.menu_nd_multi_player);
+        }
+        else {
+            id = name = "Undefined";
+        }
         final Theme theme = Theme.valueOf(themeName);
         final boolean solved = false;
         final int[] scores = new int[quizzes.size()];
@@ -995,7 +1170,6 @@ public class TopekaJSonHelper {
                 }
 
                 answer = new JSONArray(lstAnswer).toString();
-
             }
 
             Quiz tmpQuiz = null;
@@ -1063,7 +1237,8 @@ public class TopekaJSonHelper {
         categoriesName.clear();
     }
 
-    class QuizDeserializer implements JsonDeserializer<Quiz> {
+
+    public static class QuizDeserializer implements JsonDeserializer<Quiz> {
         @Override
         public Quiz deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {

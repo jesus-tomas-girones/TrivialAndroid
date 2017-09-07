@@ -17,7 +17,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    buildToolsVersion "25.0.3"
+    buildToolsVersion '25.0.3'
     compileSdkVersion 25
 
     dataBinding {
@@ -32,6 +32,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -43,15 +44,26 @@ android {
     packagingOptions {
         exclude 'LICENSE.txt'
     }
+
+    signingConfigs {
+        debug {
+            storeFile file('trivialandroid.jks')
+            keyAlias 'TrivialAndroid'
+            keyPassword 'jvg637upv'
+            storePassword 'jvg637upv'
+        }
+    }
 }
 
 ext {
-    supportLibVersion = "25.3.1"
+    androidVesion = "25.2.0"
+    supportLibVersion = "25.2.0"
     espressoVersion = "2.2.2"
     androidTestVersion = "0.5"
     hamcrestVersion = "1.3"
     junitVersion = "4.12"
-    firebase = "11.0.1"
+    firebase = "11.0.4"
+    googleplay = "11.0.4"
 }
 
 dependencies {
@@ -59,10 +71,12 @@ dependencies {
     compile "com.android.support:cardview-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
+    compile "com.android.support:preference-v7:${supportLibVersion}"
+
     compile "com.android.support.test.espresso:espresso-idling-resource:${espressoVersion}"
     testCompile "junit:junit:${junitVersion}"
-
-    androidTestCompile("com.android.support.test.espresso:espresso-core:${espressoVersion}") {
+    androidTestCompile("com.android.support.test.espresso:espresso-core:${espressoVersion}")
+    {
         exclude module: "espresso-idling-resource"
         exclude group: "com.android.support"
     }
@@ -75,21 +89,19 @@ dependencies {
         exclude group: "com.android.support"
     }
 
-    androidTestCompile("com.android.support.test:runner:${androidTestVersion}") {
-        exclude group: "com.android.support"
-    }
-
     androidTestCompile "org.hamcrest:hamcrest-core:${hamcrestVersion}"
-
-    compile "com.google.firebase:firebase-auth:${firebase}"
-    compile "com.google.firebase:firebase-database:${firebase}"
-
+    //    compile "com.google.firebase:firebase-auth:${firebase}"
+    //    compile "com.google.firebase:firebase-database:${firebase}"
     compile 'me.texy.treeview:treeview_lib:1.0.3'
-//    compile project(':treeview_lib')
-
+    //    compile project(':treeview_lib')
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.pixplicity.htmlcompat:library:1.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    //    compile 'com.android.support:mediarouter-v7:25.3.1'
+    compile "com.google.android.gms:play-services:${googleplay}"
+
+    compile 'com.vanniktech:vntnumberpickerpreference:1.0.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

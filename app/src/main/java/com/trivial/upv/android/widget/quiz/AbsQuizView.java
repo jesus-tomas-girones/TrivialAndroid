@@ -65,8 +65,8 @@ import com.trivial.upv.android.widget.fab.CheckableFab;
 
 import org.xml.sax.Attributes;
 
-import static com.trivial.upv.android.activity.QuizActivity.ARG_PLAY_OFFLINE;
-import static com.trivial.upv.android.activity.QuizActivity.TIME_TO_ANSWER_PLAY_GAME;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_ONLINE;
 
 /**
  * This is the base class for displaying a {@link Quiz}.
@@ -250,13 +250,14 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
             mSubmitAnswer.hide();
             mSubmitAnswer.setOnClickListener(new OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                public void onClick(final View v) {
                     //JVG.S
-                    if (mCategory.getId().equals(ARG_PLAY_OFFLINE)) {
+                    if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
                         ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
-
                     }
-                    //JVG.E
+                    if (mCategory.getId().equals(ARG_ONLINE)) {
+                        ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
+                    }
                     submitAnswer(v);
                     if (mInputMethodManager.isAcceptingText()) {
                         mInputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -409,7 +410,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
             }
         }
 
-        if (!answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
+        if (!mCategory.getId().equals(ARG_ONLINE) && !answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
 
             Snackbar snackbar = Snackbar
                     .make(findViewById(R.id.absQuizViewContainer), comments, Snackbar.LENGTH_INDEFINITE)

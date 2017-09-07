@@ -22,6 +22,12 @@
         android:orderInCategory="200"
         android:title="Deseleccionar Todo ..."
         app:showAsAction="never" />
+    <item
+        android:id="@+id/invite"
+        android:orderInCategory="100"
+        android:icon="@drawable/treeview_invite"
+        android:title="Invite a Friend ..."
+        app:showAsAction="ifRoom" />
     <!--<item-->
     <!--android:id="@+id/expand_level"-->
     <!--android:orderInCategory="200"-->

@@ -44,8 +44,6 @@ public class QuestionsTXTHelper {
 
     //    public static String JsonURL = "https://trivialandroid-d2b33.firebaseio.com/.json";
 //    public static String JsonURL = "http://eventosjvg.esy.es/categories_upv.json";
-    public static String JsonURL = "http://mmoviles.upv.es/trivial/trivialandroid.json";
-
     Context mContext;
 
 

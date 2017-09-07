@@ -28,8 +28,16 @@
         android:supportsRtl="true"
         android:theme="@style/Topeka"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.gms.games.APP_ID"
+            android:value="@string/app_id" />
+
         <activity
             android:name=".activity.SignInActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Topeka.SignInActivity"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -40,18 +48,29 @@
         </activity>
         <activity
             android:name=".activity.CategorySelectionActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Topeka.CategorySelectionActivity" />
         <activity
             android:name=".activity.QuizActivity"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:theme="@style/Topeka.QuizActivity"
             android:windowSoftInputMode="adjustPan" />
-        <!--<activity-->
-            <!--android:name=".activity.CategorySelectionTreeViewActivity"-->
-            <!--android:configChanges="orientation|keyboardHidden"-->
-            <!--android:label="@string/activity_treeview_label"-->
-            <!--android:screenOrientation="portrait"-->
-            <!--android:theme="@style/Topeka.CategorySelectionTreeViewActivity"></activity>-->
+        <activity android:name=".activity.GPGActivity" />
+        <activity android:name=".activity.MainActivity">
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
+
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        </activity>
+        <activity
+            android:name=".activity.SettingsActivity"
+            android:theme="@style/Topeka.Settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.CategorySelectionActivity"/>
+        </activity>
 
     </application>
 

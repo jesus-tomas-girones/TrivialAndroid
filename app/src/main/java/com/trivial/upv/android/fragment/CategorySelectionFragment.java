@@ -106,7 +106,7 @@ public class CategorySelectionFragment extends Fragment {
 
                             TextView textViewSubcategory = (TextView) getActivity().findViewById(R.id.sub_category_title);
                             textViewSubcategory.setText(mAdapter.getItem(position).getId());
-                            ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories();
+                            ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(true);
                         }
                         // JVG.S
                         /*

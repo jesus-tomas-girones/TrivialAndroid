@@ -9,15 +9,13 @@
     tools:showIn="@layout/app_bar_category_selection">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/root_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/topeka_blank"
-        android:orientation="vertical"
-        android:transitionGroup="false"
-        tools:ignore="Overdraw,UnusedAttribute">
+        android:layout_height="wrap_content"
+        android:background="@color/topeka_blank">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_player"
@@ -28,18 +26,17 @@
             android:elevation="@dimen/elevation_header"
             tools:ignore="UnusedAttribute">
 
-            <RelativeLayout
-                android:id="@+id/login_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-               >
+            <LinearLayout
+                android:id="@+id/subcategory_data"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <ImageButton
                     android:id="@+id/back"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_gravity="start|center_vertical"
+                    android:layout_gravity="center_vertical"
                     android:background="@drawable/selector_subtle"
                     android:contentDescription="@string/back"
                     android:paddingRight="@dimen/spacing_double"
@@ -48,40 +45,32 @@
                     android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/score_main"
-                    style="@style/Topeka.TextAppearance.Title.Inverse"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="@dimen/spacing_double"
-                    android:paddingEnd="@dimen/spacing_micro"
-                    android:paddingStart="@dimen/spacing_micro"
-                    android:text=""
-                    tools:ignore="NewApi" />
-
-
-                <TextView
                     android:id="@+id/sub_category_title"
                     style="@style/Topeka.TextAppearance.Title.Inverse"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_gravity="center_vertical|start"
-                    android:layout_toLeftOf="@id/score_main"
-                    android:layout_toRightOf="@id/back"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text=""
+                    tools:ignore="PrivateResource" />
+
+                <TextView
+                    android:id="@+id/score_main"
+                    style="@style/Topeka.TextAppearance.Title.Inverse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="@dimen/spacing_double"
+                    android:layout_weight="0"
+                    android:paddingEnd="@dimen/spacing_micro"
+                    android:paddingStart="@dimen/spacing_micro"
+                    android:gravity="right"
                     android:text=""
                     android:visibility="gone"
-                    tools:ignore="PrivateResource" />
-            </RelativeLayout>
+                    tools:ignore="NewApi" />
 
-            <RelativeLayout
-                android:id="@+id/subcategory_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-
-            </RelativeLayout>
+            </LinearLayout>
 
         </android.support.v7.widget.Toolbar>
 

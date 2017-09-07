@@ -42,8 +42,11 @@ public class Category implements Parcelable {
             return new Category[size];
         }
     };
-    private static final int SCORE = 8;
     private static final int NO_SCORE = 0;
+    //JVG.S
+//    private static final int SCORE = 8;
+    private static final int SCORE = 1;
+    //JVG.S
     private final String mName;
     private final String mId;
     private final Theme mTheme;

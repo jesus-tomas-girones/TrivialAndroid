@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinator_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/coordinator_view"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -13,12 +13,11 @@
 
     <com.trivial.upv.android.widget.fab.CheckableFab
         android:id="@+id/submitAnswer"
-        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_margin="@dimen/fab_margin_right"
+        android:visibility="invisible"
         app:backgroundTint="@color/theme_blue_accent"
         app:srcCompat="@drawable/answer_quiz_fab" />
-
 </android.support.design.widget.CoordinatorLayout>

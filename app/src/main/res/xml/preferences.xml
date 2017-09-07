@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="Review Mode">
+        <EditTextPreference
+            android:id="@+id/url_categories"
+            android:defaultValue="@string/url_categories"
+            android:key="url_categories"
+            android:summary="Choose a valid Url for loading Categories"
+            android:title="Url Categories" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Mode One Player">
+        <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
+            android:id="@+id/mode_one_player_quizzes"
+            android:defaultValue="10"
+            app:defaultValue="10"
+            android:key="mode_one_player_quizzes"
+            android:summary="Total Quizzies Mode One PLayer"
+            android:title="Num. Quizzes"
+            app:vnt_maxValue="25"
+            app:vnt_minValue="1"
+            app:vnt_setWrapSelectorWheel="true" />
+
+        <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
+            android:id="@+id/mode_one_player_total_time"
+            android:defaultValue="250"
+            app:defaultValue="250"
+            android:key="mode_one_player_total_time"
+            android:summary="Total Time Mode One PLayer"
+            android:title="Total Time"
+            app:vnt_maxValue="600"
+            app:vnt_minValue="5"
+            app:vnt_setWrapSelectorWheel="true" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Mode Online (Quick Match)">
+            <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
+                android:id="@+id/mode_online_quizzes"
+                android:defaultValue="10"
+                app:defaultValue="10"
+                android:key="mode_online_quizzes"
+                android:summary="Total Quizzies Mode One PLayer"
+                android:title="Num. Quizzes"
+                app:vnt_maxValue="25"
+                app:vnt_minValue="1"
+                app:vnt_setWrapSelectorWheel="true" />
+
+            <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
+                android:id="@+id/mode_online_total_time"
+                android:defaultValue="250"
+                app:defaultValue="250"
+                android:key="mode_online_total_time"
+                android:summary="Total Quizzies Mode Online"
+                android:title="Total Time"
+                app:vnt_maxValue="600"
+                app:vnt_minValue="5"
+                app:vnt_setWrapSelectorWheel="true" />
+
+            <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
+                android:id="@+id/mode_online_num_players"
+                android:defaultValue="2"
+                app:defaultValue="2"
+                android:key="mode_online_num_players"
+                android:summary="Total Players Mode Online"
+                android:title="Num. Players"
+                app:vnt_maxValue="8"
+                app:vnt_minValue="2"
+                app:vnt_setWrapSelectorWheel="true" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

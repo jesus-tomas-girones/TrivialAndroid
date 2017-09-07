@@ -28,6 +28,17 @@
         android:fillViewport="true"
         android:visibility="gone" />
 
+    <!--JVG.S-->
+    <ListView
+        android:id="@+id/scorecard_online"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:visibility="gone" />
+    <!--JVG.E-->
+
+
     <AdapterViewFlipper
         android:id="@+id/quiz_view"
         android:layout_width="match_parent"

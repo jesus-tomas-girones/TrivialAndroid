@@ -19,6 +19,7 @@ package com.trivial.upv.android.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.fragment.SignInFragment;
 import com.trivial.upv.android.helper.PreferencesHelper;
+import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -49,7 +51,19 @@ public class SignInActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.sign_in_container, SignInFragment.newInstance(edit)).commit();
         }
+
+        //JVG.S
+        // Store default preferences
+        createDefaultPreferences();
+        //JVG.E
     }
+
+    //JVG.S
+    private void createDefaultPreferences() {
+        SharedPreferencesStorage.getInstance(getBaseContext()).createDefaultValues();
+
+    }
+    //JVG.E
 
     @Override
     protected void onStop() {
