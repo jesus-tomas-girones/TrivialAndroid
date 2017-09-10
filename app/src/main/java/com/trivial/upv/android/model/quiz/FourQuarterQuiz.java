@@ -50,6 +50,14 @@ public final class FourQuarterQuiz extends OptionsQuiz<String> {
         //JVG.E
     }
 
+    public FourQuarterQuiz(String question, int[] answer, String[] options, boolean solved) {
+        super(question, answer, options, solved);
+
+        //JVG.S
+        mComments = null;
+        //JVG.E
+    }
+
     public String[] getComments() {
         return mComments;
     }

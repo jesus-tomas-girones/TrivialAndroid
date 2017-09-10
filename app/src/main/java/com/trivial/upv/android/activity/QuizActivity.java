@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -109,7 +110,12 @@ public class QuizActivity extends AppCompatActivity implements
     private QuizFragment mQuizFragment;
     private FloatingActionButton mQuizFab;
     private boolean mSavedStateIsPlaying;
+    //JVG.S
     private NetworkImageView mIcon;
+    private TextView mMoreinfo;
+    private TextView mDescription;
+    private TextView mVideo;
+    //JVG.E
     private Animator mCircularReveal;
     private ObjectAnimator mColorChange;
     private CountingIdlingResource mCountingIdlingResource;
@@ -139,6 +145,9 @@ public class QuizActivity extends AppCompatActivity implements
             }
         }
     };
+    private TextView mLblMoreInfo;
+    private TextView mLblVideo;
+
 
     public static Intent getStartIntent(Context context, Category category) {
         Intent starter = new Intent(context, QuizActivity.class);
@@ -492,37 +501,157 @@ public class QuizActivity extends AppCompatActivity implements
         initToolbar(mCategory);
     }
 
+    public static void openFile(Context context, String url) {
+        // Create URI
+        Uri uri = Uri.parse(url);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        // Check what kind of file you are trying to open, by comparing the url with extensions.
+        // When the if condition is matched, plugin sets the correct intent (mime) type,
+        // so Android knew what application to use to open the file
+        if (url.toString().contains(".doc") || url.toString().contains(".docx")) {
+            // Word document
+            intent.setDataAndType(uri, "application/msword");
+        } else if (url.toString().contains(".pdf")) {
+            // PDF file
+            intent.setDataAndType(uri, "application/pdf");
+        } else if (url.toString().contains(".ppt") || url.toString().contains(".pptx")) {
+            // Powerpoint file
+            intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+        } else if (url.toString().contains(".xls") || url.toString().contains(".xlsx")) {
+            // Excel file
+            intent.setDataAndType(uri, "application/vnd.ms-excel");
+        } else if (url.toString().contains(".zip") || url.toString().contains(".rar")) {
+            // ZIP Files
+            intent.setDataAndType(uri, "application/zip");
+        } else if (url.toString().contains(".rtf")) {
+            // RTF file
+            intent.setDataAndType(uri, "application/rtf");
+        } else if (url.toString().contains(".wav") || url.toString().contains(".mp3")) {
+            // WAV audio file
+            intent.setDataAndType(uri, "audio/x-wav");
+        } else if (url.toString().contains(".gif")) {
+            // GIF file
+            intent.setDataAndType(uri, "image/gif");
+        } else if (url.toString().contains(".jpg") || url.toString().contains(".jpeg") || url.toString().contains(".png")) {
+            // JPG file
+            intent.setDataAndType(uri, "image/jpeg");
+        } else if (url.toString().contains(".txt")) {
+            // Text file
+            intent.setDataAndType(uri, "text/plain");
+        } else if (url.toString().contains(".3gp") || url.toString().contains(".mpg") || url.toString().contains(".mpeg") || url.toString().contains(".mpe") || url.toString().contains(".mp4") || url.toString().contains(".avi")) {
+            // Video files
+            intent.setDataAndType(uri, "video/*");
+        } else if (url.toString().startsWith("http")) {
+            // HTML  file
+            intent.setDataAndType(uri, "text/html");
+        } else {
+            //if you want you can also define the intent type for any other file
+
+            //additionally use else clause below, to manage other unknown extensions
+            //in this case, Android will show all applications installed on the device
+            //so you can choose which application to use
+            intent.setDataAndType(uri, "*/*");
+        }
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+
+    }
+
     private void initLayout(String categoryId) {
         setContentView(R.layout.activity_quiz);
         //noinspection PrivateResource
         mIcon = (NetworkImageView) findViewById(R.id.icon);
+        mDescription = (TextView) findViewById(R.id.descripton);
+
+        mDescription = (TextView) findViewById(R.id.descripton);
+        if (mCategory.getDescription() != null)
+            mDescription.setText(mCategory.getDescription());
+
+        mLblMoreInfo = (TextView) findViewById(R.id.lbl_moreinfo);
+        mMoreinfo = (TextView) findViewById(R.id.more_info);
+        if (mCategory.getMoreInfo() != null) {
+            mMoreinfo.setText(mCategory.getMoreInfo());
+        } else {
+            mLblMoreInfo.setVisibility(View.GONE);
+        }
+        mMoreinfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mMoreinfo.getText().toString().isEmpty())
+                    openFile(QuizActivity.this, mMoreinfo.getText().toString());
+            }
+        });
+
+        mLblVideo = (TextView) findViewById(R.id.lbl_video);
+        mVideo = (TextView) findViewById(R.id.video);
+        if (mCategory.getVideo() != null) {
+            mVideo.setText(mCategory.getVideo());
+        } else {
+            mLblVideo.setVisibility(View.GONE);
+        }
+        mVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mVideo.getText().toString().isEmpty())
+                    openFile(QuizActivity.this, mVideo.getText().toString());
+            }
+        });
         //JVG.S
 //        int resId = getResources().getIdentifier(IMAGE_CATEGORY + categoryId, DRAWABLE,
 //                getApplicationContext().getPackageName());
 //        mIcon.setImageResource(resId);
 //        mIcon.setImageResource(resId);
 
-        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(getBaseContext()).getImageLoader());
+        mIcon.setFitsSystemWindows(true);
+        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(
+
+                getBaseContext()).
+
+                getImageLoader());
+
         //JVG.E
         ViewCompat.animate(mIcon)
-                .scaleX(1)
-                .scaleY(1)
-                .alpha(1)
-                .setInterpolator(mInterpolator)
-                .setStartDelay(300)
-                .start();
-        mQuizFab = (FloatingActionButton) findViewById(R.id.fab_quiz);
+                .
+
+                        scaleX(1)
+                .
+
+                        scaleY(1)
+                .
+
+                        alpha(1)
+                .
+
+                        setInterpolator(mInterpolator)
+                .
+
+                        setStartDelay(300)
+                .
+
+                        start();
+
+        mQuizFab = (FloatingActionButton)
+
+                findViewById(R.id.fab_quiz);
         mQuizFab.setImageResource(R.drawable.ic_play);
-        if (mSavedStateIsPlaying) {
+        if (mSavedStateIsPlaying)
+
+        {
             mQuizFab.hide();
-        } else {
+        } else
+
+        {
             mQuizFab.show();
         }
         mQuizFab.setOnClickListener(mOnClickListener);
 
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
-        if (categoryId.equals(ARG_ONLINE)) {
+        if (categoryId.equals(ARG_ONLINE) || mCategory.getQuizzes()==null)
+
+        {
             mQuizFab.hide();
         }
         // JVG.E

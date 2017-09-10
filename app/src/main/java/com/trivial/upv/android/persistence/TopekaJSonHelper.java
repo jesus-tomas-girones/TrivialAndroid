@@ -64,6 +64,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -120,6 +121,8 @@ public class TopekaJSonHelper {
 
         String url = sPref.getString(PREF_URL_CATEGORIES, "http://mmoviles.upv.es/trivial/trivialandroid.json");
 
+        Log.d("CATEGORIES", url);
+
         request = new StringRequestHeaders(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
@@ -152,7 +155,12 @@ public class TopekaJSonHelper {
                                 if (contador > 0 && iguales && contador == preguntas.length && line == null) {
                             /* The same file  Take information from cache*/
                                     Log.d("TRAZA", "fichero no se ha modificado");
-                                    readCategoriesFromCache(response, preguntas);
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            readCategoriesFromCache(response, preguntas);
+                                        }
+                                    }).start();
                                     return;
                                 } else {
                                     // New File categories readed. Update
@@ -185,7 +193,13 @@ public class TopekaJSonHelper {
                     }.start();
                 } else {
                     Log.d("TRAZA", "fecha <= ultima fecha");
-                    readCategoriesFromCache(response, preguntas);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            readCategoriesFromCache(response, preguntas);
+                        }
+                    }).start();
+
                 }
             }
         }, new Response.ErrorListener() {
@@ -555,8 +569,11 @@ public class TopekaJSonHelper {
         final int[] scores = categoryTXT.getScore();
         final List<Quiz> quizzes = categoryTXT.getQuizzes();
         final String img = categoryTXT.getImg();
+        final String moreinfo = categoryTXT.getMoreinfo();
+        final String description = categoryTXT.getDescription();
+        final String video = categoryTXT.getVideo();
 
-        return new Category(name, id, theme, quizzes, scores, solved, img);
+        return new Category(name, id, theme, quizzes, scores, solved, img, moreinfo, description, video);
     }
 
     public static int[] createArrayIntFromNumQuizzes(CategoryJSON categoryTXT) {
@@ -802,18 +819,26 @@ public class TopekaJSonHelper {
 
         try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(mContext.openFileOutput("cache.json", Context.MODE_PRIVATE)));
-            try {
-                bw.write(json);
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                sendBroadCastError("CACHE", "CARGA DE CACHE CON ERROR");
+
+            int bytesWritten = 0;
+            int totalLength = json.length();
+            while (bytesWritten < totalLength) {
+
+                int nextPos = Math.min(totalLength, bytesWritten + 1500);
+                bw.write(json.substring(bytesWritten, nextPos));
+                bw.newLine();
+
+                bytesWritten += nextPos - bytesWritten;
+
             }
+            bw.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             sendBroadCastError("CACHE", "CARGA DE CACHE CON ERROR NOT FOUND!");
+        } catch (IOException e) {
+            e.printStackTrace();
+            sendBroadCastError("CACHE", "CARGA DE CACHE CON ERROR");
         }
-
 //        Log.d("OBJECT", "TRAZA");
     }
 
@@ -834,12 +859,22 @@ public class TopekaJSonHelper {
         Gson gson = builder.create();
 
         try {
+            long totalLength = new File(mContext.getApplicationContext().getFilesDir() + "/cache.json").length();
+
             BufferedReader br = new BufferedReader(new InputStreamReader(mContext.openFileInput("cache.json")));
 
             StringBuilder sb = new StringBuilder();
 
             String line = null;
+
+            int numLines = 0;
             while ((line = br.readLine()) != null) {
+                numLines++;
+
+                int avance = (int)((numLines * line.length() * 100 / totalLength));
+                if (avance % 5 == 0 && avance>0) {
+                    sendBroadCastMessageRefresh(avance);
+                }
                 sb.append(line);
             }
             br.close();
@@ -1058,8 +1093,11 @@ public class TopekaJSonHelper {
         }
 
         String img = "http://mmoviles.upv.es/trivial/img/gpgames.png";
+        String moreInfo = null;
+        String description = null;
+        String video = null;
 
-        return new Category(name, id, theme, tmpQuizzes, scores, solved, img);
+        return new Category(name, id, theme, tmpQuizzes, scores, solved, img, moreInfo, description, video);
     }
 
 
@@ -1123,7 +1161,7 @@ public class TopekaJSonHelper {
 
     private Category categoryPlayGameOffLine;
 
-    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img, String themeName, String mode) {
+    public void createCategoryPlayGameOffLine(List<Quiz> quizzes, String img, String themeName, String mode, String moreInfo, String description, String video) {
 
         if (categoryPlayGameOffLine != null) {
             categoryPlayGameOffLine.getQuizzes().clear();
@@ -1134,14 +1172,13 @@ public class TopekaJSonHelper {
 
         if (mode.equals(QuizActivity.ARG_ONE_PLAYER)) {
             id = QuizActivity.ARG_ONE_PLAYER;
-            name  = mContext.getResources().getString(R.string.menu_nd_one_player);
-        } else if (mode.equals(QuizActivity.ARG_ONLINE))  {
+            name = mContext.getResources().getString(R.string.menu_nd_one_player);
+        } else if (mode.equals(QuizActivity.ARG_ONLINE)) {
             id = QuizActivity.ARG_ONLINE;
-            name  = mContext.getResources().getString(R.string.menu_nd_multi_player);
-            themeName="topeka";
-            img="http://mmoviles.upv.es/trivial/img/gpgames.png";
-        }
-        else {
+            name = mContext.getResources().getString(R.string.menu_nd_multi_player);
+            themeName = "topeka";
+            img = "http://mmoviles.upv.es/trivial/img/gpgames.png";
+        } else {
             id = name = "Undefined";
         }
         final Theme theme = Theme.valueOf(themeName);
@@ -1202,7 +1239,7 @@ public class TopekaJSonHelper {
             tmpQuizzes.add(tmpQuiz);
         }
 
-        categoryPlayGameOffLine = new Category(name, id, theme, tmpQuizzes, scores, solved, img);
+        categoryPlayGameOffLine = new Category(name, id, theme, tmpQuizzes, scores, solved, img, moreInfo, description, video);
     }
 
     @NonNull

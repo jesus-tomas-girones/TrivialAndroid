@@ -33,6 +33,11 @@ public class CategoryJSON {
     @Expose
     private String moreinfo;
 
+    @SerializedName("video")
+    @Expose
+    private String video = null;
+
+
     @SerializedName("subcategories")
     @Expose
     private List<CategoryJSON> subcategories = null;
@@ -46,7 +51,7 @@ public class CategoryJSON {
 
     @SerializedName("score")
     @Expose
-    private int[] score= null;
+    private int[] score = null;
 
     /*public String getId() {
         return id;
@@ -126,5 +131,13 @@ public class CategoryJSON {
 
     public void setScore(int[] score) {
         this.score = score;
+    }
+
+    public String getVideo() {
+        return video;
+    }
+
+    public void setVideo(String video) {
+        this.video = video;
     }
 }

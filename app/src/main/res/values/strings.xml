@@ -15,7 +15,7 @@
   -->
 
 <resources>
-    <string name="app_name">Topeka</string>
+    <string name="app_name">TrivialAndroid</string>
     <string name="last_initial">Last Initial</string>
     <string name="first_name">First Name</string>
     <string name="sign_in">Sign In</string>

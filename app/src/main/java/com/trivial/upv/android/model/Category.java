@@ -56,22 +56,59 @@ public class Category implements Parcelable {
 
     //JVG.S
     private final String mImg;
+    private final String mMoreInfo;
+    private final String mDescription;
+    private final String mVideo;
 
     public String getImg() {
         return mImg;
     }
+
+    public String getMoreInfo() {
+        return mMoreInfo;
+    }
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public String getVideo() {
+        return mVideo;
+    }
     //JVG.S
 
     public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
-                    @NonNull List<Quiz> quizzes, boolean solved, @NonNull String img) {
+                    @NonNull List<Quiz> quizzes, boolean solved, @NonNull String img, String moreInfo, String description, String video) {
         mName = name;
         mId = id;
         mTheme = theme;
         mQuizzes = quizzes;
         mScores = new int[quizzes.size()];
         mSolved = solved;
+        //JVG.S
         mImg = img;
+        mMoreInfo = moreInfo;
+        mDescription = description;
+        mVideo = video;
+        //JVG.E
     }
+
+    public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
+                    @NonNull List<Quiz> quizzes, boolean solved) {
+        mName = name;
+        mId = id;
+        mTheme = theme;
+        mQuizzes = quizzes;
+        mScores = new int[quizzes.size()];
+        mSolved = solved;
+
+        //JVG.S
+        mImg = null;
+        //JVG.E
+        mMoreInfo = null;
+        mDescription = null;
+        mVideo= null;
+    }
+
 
     // JVG.S
     public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
@@ -90,12 +127,15 @@ public class Category implements Parcelable {
         mSolved = solved;
         //JVG.S
         mImg = null;
+        mMoreInfo = null;
+        mDescription = null;
+        mVideo = null;
         //JVG.E
     }
     // JVG.E
 
     public Category(@NonNull String name, @NonNull String id, @NonNull Theme theme,
-                    @NonNull List<Quiz> quizzes, @NonNull int[] scores, boolean solved, @NonNull String img) {
+                    @NonNull List<Quiz> quizzes, @NonNull int[] scores, boolean solved, @NonNull String img, String moreInfo, String description, String video ) {
         mName = name;
         mId = id;
         mTheme = theme;
@@ -112,6 +152,9 @@ public class Category implements Parcelable {
         //JVG.E
         mSolved = solved;
         mImg = img;
+        mMoreInfo = moreInfo;
+        mDescription = description;
+        mVideo = video;
     }
 
     protected Category(Parcel in) {
@@ -122,8 +165,12 @@ public class Category implements Parcelable {
         in.readTypedList(mQuizzes, Quiz.CREATOR);
         mScores = in.createIntArray();
         mSolved = ParcelableHelper.readBoolean(in);
+        //JVG.S
         mImg = in.readString();
-        ;
+        mMoreInfo = in.readString();
+        mDescription = in.readString();
+        mVideo = in.readString();
+        //JVG.E
     }
 
     public String getName() {
@@ -226,6 +273,9 @@ public class Category implements Parcelable {
                 ", mScores=" + Arrays.toString(mScores) +
                 ", mSolved=" + mSolved +
                 ", mImg=" + mImg +
+                ", mMoreInfo=" + mMoreInfo +
+                ", mDescription=" + mDescription +
+                ", mVideo=" + mVideo +
                 '}';
     }
 
@@ -242,7 +292,12 @@ public class Category implements Parcelable {
         dest.writeTypedList(getQuizzes());
         dest.writeIntArray(mScores);
         ParcelableHelper.writeBoolean(dest, mSolved);
+        //JVG.S
         dest.writeString(mImg);
+        dest.writeString(mMoreInfo);
+        dest.writeString(mDescription);
+        dest.writeString(mVideo);
+        //JVG.S
     }
 
     @SuppressWarnings("RedundantIfStatement")
@@ -270,9 +325,15 @@ public class Category implements Parcelable {
             return false;
         }
 
+        //JVG.S
         if (!mImg.equals(category.mImg)) {
             return false;
         }
+
+        if (!mMoreInfo.equals(category.mMoreInfo)) {
+            return false;
+        }
+        //JVG.E
 
         return true;
     }

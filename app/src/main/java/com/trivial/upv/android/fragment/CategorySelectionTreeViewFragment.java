@@ -334,7 +334,11 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         }
         List<Quiz> tmpQuizzes = getRandomizeQuizzes(quizzes, numQuizzes);
 
-        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode);
+        String moreInfo = null;
+        String description = null;
+        String video = null;
+
+        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode,  moreInfo, description, video);
 
         return true;
     }

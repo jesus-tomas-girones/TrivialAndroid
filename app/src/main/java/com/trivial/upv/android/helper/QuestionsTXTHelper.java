@@ -66,7 +66,7 @@ public class QuestionsTXTHelper {
         List<Quiz> quizzes = new ArrayList<>();
 
 
-        String tmpPreguntasTXT = preguntasTXT.replaceAll("(\\r?\\n\\r?\\n)(\\r?\\n)*","$1");
+        String tmpPreguntasTXT = preguntasTXT.replaceAll("(\\r?\\n\\r?\\n)(\\r?\\n)*", "$1");
 
         String[] preguntas = tmpPreguntasTXT.split("\\r?\\n");
         int contador = 0;
@@ -111,9 +111,14 @@ public class QuestionsTXTHelper {
             questionsTXT.getQuestions().add(questionTXT);
         }
 
-        category.setDescription(questionsTXT.getSubject());
-        category.setCategory(questionsTXT.getSubject());
-        category.setMoreinfo(questionsTXT.getSubject());
+        if (category.getDescription() == null)
+            category.setDescription(questionsTXT.getSubject());
+
+        if (category.getCategory() == null)
+            category.setCategory(questionsTXT.getSubject());
+
+//        if (category.getMoreinfo() == null)
+//            category.setMoreinfo(null);
 
         Quiz quizz;
         for (QuestionTXT question : questionsTXT.getQuestions()) {
@@ -175,6 +180,8 @@ public class QuestionsTXTHelper {
 
         lineTmp = addPathToUrlImg(lineTmp, url);
 
+        lineTmp = lineTmp.replaceAll("<code>", "<tt>");
+        lineTmp = lineTmp.replaceAll("</code>", "</tt>");
 
         return lineTmp;
     }
@@ -233,7 +240,10 @@ public class QuestionsTXTHelper {
             }
 //        Log.d("CARGA", "PENDING:" + pendingRequests);
             else {
-                TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
+
+                int avance = (maxPendingRequests - pendingRequests) * 100 / maxPendingRequests;
+                if (avance % 5 == 0 && avance > 0)
+                    TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
             }
         }
 
@@ -262,7 +272,7 @@ public class QuestionsTXTHelper {
         if (DEBUG) {
             String line;
             StringBuilder categoriesJson = new StringBuilder();
-            InputStream rawCategories = mContext.getResources().openRawResource(R.raw.trivialandroidv4);
+            InputStream rawCategories = mContext.getResources().openRawResource(R.raw.trivialandroid_video);
             BufferedReader reader = new BufferedReader(new InputStreamReader(rawCategories));
 
             // Crear una cadena con el Fichero JSON completo
@@ -284,69 +294,12 @@ public class QuestionsTXTHelper {
         JSONObject categories = root.getJSONObject("categories");
 
         // Genera tantas categorías como keys distintos tiene el JSON
-        JSONObject category;
-        CategoryJSON mCategory;
-        Iterator<String> keys = categories.keys();
-        while (keys.hasNext()) {
-            // Note that "key" must be "1", "2", "3"...
-            String key = keys.next();
+        mCategories = asignaSubtemas(categories, null);
 
-            mCategory = new CategoryJSON();
-            category = (JSONObject) categories.get(key);
-
-            //mCategory.setId(category.getString("id"));
-            mCategory.setCategory(category.getString("category"));
-
-            mCategory.setDescription(category.getString("description"));
-            mCategory.setImg(category.getString("img"));
-            mCategory.setMoreinfo(category.getString("moreinfo"));
-            mCategory.setTheme(category.getString("theme"));
-
-            // Genera las subcategorías recursivamente
-            if (category.has("subcategories")) {
-                mCategory.setSubcategories(asignaSubtemas(category.getJSONObject("subcategories")));
-            } else {
-                mCategory.setSubcategories(null);
-            }
-
-            // Una categoría principal no debería tener Quizzes
-            if (category.has("quizzes")) {
-                // Quizzes
-                JSONArray preguntasJSon = category.getJSONArray("quizzes");
-
-                List<String> quizzies = new ArrayList<>();
-
-                List<CategoryJSON> sub_subcategories = new ArrayList<>();
-                CategoryJSON sub_subcategory = null;
-
-                for (int j = 0; j < preguntasJSon.length(); j++) {
-                    sub_subcategory = new CategoryJSON();
-                    //sub_subcategory.setCategory(subcategory.getString("category"));
-                    //sub_subcategory.setDescription(subcategory.getString("description"));
-                    sub_subcategory.setImg(category.getString("img"));
-                    //sub_subcategory.setMoreinfo(subcategory.getString("moreinfo"));
-                    sub_subcategory.setTheme(category.getString("theme"));
-                    // Añade manualmente las subtcategorias de las preguntas
-
-                    quizzies.add((String) preguntasJSon.get(j));
-
-                    sub_subcategories.add(sub_subcategory);
-
-                    getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
-//                    localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
-                }
-                mCategory.setSubcategories(sub_subcategories);
-                // Los QUIZZIES se asignan mediente peticiones asíncronas
-                ///mCategory.setQuizzes(quizzies);
-            } else {
-                mCategory.setQuizzes(null);
-            }
-            mCategories.add(mCategory);
-        }
         return mCategories;
     }
 
-    private List<CategoryJSON> asignaSubtemas(JSONObject subcategorias) throws JSONException, MalformedURLException, URISyntaxException {
+    private List<CategoryJSON> asignaSubtemas(JSONObject subcategorias, JSONObject parent) throws JSONException, MalformedURLException, URISyntaxException {
 
         JSONObject subcategory;
         List<CategoryJSON> preguntas = new ArrayList<>();
@@ -360,48 +313,130 @@ public class QuestionsTXTHelper {
             subcategory = (JSONObject) subcategorias.get(key);
 
             /// pregunta.setId(subcategory.getString("id"));
-            pregunta.setCategory(subcategory.getString("category"));
 
-            pregunta.setDescription(subcategory.getString("description"));
-            pregunta.setImg(subcategory.getString("img"));
-            pregunta.setMoreinfo(subcategory.getString("moreinfo"));
-            pregunta.setTheme(subcategory.getString("theme"));
+            if (subcategory.has("subcategories") || subcategory.has("quizzes")) {
+                pregunta.setCategory(subcategory.getString("category"));
 
-            if (subcategory.has("subcategories")) {
-                pregunta.setQuizzes(null);
-                pregunta.setSubcategories(asignaSubtemas(subcategory.getJSONObject("subcategories")));
+                pregunta.setDescription(subcategory.getString("description"));
+
+                if (!subcategory.has("img")) {
+                    Log.d("PARADA", "PARADA");
+                }
+                pregunta.setImg(subcategory.getString("img"));
+                pregunta.setMoreinfo(subcategory.getString("moreinfo"));
+                pregunta.setTheme(subcategory.getString("theme"));
+                if (subcategory.has("video")) {
+                    pregunta.setVideo(subcategory.getString("video"));
+                }
+
+
+                if (subcategory.has("subcategories")) {
+                    pregunta.setQuizzes(null);
+
+                    Iterator<String> names = subcategorias.keys();
+                    String tmpParent = names.next();
+
+                    pregunta.setSubcategories(asignaSubtemas(subcategory.getJSONObject("subcategories"), subcategorias.getJSONObject(tmpParent)));
+                } else {
+
+                    if (subcategory.has("quizzes")) {
+                        // Quizzes
+                        pregunta.setSubcategories(null);
+
+                        JSONArray preguntasJSon = subcategory.getJSONArray("quizzes");
+
+                        List<CategoryJSON> sub_subcategories = new ArrayList<>();
+                        CategoryJSON sub_subcategory = null;
+
+                        for (int j = 0; j < preguntasJSon.length(); j++) {
+
+                            sub_subcategory = new CategoryJSON();
+                            //sub_subcategory.setCategory(subcategory.getString("category"));
+
+                            //sub_subcategory.setDescription(subcategory.getString("description"));
+                            sub_subcategory.setImg(subcategory.getString("img"));
+                            //sub_subcategory.setMoreinfo(subcategory.getString("moreinfo"));
+                            sub_subcategory.setTheme(subcategory.getString("theme"));
+                            // Añade manualmente las subtcategorias de las preguntas
+
+                            sub_subcategories.add(sub_subcategory);
+
+                            getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
+//                        localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
+                        }
+                        pregunta.setSubcategories(sub_subcategories);
+                        // Los QUIZZIES se asignan mediente peticiones asíncronas
+                    }
+                }
             } else {
+//                if (subcategory.has("quiz")) {
+                // Create new category with quizzes
+                // Quizzes
+
+                //- Campo “video” en objeto Category
+                //- Cuando una categoría tienen el campo “quiz” en lugar de “quizzes”, se crea un objeto Category con los campos que se indiquen.
+                //                             Si no aparece “img”, “theme” los hereda de la categoría.
+                //                             Si no aparece “category” el título lo coge del fichero txt  (indicado en “quiz”)
+                //                             Si no aparece  "description", "moreinfo", "video" se deja en blanco
+
                 pregunta.setSubcategories(null);
 
-                if (subcategory.has("quizzes")) {
-                    // Quizzes
-                    JSONArray preguntasJSon = subcategory.getJSONArray("quizzes");
 
-                    List<CategoryJSON> sub_subcategories = new ArrayList<>();
-                    CategoryJSON sub_subcategory = null;
-
-                    for (int j = 0; j < preguntasJSon.length(); j++) {
-
-                        sub_subcategory = new CategoryJSON();
-                        //sub_subcategory.setCategory(subcategory.getString("category"));
-
-                        //sub_subcategory.setDescription(subcategory.getString("description"));
-                        sub_subcategory.setImg(subcategory.getString("img"));
-                        //sub_subcategory.setMoreinfo(subcategory.getString("moreinfo"));
-                        sub_subcategory.setTheme(subcategory.getString("theme"));
-                        // Añade manualmente las subtcategorias de las preguntas
-
-                        sub_subcategories.add(sub_subcategory);
-
-                        getQuizzesTXTFromInternetVolley(sub_subcategory, (String) preguntasJSon.get(j));
-//                        localizaPreguntasTXT(sub_subcategory, (String) preguntasJSon.get(j));
-                    }
-                    pregunta.setSubcategories(sub_subcategories);
-                    // Los QUIZZIES se asignan mediente peticiones asíncronas
+                // Se herada del padre
+                if (subcategory.has("img")) {
+                    pregunta.setImg(subcategory.getString("img"));
                 } else {
-                    pregunta.setQuizzes(null);
+                    pregunta.setImg(parent.getString("img"));
                 }
+
+                // Se herada del padre
+                if (subcategory.has("theme")) {
+                    pregunta.setTheme(subcategory.getString("theme"));
+                } else {
+                    pregunta.setTheme(parent.getString("theme"));
+                }
+
+                // Si no aparece lo toma del .txt
+                if (subcategory.has("category")) {
+                    pregunta.setCategory(subcategory.getString("category"));
+                } else {
+                    pregunta.setCategory(null);
+                }
+
+                // Si no aparece, se deja en blanco
+                String video;
+                if (subcategory.has("video")) {
+                    pregunta.setVideo(subcategory.getString("video"));
+                } else {
+                    pregunta.setVideo(null);
+                }
+
+                // Si no aparece, se deja en blanco
+                if (subcategory.has("description")) {
+                    pregunta.setDescription(subcategory.getString("description"));
+                } else {
+                    pregunta.setDescription(null);
+                }
+
+                // Si no aparece, se deja en blanco
+                if (subcategory.has("moreinfo")) {
+                    pregunta.setMoreinfo(subcategory.getString("moreinfo"));
+                } else {
+                    pregunta.setMoreinfo(null);
+                }
+
+                if (subcategory.has("quiz")) {
+                    getQuizzesTXTFromInternetVolley(pregunta, subcategory.getString("quiz"));
+                } else {
+                    if (pregunta.getDescription() == null && pregunta.getCategory() != null) {
+                        pregunta.setDescription(pregunta.getCategory());
+                    } else {
+                        pregunta.setDescription(parent.getString("description"));
+                    }
+                }
+//                }
             }
+
             preguntas.add(pregunta);
         }
         return preguntas;
