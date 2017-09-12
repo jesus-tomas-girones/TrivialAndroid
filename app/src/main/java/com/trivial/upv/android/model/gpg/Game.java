@@ -12,6 +12,7 @@ import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,11 +27,6 @@ public class Game {
 
     public static String mMyId;
     public static int jugadorLocal;
-    public static int turno;
-    public static int puntosJ1;
-    public static int puntosJ2;
-
-    public static String gameType = "LOCAL";
 
     public static GoogleApiClient mGoogleApiClient;
     public static int numQuizzes;
@@ -46,7 +42,7 @@ public class Game {
     public static long timeStamp;
     public static  Map<String, Long> mFinishedParticipants = new HashMap<>();
     public static Map<String, Long> mParticipantScore = new HashMap<>();
-    public static Category categoryGame;
+
     public static int numPlayers;
     public static int totalTime;
     public static String myName;
@@ -55,9 +51,10 @@ public class Game {
     public static int tmpNumPlayers = 2;
     public static int tmpTotalTime = 250;
     public static String master;
+    public static List<String> listCategories = new ArrayList<>() ;
+    public static long level;
 
     public static void resetGameVars() {
-        Game.turno = 1;
         Game.mRoomId = null;
         if (Game.mParticipants != null && Game.mParticipants.size() > 0)
             Game.mParticipants.clear();
@@ -70,6 +67,7 @@ public class Game {
         mFinishedParticipants.clear();
         mParticipantScore.clear();
         master = null;
+//        level = 0;
     }
 
     public static int numParticipantsOK() {

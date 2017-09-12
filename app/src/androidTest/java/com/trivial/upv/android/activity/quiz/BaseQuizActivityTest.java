@@ -72,7 +72,9 @@ public abstract class BaseQuizActivityTest {
                 protected void beforeActivityLaunched() {
                     Context targetContext = InstrumentationRegistry.getTargetContext();
                     PreferencesHelper.signOut(targetContext);
-                    TopekaDatabaseHelper.reset(targetContext);
+                    // JVG.S
+//                    TopekaDatabaseHelper.reset(targetContext);
+                    // JVG.E
                     PreferencesHelper.writeToPreferences(targetContext,
                             new Player("Zaphod", "B", Avatar.FIVE));
                 }
@@ -80,7 +82,9 @@ public abstract class BaseQuizActivityTest {
                 @Override
                 protected Intent getActivityIntent() {
                     Context targetContext = InstrumentationRegistry.getTargetContext();
-                    mCategories = TopekaDatabaseHelper.getCategories(targetContext, false);
+                    //JVG.S
+//                    mCategories = TopekaDatabaseHelper.getCategories(targetContext, false);
+                    // JVG.E
                     return QuizActivity.getStartIntent(targetContext,
                             getCurrentCategory());
                 }

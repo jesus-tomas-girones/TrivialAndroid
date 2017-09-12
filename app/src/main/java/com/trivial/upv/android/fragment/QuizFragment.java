@@ -61,7 +61,7 @@ import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONLINE;
 import static com.trivial.upv.android.activity.QuizActivity.MAX_RETRY_TIMES;
-import static com.trivial.upv.android.activity.QuizActivity.TIME_TO_ANSWER_PLAY_GAME;
+
 
 /**
  * Encapsulates Quiz solving and displays it to the user.
@@ -217,7 +217,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
                             } else if (mCategory.getId().equals(ARG_ONLINE)) {
                                 ((QuizActivity) getActivity()).setTimeToNextItem(Game.totalTime * 1000);
-                                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
+                                setTimeLeftText(Game.totalTime * 1000);
                                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
                             }
                             return true;

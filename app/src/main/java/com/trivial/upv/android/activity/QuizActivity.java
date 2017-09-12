@@ -697,7 +697,7 @@ public class QuizActivity extends AppCompatActivity implements
     private Runnable mRunnablePlayGame = new Runnable() {
         @Override
         public void run() {
-            Log.d("HANDLER", "RUN HANDLER");
+//            Log.d("HANDLER", "RUN HANDLER");
             //JVG.E
             if (timeToNextItem <= 0) {
 //                if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
@@ -724,9 +724,9 @@ public class QuizActivity extends AppCompatActivity implements
             if (nextItem < count || (nextItem == count && timeToNextItem >= 0)) {
                 mHandlerPlayGame.postDelayed(mRunnablePlayGame,
                         1000);
-                Log.d("HANDLER", "PROGRAMO_EJECUCIÓN: " + timeToNextItem + "-" + "nextItem=" + nextItem + "; count=" + count);
+//                Log.d("HANDLER", "PROGRAMO_EJECUCIÓN: " + timeToNextItem + "-" + "nextItem=" + nextItem + "; count=" + count);
             } else {
-                Log.d("HANDLER", "YA NO PROGRAMO MÁS EJECUCIONES");
+//                Log.d("HANDLER", "YA NO PROGRAMO MÁS EJECUCIONES");
             }
         }
     }
@@ -818,6 +818,7 @@ public class QuizActivity extends AppCompatActivity implements
         rtmConfigBuilder.setRoomStatusUpdateListener(this);
         if (autoMatchCriteria != null) {
             rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
+            rtmConfigBuilder.setVariant((int)Game.level);
         }
         keepScreenOn();
         Game.resetGameVars();
@@ -1155,6 +1156,7 @@ public class QuizActivity extends AppCompatActivity implements
     public void showGameError(String msg, final boolean exit) {
 //        BaseGameUtils.makeSimpleDialog(this, getString(R.string.game_problem)).show();
 //        switchToMainScreen();
+        cancelPostDelayHandlerPlayGame();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + "Oops! Something wrong happened!" + "\n" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

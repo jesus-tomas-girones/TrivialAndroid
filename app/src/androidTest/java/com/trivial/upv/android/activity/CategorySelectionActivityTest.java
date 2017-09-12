@@ -38,6 +38,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static android.support.test.espresso.Espresso.onView;
@@ -76,7 +77,10 @@ public class CategorySelectionActivityTest {
 
     @Before
     public void loadCategories() {
-        mCategories = TopekaDatabaseHelper.getCategories(mTargetContext, false);
+        //JVG.S
+        mCategories = new ArrayList<>();
+//        mCategories = TopekaDatabaseHelper.getCategories(mTargetContext, false);
+        //JVG.E
     }
 
     @Test

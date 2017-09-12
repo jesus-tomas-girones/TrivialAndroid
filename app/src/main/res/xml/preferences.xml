@@ -34,7 +34,7 @@
             app:vnt_setWrapSelectorWheel="true" />
 
     </PreferenceCategory>
-    <PreferenceCategory android:title="Mode Online (Quick Match)">
+    <PreferenceCategory android:title="Mode Online">
             <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
                 android:id="@+id/mode_online_quizzes"
                 android:defaultValue="10"
@@ -57,16 +57,21 @@
                 app:vnt_minValue="5"
                 app:vnt_setWrapSelectorWheel="true" />
 
-            <com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference
-                android:id="@+id/mode_online_num_players"
-                android:defaultValue="2"
-                app:defaultValue="2"
-                android:key="mode_online_num_players"
-                android:summary="Total Players Mode Online"
-                android:title="Num. Players"
-                app:vnt_maxValue="8"
-                app:vnt_minValue="2"
-                app:vnt_setWrapSelectorWheel="true" />
+        <EditTextPreference
+            android:defaultValue=""
+            android:key="url_categories"
+            android:summary="Any change in 'Mode Online' only takes effect when you start a Game. It means that the player who starts the Game is the Master, and the rest of players take his settings as theirs."
+            android:title="Warning:"  android:enabled="false"/>
+            <!--<com.vanniktech.vntnumberpickerpreference.VNTNumberPickerPreference-->
+                <!--android:id="@+id/mode_online_num_players"-->
+                <!--android:defaultValue="2"-->
+                <!--app:defaultValue="2"-->
+                <!--android:key="mode_online_num_players"-->
+                <!--android:summary="Total Players Mode Online"-->
+                <!--android:title="Num. Players"-->
+                <!--app:vnt_maxValue="8"-->
+                <!--app:vnt_minValue="2"-->
+                <!--app:vnt_setWrapSelectorWheel="true" />-->
     </PreferenceCategory>
 
 </PreferenceScreen>

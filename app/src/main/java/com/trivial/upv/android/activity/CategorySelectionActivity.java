@@ -224,7 +224,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             public void onClickAction() {
                 Log.d("TRAZA", "OnInvitationReceived");
                 Game.mIncomingInvitationId = invitation.getInvitationId();
-                Game.category = TopekaJSonHelper.getInstance(getApplicationContext(), false).createCategoryPlayTimeReal(10);
+                Game.category = TopekaJSonHelper.getInstance(getApplicationContext(), false).createCategoryPlayTimeReal(10, null);
                 Intent startIntent = QuizActivity.getStartIntent(CategorySelectionActivity.this, Game.category);
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
                     ActivityCompat.startActivity(CategorySelectionActivity.this, startIntent, ActivityOptions.makeSceneTransitionAnimation(CategorySelectionActivity.this).toBundle());
@@ -316,7 +316,9 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
                 } else if ("REFRESH".equals(result)) {
                     if (pDialog != null) {
-                        pDialog.setProgress(intent.getExtras().getInt("REFRESH", 0));
+                        int value = intent.getExtras().getInt("REFRESH", 0);
+                        if (value > pDialog.getProgress())
+                            pDialog.setProgress(intent.getExtras().getInt("REFRESH", 0));
                     }
                 } else if ("ERROR".equals(result)) {
                     snackbar = Snackbar

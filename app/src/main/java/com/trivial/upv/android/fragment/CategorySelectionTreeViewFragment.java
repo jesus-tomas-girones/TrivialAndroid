@@ -53,6 +53,7 @@ import static com.trivial.upv.android.fragment.PlayOnlineFragment.RC_SELECT_PLAY
 public class CategorySelectionTreeViewFragment extends Fragment {
     private static final String MODE = "mode";
     private static final String TAG = "TreeViewFragment";
+    private static final int MAX_LEVEL = 1;
     protected Toolbar toolbar;
     private ViewGroup viewGroup;
     private TreeNode root;
@@ -93,12 +94,12 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.treeview_fragment, menu);
 
-        inviteItem = menu.findItem(R.id.invite);
-        inviteItem.setVisible(false);
+//        inviteItem = menu.findItem(R.id.invite);
+//        inviteItem.setVisible(false);
 
     }
 
-    private MenuItem inviteItem = null;
+//    private MenuItem inviteItem = null;
 
     // Setup Actions Menú
     @Override
@@ -107,14 +108,14 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             case R.id.select_all:
                 treeView.selectAll();
                 mSubmitAnswer.show();
-                if (inviteItem != null)
-                    inviteItem.setVisible(true);
+//                if (inviteItem != null)
+//                    inviteItem.setVisible(true);
                 break;
             case R.id.deselect_all:
                 treeView.deselectAll();
                 mSubmitAnswer.hide();
-                if (inviteItem != null)
-                    inviteItem.setVisible(false);
+//                if (inviteItem != null)
+//                    inviteItem.setVisible(false);
                 break;
             case R.id.expand_all:
                 treeView.expandAll();
@@ -122,9 +123,9 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             case R.id.collapse_all:
                 treeView.collapseAll();
                 break;
-            case R.id.invite:
-                inviteClick();
-                break;
+//            case R.id.invite:
+//                inviteClick();
+//                break;
 //            case R.id.expand_level:
 //                treeView.expandLevel(1);
 //                break;
@@ -161,35 +162,6 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     }
 
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case RC_SELECT_PLAYERS:
-                // we got the result from the "select players" UI -- ready to create the room
-                handleSelectPlayersResult(resultCode, data);
-                break;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void startQuizActivityWithTransition(Activity activity, View toolbar,
-                                                 Category category) {
-//
-//        final Pair[] pairs = TransitionHelper.createSafeTransitionParticipants(activity, false,
-//                new Pair<>(toolbar, activity.getString(R.string.transition_toolbar)));
-//        @SuppressWarnings("unchecked")
-//        ActivityOptionsCompat sceneTransitionAnimation = ActivityOptionsCompat
-//                .makeSceneTransitionAnimation(activity, pairs);
-//
-//        // Start the activity with the participants, animating from one to the other.
-//        final Bundle transitionBundle = sceneTransitionAnimation.toBundle();
-//        Intent startIntent = QuizActivity.getStartIntent(activity, category);
-//        ActivityCompat.startActivityForResult(activity,
-//                startIntent,
-//                REQUEST_CATEGORY,
-//                transitionBundle);
-    }
-
     private void playGame() {
         if (mode.equals(ARG_ONE_PLAYER)) {
             playGameOnePlayer();
@@ -203,13 +175,13 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     }
 
     private void playGameOnline() {
-        if (getRandomQuizzesFromSelectedCategories(Game.tmpNumQuizzes)) {
+        if (getRandomQuizzesOnlineFromSelectedCategories(Game.tmpNumQuizzes)) {
 
-            Game.numQuizzes = Game.tmpNumQuizzes;
-            Game.numPlayers = Game.tmpNumPlayers;
-            Game.totalTime = Game.tmpTotalTime;
-
-            Game.category = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
+//            Game.numQuizzes = Game.tmpNumQuizzes;
+//            Game.numPlayers = Game.tmpNumPlayers;
+//            Game.totalTime = Game.tmpTotalTime;
+//
+//            Game.category = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
             animateFloatButton();
         }
     }
@@ -236,7 +208,9 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         if (mode.equals(ARG_ONE_PLAYER)) {
             startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
         } else if (mode.equals(ARG_ONLINE)) {
-            startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
+            //startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
+
+            startIntent = null;
         } else {
             startIntent = null;
             Log.d(TAG, "AnimateFloatButton option incorrect");
@@ -271,18 +245,25 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-
-                    ActivityCompat.startActivity(getActivity(), startIntent,
-                            ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
-                    mSubmitAnswer.show();
+                    if (mode.equals(ARG_ONE_PLAYER)) {
+                        ActivityCompat.startActivity(getActivity(), startIntent,
+                                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+                        mSubmitAnswer.show();
+                    } else if (mode.equals(ARG_ONLINE)) {
+                        getActivity().onBackPressed();
+                    }
 
 //                    removeFragmentIfMultiplayerGame();
                 }
             });
             anim.start();
         } else {
-            ActivityCompat.startActivity(getActivity(), startIntent,
-                    null);
+            if (mode.equals(ARG_ONE_PLAYER)) {
+                ActivityCompat.startActivity(getActivity(), startIntent,
+                        null);
+            } else if (mode.equals(ARG_ONLINE)) {
+                getActivity().onBackPressed();
+            }
 //            removeFragmentIfMultiplayerGame();
         }
     }
@@ -294,6 +275,60 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
         FragmentManager fm = getActivity().getSupportFragmentManager();
         fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
+
+    private boolean getRandomQuizzesOnlineFromSelectedCategories(int numQuizzes) {
+        List<TreeNode> selectedNodes = treeView.getSelectedNodes();
+
+        String tmpImg = "";
+        String tmpTheme = "";
+
+        ArrayList<Quiz> quizzes = new ArrayList<>();
+        Game.listCategories.clear();
+        long level = 0;
+
+        TopekaJSonHelper instanceJSON = TopekaJSonHelper.getInstance(getContext(), false);
+        for (int i = 0; i < selectedNodes.size(); i++) {
+            CategoryJSON category = (CategoryJSON) selectedNodes.get(i).getValue();
+            Game.listCategories.add(category.getCategory());
+
+            level += Math.pow(2, instanceJSON.findPosCategory(category.getCategory()));
+
+            getRandomQuizzesOnlineFromSelectedSubCategories(quizzes, category);
+        }
+
+
+        if (quizzes.size() < numQuizzes) {
+            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("You need select more categories. At least you need " + numQuizzes + " Quizzes.", "GO ON", false, null);
+            return false;
+        } else if (Game.listCategories.size() > 31) {
+            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("You need select less categories. Less than 31", "GO ON", false, null);
+            return false;
+        }
+        List<Quiz> tmpQuizzes = getRandomizeQuizzes(quizzes, numQuizzes);
+
+        String moreInfo = null;
+        String description = null;
+        String video = null;
+
+        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
+        Game.level = level;
+//        Log.d("LEVEL", "Level:" + Game.level);
+        return true;
+    }
+
+    private void getRandomQuizzesOnlineFromSelectedSubCategories(ArrayList<Quiz> quizzes, CategoryJSON category) {
+
+        if (category.getSubcategories() != null) {
+            for (CategoryJSON subcategory : category.getSubcategories()) {
+                if (subcategory.getQuizzes() != null) {
+                    quizzes.addAll(subcategory.getQuizzes());
+                } else {
+                    getRandomQuizzesOnlineFromSelectedSubCategories(quizzes, subcategory);
+                }
+            }
+        }
     }
 
     private boolean getRandomQuizzesFromSelectedCategories(int numQuizzes) {
@@ -338,7 +373,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         String description = null;
         String video = null;
 
-        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode,  moreInfo, description, video);
+        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
 
         return true;
     }
@@ -412,14 +447,14 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             @Override
             public void onClick() {
                 if (treeView.getSelectedNodes().size() > 0) {
-                    if (mode.equals(ARG_ONLINE)) {
-                        if (inviteItem != null)
-                            inviteItem.setVisible(true);
-                    }
+//                    if (mode.equals(ARG_ONLINE)) {
+//                        if (inviteItem != null)
+//                            inviteItem.setVisible(true);
+//                    }
                     mSubmitAnswer.show();
                 } else {
                     mSubmitAnswer.hide();
-                    inviteItem.setVisible(false);
+//                    inviteItem.setVisible(false);
                 }
             }
         });
@@ -448,6 +483,10 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
     private void buildTreeSubcategory(TreeNode parentNode, List<CategoryJSON> categoriesJSON, int level) {
         TreeNode treeNode = null;
+
+        if (mode.equals(ARG_ONLINE) && level >= MAX_LEVEL) {
+            return;
+        }
         if (categoriesJSON != null) for (CategoryJSON category : categoriesJSON)
             if (category.getSubcategories() != null) {
                 treeNode = new TreeNode(category);
@@ -455,6 +494,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 buildTreeSubcategory(treeNode, category.getSubcategories(), level + 1);
                 parentNode.addChild(treeNode);
             }
+
     }
 
     private void initView(View view) {
@@ -481,26 +521,4 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         }
 
     }
-
-    private void handleSelectPlayersResult(int response, Intent data) {
-        if (response != RESULT_OK) {
-            Log.w(TAG, "*** select players UI cancelled, " + response);
-//            switchToMainScreen();
-            return;
-        }
-
-        Log.d(TAG, "Select players UI succeeded.");
-
-        // get the invitee list
-//        final ArrayList<String> invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-        Game.resetGameVars();
-        Game.invitees = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
-        Game.minAutoMatchPlayers = data.getIntExtra(Multiplayer.EXTRA_MIN_AUTOMATCH_PLAYERS, 0);
-        Game.maxAutoMatchPlayers = data.getIntExtra(Multiplayer.EXTRA_MAX_AUTOMATCH_PLAYERS, 0);
-
-        Log.d(TAG, "Invitee count: " + Game.invitees.size());
-
-        playGameOnline();
-    }
-
 }

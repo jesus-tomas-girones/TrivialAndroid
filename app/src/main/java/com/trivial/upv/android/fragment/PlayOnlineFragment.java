@@ -1,6 +1,5 @@
 package com.trivial.upv.android.fragment;
 
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,14 +20,16 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
-import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.gpg.BaseGameUtils;
 import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 import com.trivial.upv.android.model.gpg.Game;
+import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
+
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -41,7 +42,6 @@ public class PlayOnlineFragment extends Fragment
         implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-//        OnInvitationReceivedListener,
         View.OnClickListener {
 
     private static final String QUICK_GAME = "QUICK_GAME";
@@ -59,14 +59,27 @@ public class PlayOnlineFragment extends Fragment
     private boolean mSignInClicked = false;
 
     private com.google.android.gms.common.SignInButton btnConectar;
-    private Button btnDesconectar;
+    //    private Button btnDesconectar;
     private Button btnShowIntitations;
     private Button btnQuickGame;
 
     private LinearLayout globalActions;
     private LinearLayout newGameActions;
+    private LinearLayout loginActions;
     private static String NAME_PREFERENCES = "TrivialAndroid";
     private static String NAME_PREFERENCES_CONNECTED = "conectado";
+    private TextView txtListCategories;
+
+    public PlayOnlineFragment() {
+        Game.resetGameVars();
+        Game.listCategories.clear();
+        List<CategoryJSON> categoriesJSON = TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON();
+        for (CategoryJSON category : categoriesJSON) {
+            Game.listCategories.add(new String(category.getCategory()));
+        }
+
+        Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
+    }
 
 
     public static PlayOnlineFragment newInstance() {
@@ -76,6 +89,7 @@ public class PlayOnlineFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         return inflater.inflate(R.layout.fragment_play_online, container, false);
     }
 
@@ -104,6 +118,22 @@ public class PlayOnlineFragment extends Fragment
 
         showSeekbarsProgress();
         ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
+
+        if (Game.listCategories.size() == TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
+            txtListCategories.setText("(All Categories)");
+        } else {
+//            txtListCategories.setText("(Otras)");
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int pos = 0; pos < Game.listCategories.size(); pos++) {
+                sb.append(Game.listCategories.get(pos));
+                if (pos != Game.listCategories.size() - 1) {
+                    sb.append(",\n");
+                }
+            }
+            txtListCategories.setText(sb.toString());
+        }
     }
 
     private void setUpView(final View view) {
@@ -112,18 +142,23 @@ public class PlayOnlineFragment extends Fragment
 
         globalActions = (LinearLayout) view.findViewById(R.id.global_actions);
         newGameActions = (LinearLayout) view.findViewById(R.id.new_game_actions);
+        loginActions = (LinearLayout) view.findViewById(R.id.login_actions);
+        txtListCategories = (TextView) view.findViewById(R.id.txtListCategories);
+        btnInvitar = (Button) view.findViewById(R.id.btnInvite);
+        btnInvitar.setOnClickListener(this);
 
         btnConectar = (com.google.android.gms.common.SignInButton) view.findViewById(R.id.sign_in_button);
         btnConectar.setOnClickListener(this);
 
-        btnDesconectar = (Button) view.findViewById(R.id.sign_out_button);
-        btnDesconectar.setOnClickListener(this);
+//        btnDesconectar = (Button) view.findViewById(R.id.sign_out_button);
+//        btnDesconectar.setOnClickListener(this);
 
         // Reset Data Game
         Game.resetGameVars();
 
-        btnConectar.setVisibility(View.VISIBLE);
-        btnDesconectar.setVisibility(View.GONE);
+//        btnConectar.setVisibility(View.VISIBLE);
+        loginActions.setVisibility(View.VISIBLE);
+//        btnDesconectar.setVisibility(View.GONE);
 
         newGameActions.setVisibility(View.GONE);
         globalActions.setVisibility(View.GONE);
@@ -132,24 +167,16 @@ public class PlayOnlineFragment extends Fragment
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API).addScope(Games.SCOPE_GAMES)
-//                .addApi(Drive.API).addScope(Drive.SCOPE_APPFOLDER)
-//                .setViewForPopups(findViewById(android.R.id.content))
                 .build();
 
-//        SharedPreferences prefs = getContext().getSharedPreferences(NAME_PREFERENCES, MODE_PRIVATE);
-//        int conectado = prefs.getInt(NAME_PREFERENCES_CONNECTED, 0);
-//
-//        if (conectado != 0) {
-//            Game.mGoogleApiClient.connect();
-//        }
 
-        btnNewGame = (Button) view.findViewById(R.id.btnNewGame);
+        btnNewGame = (Button) view.findViewById(R.id.btnSelectCategories);
         btnNewGame.setOnClickListener(this);
 //        btnInvitar = (Button) view.findViewById(R.id.btnInvitar);
 //        btnInvitar.setOnClickListener(this);
         btnShowIntitations = (Button) view.findViewById(R.id.btnShowInvitations);
         btnShowIntitations.setOnClickListener(this);
-        btnQuickGame = (Button) view.findViewById(R.id.btnQuickGame);
+        btnQuickGame = (Button) view.findViewById(R.id.btnPlayAnyone);
         btnQuickGame.setOnClickListener(this);
 
         // Set default value to 0
@@ -178,129 +205,94 @@ public class PlayOnlineFragment extends Fragment
             }
         });
 
-        sbTotalTime = (SeekBar) view.findViewById(R.id.sbTotalTime);
-        txtTotalTime = (TextView) view.findViewById(R.id.txtTotalTime);
-
-        sbTotalTime.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
-                    TextView txtDisplay = (TextView) view.findViewById(R.id.txtTotalTime);
-                    int progress = sbTotalTime.getProgress();
-
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar,
-                                                  int progresValue, boolean fromUser) {
-                        if (progresValue < 5) {
-                            seekBar.setProgress(5);
-                            progress = 5;
-                        } else
-                            progress = progresValue;
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        // Display the value in textview
-                        txtDisplay.setText("Total Time: " + progress + "/" + seekBar.getMax());
-                    }
-                });
-
-        sbQuizzes = (SeekBar) view.findViewById(R.id.sbQuizzes);
-        txtQuizzes = (TextView) view.findViewById(R.id.txtQuizzes);
-
-        sbQuizzes.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
-
-                    int progress = sbQuizzes.getProgress();
-
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar,
-                                                  int progresValue, boolean fromUser) {
-                        if (progresValue < 1) {
-                            seekBar.setProgress(1);
-                            progress = 1;
-                        } else
-                            progress = progresValue;
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                    }
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-                        // Display the value in textview
-                        txtQuizzes.setText("Num. Quizzes: " + progress + "/" + seekBar.getMax());
-                    }
-                });
-
+//        sbTotalTime = (SeekBar) view.findViewById(R.id.sbTotalTime);
+//        txtTotalTime = (TextView) view.findViewById(R.id.txtTotalTime);
+//
+//        sbTotalTime.setOnSeekBarChangeListener(
+//                new SeekBar.OnSeekBarChangeListener() {
+//                    TextView txtDisplay = (TextView) view.findViewById(R.id.txtTotalTime);
+//                    int progress = sbTotalTime.getProgress();
+//
+//                    @Override
+//                    public void onProgressChanged(SeekBar seekBar,
+//                                                  int progresValue, boolean fromUser) {
+//                        if (progresValue < 5) {
+//                            seekBar.setProgress(5);
+//                            progress = 5;
+//                        } else
+//                            progress = progresValue;
+//                    }
+//
+//                    @Override
+//                    public void onStartTrackingTouch(SeekBar seekBar) {
+//                    }
+//
+//                    @Override
+//                    public void onStopTrackingTouch(SeekBar seekBar) {
+//                        // Display the value in textview
+//                        txtDisplay.setText("Total Time: " + progress + "/" + seekBar.getMax());
+//                    }
+//                });
+//
+//        sbQuizzes = (SeekBar) view.findViewById(R.id.sbQuizzes);
+//        txtQuizzes = (TextView) view.findViewById(R.id.txtQuizzes);
+//
+//        sbQuizzes.setOnSeekBarChangeListener(
+//                new SeekBar.OnSeekBarChangeListener() {
+//
+//                    int progress = sbQuizzes.getProgress();
+//
+//                    @Override
+//                    public void onProgressChanged(SeekBar seekBar,
+//                                                  int progresValue, boolean fromUser) {
+//                        if (progresValue < 1) {
+//                            seekBar.setProgress(1);
+//                            progress = 1;
+//                        } else
+//                            progress = progresValue;
+//                    }
+//
+//                    @Override
+//                    public void onStartTrackingTouch(SeekBar seekBar) {
+//                    }
+//
+//                    @Override
+//                    public void onStopTrackingTouch(SeekBar seekBar) {
+//                        // Display the value in textview
+//                        txtQuizzes.setText("Num. Quizzes: " + progress + "/" + seekBar.getMax());
+//                    }
+//                });
+//
 
     }
-//        btnPartidasGuardadas = (Button) findViewById(R.id.btnPartidasGuardadas);
-//        btnPartidaPorTurnos = (Button) findViewById(R.id.btnPartidaPorTurnos);
-//        btnMarcadores = (Button) findViewById(R.id.btnMarcadores);
-//        btnMarcadoresLocal = (Button) findViewById(R.id.btnMarcadorLocal);
-//        btnLogros = (Button) findViewById(R.id.btnLogros);
-//        btnMisiones = (Button) findViewById(R.id.btnMisiones);
-//        btnRegalos = (Button) findViewById(R.id.btnRegalos);
 
-
-    // LOGROS
-//    public void btnLogros_Click(View v) {
-//        startActivityForResult(Games.Achievements.getAchievementsIntent(Game.mGoogleApiClient), REQUEST_ACHIEVEMENTS);
-//    }
-
-    //    String mIncomingInvitationId = null;
     final static int RC_SELECT_PLAYERS = 10000;
     private Button btnInvitar;
     private Button btnPartidaPorTurnos;
     final static String TAG = "PLAYONLINEFRAGMENT";
 
-//    public void btnPartidaPorTurnos_Click(View v) {
-//        Game.gameType = "TURNO";
-//        nuevoJuego(20);
-//        Intent intent = new Intent(this, Juego.class);
-//        startActivity(intent);
-//        Games.Events.increment(Game.mGoogleApiClient, getString(R.string.evento_porTurnos), 1);
-//    }
 
-    public void newGame(View v) {
+    public void selectCategories(View v) {
 
-        Game.gameType = CUSTOM_GAME;
-        Game.turno = 1;
         Game.jugadorLocal = 0;
-        Game.puntosJ1 = Game.puntosJ2 = 0;
-        Game.tmpNumQuizzes = sbQuizzes.getProgress();
-        Game.tmpTotalTime = sbTotalTime.getProgress();
-        Game.tmpNumPlayers = sbPlayers.getProgress();
+//        Game.tmpNumQuizzes = sbQuizzes.getProgress();
+//        Game.tmpTotalTime = sbTotalTime.getProgress();
+        SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
+        Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
+        Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
+        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
 
-        // Choose categury in custom Game
+        // Choose category in custom Game
         ((CategorySelectionActivity) getActivity()).attachTreeViewFragment(QuizActivity.ARG_ONLINE);
     }
 
-    public void btnPartidasGuardadas_Click(View v) {
-//        Game.gameType = "GUARDADA";
-//        nuevoJuego(4, 4);
-//        Intent intent = new Intent(this, Juego.class);
-//        startActivity(intent);
-    }
-
-
-    public void btnJugar_Click(View v) {
-//        Game.gameType = "LOCAL";
-//        nuevoJuego(4, 4);
-//        Intent intent = new Intent(this, Juego.class);
-//        startActivity(intent);
-//        Games.Events.increment(Game.mGoogleApiClient, getString(R.string.evento_offline), 1);
-    }
 
     @Override
     public void onConnected(@Nullable Bundle connectionHint) {
 //        Toast.makeText(this, "CONECTADO", Toast.LENGTH_SHORT).show();
-        btnConectar.setVisibility(View.GONE);
-        btnDesconectar.setVisibility(View.VISIBLE);
+//        btnConectar.setVisibility(View.GONE);
+        loginActions.setVisibility(View.GONE);
+//        btnDesconectar.setVisibility(View.VISIBLE);
 //        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
 //        findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
         globalActions.setVisibility(View.VISIBLE);
@@ -316,7 +308,7 @@ public class PlayOnlineFragment extends Fragment
 
         // register listener so we are notified if we receive an invitation to play
         // while we are in the game
-        Games.Invitations.registerInvitationListener(Game.mGoogleApiClient, (CategorySelectionActivity)getActivity());
+        Games.Invitations.registerInvitationListener(Game.mGoogleApiClient, (CategorySelectionActivity) getActivity());
 
         if (connectionHint != null) {
             Log.d(TAG, "onConnected: connection hint provided. Checking for invite.");
@@ -419,6 +411,16 @@ public class PlayOnlineFragment extends Fragment
 
         Log.d(TAG, "Invitee count: " + Game.invitees.size());
 
+        Game.jugadorLocal = 0;
+//        Game.tmpNumQuizzes = sbQuizzes.getProgress();
+//        Game.tmpTotalTime = sbTotalTime.getProgress();
+        SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
+        Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
+        Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
+        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
+
+
+        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10), Game.listCategories);
         startQuizzes();
     }
 
@@ -447,7 +449,7 @@ public class PlayOnlineFragment extends Fragment
 
         Game.resetGameVars();
         Game.mIncomingInvitationId = invId;
-
+        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(10, null);
         startQuizzes();
 //        switchToScreen(R.id.screen_wait);
     }
@@ -455,7 +457,7 @@ public class PlayOnlineFragment extends Fragment
 
     private void startQuizzes() {
         Intent startIntent;
-        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(10);
+
         startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
             ActivityCompat.startActivity(getActivity(), startIntent, null);
@@ -469,35 +471,10 @@ public class PlayOnlineFragment extends Fragment
         // show list of invitable players
         Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(Game.mGoogleApiClient, NUMERO_MINIMO_OPONENTES, NUMERO_MAXIMO_OPONENTES);
         //switchToScreen(R.id.screen_wait);
-        startActivityForResult(intent, RC_SELECT_PLAYERS);
+        getActivity().startActivityForResult(intent, RC_SELECT_PLAYERS);
 //        Games.Achievements.unlock(Game.mGoogleApiClient, getString(R.string.logro_invitar));
     }
 
-    //     Called when we get an invitation to play a game. We react by showing that to the user.
-//    @Override
-//    public void onInvitationReceived(final Invitation invitation) {
-//        // We got an invitation to play a game! So, store it in
-//        // mIncomingInvitationId
-//        // and show the popup on the screen.
-//        CategorySelectionActivity.OnClickSnackBarAction actionInvitation = new CategorySelectionActivity.OnClickSnackBarAction() {
-//            @Override
-//            public void onClickAction() {
-//                Game.mIncomingInvitationId = invitation.getInvitationId();
-//                startQuizzes();
-//            }
-//        };
-//
-//        if (invitation != null && invitation.getInvitationId() != null)
-//            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("Invitation Received from " + invitation.getInviter().getDisplayName(), "Accept?", true, actionInvitation);
-//    }
-//
-//
-//    public void onInvitationRemoved(String invitationId) {
-//        if (Game.mIncomingInvitationId != null && Game.mIncomingInvitationId.equals(invitationId)) {
-//            Game.mIncomingInvitationId = null;
-////            switchToScreen(mCurScreen); // This will hide the invitation popup
-//        }
-//    }
 
     final static int REQUEST_LEADERBOARD = 100;
     final static int REQUEST_ACHIEVEMENTS = 101;
@@ -511,17 +488,18 @@ public class PlayOnlineFragment extends Fragment
     public void onClick(View v) {
 
         switch (v.getId()) {
-//            case R.id.btnInvitar:
-//                btnInvitar_Click();
-//                break;
-            case R.id.btnNewGame:
-                newGame(v);
+
+            case R.id.btnSelectCategories:
+                selectCategories(v);
                 break;
-            case R.id.btnQuickGame:
-                quickGame(v);
+            case R.id.btnPlayAnyone:
+                playAnyOne(v);
                 break;
             case R.id.btnShowInvitations:
                 btnVer_Invitaciones_Click(v);
+                break;
+            case R.id.btnInvite:
+                btnInvitar_Click();
                 break;
             case R.id.sign_in_button:
                 // start the sign-in flow
@@ -529,125 +507,45 @@ public class PlayOnlineFragment extends Fragment
                 mSignInClicked = true;
                 Game.mGoogleApiClient.connect();
                 break;
-            case R.id.sign_out_button:
-                Log.d(TAG, "Sign-out button clicked");
-                mSignInClicked = false;
-                Games.signOut(Game.mGoogleApiClient);
-                Game.mGoogleApiClient.disconnect();
-//            switchToScreen(R.id.screen_sign_in);
-
-                btnConectar.setVisibility(View.VISIBLE);
-                btnDesconectar.setVisibility(View.GONE);
-                globalActions.setVisibility(View.GONE);
-                newGameActions.setVisibility(View.GONE);
-//            findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-//            findViewById(R.id.sign_out_button).setVisibility(View.GONE);
-//                SharedPreferences.Editor editor = getContext().getSharedPreferences(NAME_PREFERENCES, MODE_PRIVATE).edit();
-//                editor.putInt(NAME_PREFERENCES_CONNECTED, 0);
-//                editor.commit();
-                break;
+//            case R.id.sign_out_button:
+//                Log.d(TAG, "Sign-out button clicked");
+//                mSignInClicked = false;
+//                Games.signOut(Game.mGoogleApiClient);
+//                Game.mGoogleApiClient.disconnect();
+//
+//                loginActions.setVisibility(View.VISIBLE);
+//                globalActions.setVisibility(View.GONE);
+//                newGameActions.setVisibility(View.GONE);
+//                break;
         }
     }
 
     //Click actions
 
     // QuickGame
-    private void quickGame(View v) {
+    private void playAnyOne(View v) {
         // QuizFragment
         SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
+//        Game.numPlayers = Game.tmpNumPlayers = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_PLAYERS, 2);
+        Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
         Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
-        Game.numPlayers = Game.tmpNumPlayers = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_PLAYERS, 2);
-        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME,250);
+        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
         Game.minAutoMatchPlayers = Game.numPlayers - 1;
         Game.maxAutoMatchPlayers = Game.numPlayers - 1;
-        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(Game.tmpNumQuizzes);
+
+        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(
+                SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10),
+                Game.listCategories);
 
         Intent intent = QuizActivity.getStartIntent(getContext(), Game.category);
         startActivity(intent);
     }
 
-    public void btnMarcadores_Click(View view) {
-//        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(Game.mGoogleApiClient, getString(R.string.marcador_tiempoReal_id)), REQUEST_LEADERBOARD);
-    }
-
-    public void btnMarcadorLocal_Click(View view) {
-//        startActivityForResult(Games.Leaderboards.getLeaderboardIntent(Game.mGoogleApiClient, getString(R.string.marcador_local_id)), REQUEST_LEADERBOARD);
-    }
-
-    public void btnMisiones_Click(View v) {
-//        startActivityForResult(Games.Quests.getQuestsIntent(Game.mGoogleApiClient, Quests.SELECT_ALL_QUESTS), REQUEST_QUESTS);
-    }
-
-    private Button btnRegalos;
-    final static int SEND_GIFT_QUESTS = 103;
-//    private static final int DEFAULT_LIFETIME = 7;
-
-//    public void btnRegalos_Click(View v) {
-//        Bitmap mGiftIcon;
-//        mGiftIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_send_gift);
-//        startActivityForResult(Games.Requests.getSendIntent(Game.mGoogleApiClient, GameRequest.TYPE_GIFT, "".getBytes(), DEFAULT_LIFETIME, mGiftIcon, "Esto es un regalo"), REQUEST_QUESTS);
-//    }
-
-//    private OnRequestReceivedListener mRequestListener = new OnRequestReceivedListener() {
-//        @Override
-//        public void onRequestReceived(GameRequest request) {
-//            String requestStringResource;
-//            switch (request.getType()) {
-//                case GameRequest.TYPE_GIFT:
-//                    requestStringResource = "Has recibido un regalo...";
-//                    break;
-//                case GameRequest.TYPE_WISH:
-//                    requestStringResource = "Has recibido un deseo...";
-//                    break;
-//                default:
-//                    return;
-//            }
-//
-//            Toast.makeText(PlayOnlineFragment.this, requestStringResource, Toast.LENGTH_SHORT).show();
-//
-//        }
-//
-//        @Override
-//        public void onRequestRemoved(String requestId) {
-//        }
-//    };
-
-//    public void estadisticasJugador() {
-//        PendingResult<Stats.LoadPlayerStatsResult> result = Games.Stats.loadPlayerStats(Game.mGoogleApiClient, false);
-//        result.setResultCallback(new ResultCallback<Stats.LoadPlayerStatsResult>() {
-//            public void onResult(Stats.LoadPlayerStatsResult result) {
-//                Status status = result.getStatus();
-//                Log.d("estadisticas", "mostrar_estadisticas");
-//                if (status.isSuccess()) {
-//                    PlayerStats stats = result.getPlayerStats();
-//                    if (stats != null) {
-//                        Toast.makeText(PlayOnlineFragment.this, "Estadísticas del jugador cargadas", Toast.LENGTH_SHORT).show();
-//                        if (stats.getDaysSinceLastPlayed() > 1) {
-////                        if (stats.getDaysSinceLastPlayed() > 7) {
-//                            Toast.makeText(PlayOnlineFragment.this, "Ya te hechabamos de menos...", Toast.LENGTH_SHORT).show();
-//                        } else {
-//                            Toast.makeText(PlayOnlineFragment.this, "Bienvenido!!", Toast.LENGTH_SHORT).show();
-//                        }
-////                        if (stats.getNumberOfSessions() > 100) {
-//                        if (stats.getNumberOfSessions() > 5) {
-//                            Toast.makeText(PlayOnlineFragment.this, "Ya eres un jugador experto", Toast.LENGTH_SHORT).show();
-//                        } else {
-//                            Toast.makeText(PlayOnlineFragment.this, "Practica y ejercitarás la mente.", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                } else {
-//                    Toast.makeText(PlayOnlineFragment.this, "Error…", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-//    }
-
-
 
     private void showSeekbarsProgress() {
         txtPlayers.setText("Num. Players: " + sbPlayers.getProgress() + "/" + sbPlayers.getMax());
-        txtTotalTime.setText("Total Time: " + sbTotalTime.getProgress() + "/" + sbTotalTime.getMax());
-        txtQuizzes.setText("Num. Quizzes: " + sbQuizzes.getProgress() + "/" + sbQuizzes.getMax());
+//        txtTotalTime.setText("Total Time: " + sbTotalTime.getProgress() + "/" + sbTotalTime.getMax());
+//        txtQuizzes.setText("Num. Quizzes: " + sbQuizzes.getProgress() + "/" + sbQuizzes.getMax());
     }
 
     // Activity just got to the foreground. We switch to the wait screen because we will now

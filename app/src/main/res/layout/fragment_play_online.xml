@@ -11,6 +11,7 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/login_actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
@@ -25,53 +26,16 @@
                 android:textColor="@color/theme_red_text"
                 android:visibility="gone" />
 
-            <Button
-                android:id="@+id/sign_out_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/light_grey"
-                android:text="Desconectar"
-                android:textColor="@android:color/black"
-                android:visibility="gone" />
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/global_actions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/border"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <Button
-                android:id="@+id/btnQuickGame"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:backgroundTint="@color/theme_purple_background"
-                android:padding="0dp"
-                android:text="Quick Game"
-                android:textColor="@android:color/black" />
-
             <!--<Button-->
-            <!--android:id="@+id/btnInvitar"-->
+            <!--android:id="@+id/sign_out_button"-->
             <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="45dp"-->
-            <!--android:layout_marginTop="5dp"-->
-            <!--android:padding="0dp"-->
-            <!--android:text="Invitar" />-->
-
-            <Button
-                android:id="@+id/btnShowInvitations"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginTop="5dp"
-                android:backgroundTint="@color/theme_red_background"
-                android:padding="0dp"
-                android:text="Show Invitations ..."
-                android:textColor="@android:color/black" />
+            <!--android:layout_height="wrap_content"-->
+            <!--android:backgroundTint="@color/light_grey"-->
+            <!--android:text="Desconectar"-->
+            <!--android:textColor="@android:color/black"-->
+            <!--android:visibility="gone" />-->
         </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/new_game_actions"
@@ -82,14 +46,68 @@
             android:orientation="vertical"
             android:padding="10dp">
 
-            <Button
-                android:id="@+id/btnNewGame"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:backgroundTint="@color/theme_green_primary_dark"
-                android:padding="0dp"
-                android:text="Custom Game"
-                android:textColor="@android:color/black" />
+                android:layout_height="wrap_content"
+                android:background="@drawable/border"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <Button
+                    android:id="@+id/btnPlayAnyone"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/theme_purple_background"
+                    android:padding="0dp"
+                    android:text="Play AnyOne"
+                    android:textColor="@android:color/black" />
+
+                <Button
+                    android:id="@+id/btnInvite"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/theme_green_primary_dark"
+                    android:padding="0dp"
+                    android:text="Select Players"
+                    android:textColor="@android:color/black" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/border"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <Button
+                    android:id="@+id/btnSelectCategories"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center_horizontal"
+                    android:backgroundTint="@color/theme_yellow_primary_dark"
+                    android:padding="0dp"
+                    android:layout_marginRight="5dp"
+                    android:text="Select Categories"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/txtListCategories"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/theme_purple_background"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:padding="0dp"
+                    android:text="(All Categories)"
+/>
+
+            </LinearLayout>
 
             <SeekBar
                 android:id="@+id/sbPlayers"
@@ -108,38 +126,66 @@
                 android:gravity="center_horizontal"
                 android:text="Total PLayers" />
 
-            <SeekBar
-                android:id="@+id/sbQuizzes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="25"
-                android:progress="10"
-                android:thumb="@drawable/thumb_image" />
 
-            <TextView
-                android:id="@+id/txtQuizzes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:gravity="center_horizontal"
-                android:text="Total Quizzes" />
+            <!--<SeekBar-->
+            <!--android:id="@+id/sbQuizzes"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:max="25"-->
+            <!--android:progress="10"-->
+            <!--android:thumb="@drawable/thumb_image" />-->
 
-            <SeekBar
-                android:id="@+id/sbTotalTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="600"
-                android:progress="250"
-                android:thumb="@drawable/thumb_image" />
+            <!--<TextView-->
+            <!--android:id="@+id/txtQuizzes"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:gravity="center_horizontal"-->
+            <!--android:text="Total Quizzes" />-->
 
-            <TextView
-                android:id="@+id/txtTotalTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:gravity="center_horizontal"
-                android:text="Total Time to Answer" />
+            <!--<SeekBar-->
+            <!--android:id="@+id/sbTotalTime"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:max="600"-->
+            <!--android:progress="250"-->
+            <!--android:thumb="@drawable/thumb_image" />-->
 
+            <!--<TextView-->
+            <!--android:id="@+id/txtTotalTime"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:gravity="center_horizontal"-->
+            <!--android:text="Total Time to Answer" />-->
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/global_actions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/border"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <!--<Button-->
+            <!--android:id="@+id/btnInvitar"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="45dp"-->
+            <!--android:layout_marginTop="5dp"-->
+            <!--android:padding="0dp"-->
+            <!--android:text="Invitar" />-->
+
+            <Button
+                android:id="@+id/btnShowInvitations"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:backgroundTint="@color/theme_red_background"
+                android:padding="0dp"
+                android:text="Show Invitations ..."
+                android:textColor="@android:color/black" />
         </LinearLayout>
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

@@ -871,8 +871,8 @@ public class TopekaJSonHelper {
             while ((line = br.readLine()) != null) {
                 numLines++;
 
-                int avance = (int)((numLines * line.length() * 100 / totalLength));
-                if (avance % 5 == 0 && avance>0) {
+                int avance = (int) ((numLines * line.length() * 100 / totalLength));
+                if (avance % 5 == 0 && avance > 0) {
                     sendBroadCastMessageRefresh(avance);
                 }
                 sb.append(line);
@@ -998,13 +998,15 @@ public class TopekaJSonHelper {
         return categoryPlayGameOffLine;
     }
 
-    public Category createCategoryPlayTimeReal(int numQuizzes) {
+    public Category createCategoryPlayTimeReal(int numQuizzes, List<String> categoriesSelected) {
         ArrayList<Quiz> allQuizzes = new ArrayList<>();
         final boolean solved = false;
 
         if (categoriesJSON != null) {
             for (CategoryJSON category : categoriesJSON) {
-                if (category != null) {
+                if (category != null &&
+                        ( (categoriesSelected!=null && categoriesSelected.indexOf(category.getCategory()) >= 0) || categoriesSelected == null)) {
+//                    Log.d("CATEGORY", category.getCategory());
                     if (category.getSubcategories() != null) {
                         getCategoryPlayTimeRealSubcategories(allQuizzes, category.getSubcategories());
                     } else {
@@ -1274,6 +1276,14 @@ public class TopekaJSonHelper {
         categoriesCurrent = categoriesJSON;
         categoriesPath.clear();
         categoriesName.clear();
+    }
+
+    public int findPosCategory(String category) {
+        for (int i = 0; categoriesJSON != null && i < categoriesJSON.size(); i++) {
+            if (categoriesJSON.get(i).getCategory().equals(category))
+                return i;
+        }
+        return -1;
     }
 
 

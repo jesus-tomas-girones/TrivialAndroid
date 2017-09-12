@@ -1,6 +1,8 @@
 package com.trivial.upv.android.activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -8,6 +10,8 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.trivial.upv.android.R;
@@ -38,6 +42,8 @@ public class SettingsActivity extends AppCompatActivity {
                 .commit();
     }
 
+
+
     public static Intent getStartIntent(Context context) {
         Intent starter = new Intent(context, SettingsActivity.class);
 //        starter.putExtra(Category.TAG, category.getId());
@@ -67,6 +73,18 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                this.finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }
