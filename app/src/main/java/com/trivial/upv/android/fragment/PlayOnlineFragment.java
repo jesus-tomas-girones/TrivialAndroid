@@ -191,8 +191,12 @@ public class PlayOnlineFragment extends Fragment
                 if (progresValue < 2) {
                     seekBar.setProgress(2);
                     progress = 2;
-                } else
-                    progress = progresValue;
+                } else {
+
+                    progress = normalizeProgres2_4_8(progresValue);
+                    sbPlayers.setProgress(progress);
+                    txtPlayers.setText("Num. Players: " + progress + "/" + (seekBar.getMax() - 1));
+                }
             }
 
             @Override
@@ -201,7 +205,7 @@ public class PlayOnlineFragment extends Fragment
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) { /* Display the value in textview*/
-                txtPlayers.setText("Num. Players: " + progress + "/" + seekBar.getMax());
+                txtPlayers.setText("Num. Players: " + progress + "/" + (seekBar.getMax() - 1));
             }
         });
 
@@ -264,6 +268,25 @@ public class PlayOnlineFragment extends Fragment
 //                });
 //
 
+    }
+
+    private int normalizeProgres2_4_8(int progresValue) {
+        int diff_2 = Math.abs(progresValue - 2);
+        int diff_4 = Math.abs(progresValue - 4);
+        int diff_8 = Math.abs(progresValue - 8);
+        int minDiff = Math.min(diff_2, diff_4);
+        minDiff = Math.min(minDiff, diff_8);
+
+        int tmpValue = 0;
+        if (minDiff == diff_8) {
+            tmpValue = 8;
+        } else if (minDiff == diff_4) {
+            tmpValue = 4;
+        } else if (minDiff == diff_2) {
+            tmpValue = 2;
+        }
+
+        return tmpValue;
     }
 
     final static int RC_SELECT_PLAYERS = 10000;
@@ -543,7 +566,7 @@ public class PlayOnlineFragment extends Fragment
 
 
     private void showSeekbarsProgress() {
-        txtPlayers.setText("Num. Players: " + sbPlayers.getProgress() + "/" + sbPlayers.getMax());
+        txtPlayers.setText("Num. Players: " + sbPlayers.getProgress() + "/" + (sbPlayers.getMax() - 1));
 //        txtTotalTime.setText("Total Time: " + sbTotalTime.getProgress() + "/" + sbTotalTime.getMax());
 //        txtQuizzes.setText("Num. Quizzes: " + sbQuizzes.getProgress() + "/" + sbQuizzes.getMax());
     }
