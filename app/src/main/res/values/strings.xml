@@ -72,9 +72,17 @@
     <string name="is_inviting_you">is challenging you to a game!</string>
     <string name="signin_other_error">There was an issue with sign in. Please try again later.</string>
 
-
     <string name="url_categories">http://mmoviles.upv.es/trivial/trivialandroid.json</string>
-
-
     <!--JVG.E-->
+    <!--JTG.S-->
+    <string name="main_title">Android Programing Trivia</string>
+    <string name="main_text">¿Eres un experto programador de Android? ¿Quieres poner a prueba tus conocimientos y competir con otros desarrolladores? Descubre los tres modos para repasar, comprobar tus conocimientos y competir contra otros programadores.</string>
+    <string name="main_learm">Si lo que quieres es aprender, en <a href="http://www.androidcurso.com">www.androidcurso.com</a> encontrarás cursos gratuitos, cursos de especialización y el Máster de la <a href="http://www.upv.es">Universidad Politécnica de Valencia</a> en desarrollo de aplicaciones Android.</string>
+    <string name="about_title">About Android Programing Trivia</string>
+    <string name="abot_text1">Este programa ha sido desarrollado en el <a href="http://www.androidcurso.com" >Master de Desarrollo de aplicaciones Android</a> de la <a href="www.upv.es">Universidad Politécnica de Valencia</a>. La mayor parte de la programación ha sido desarrollada por Jordi Vilches, y ha sido presentado como proyecto final de este Master. La dirección ha estado a cargo de Jesús Tomás. El interfaz de usuario se ha basado en la Topeka, aplicación desarrollada por Google para ilustrar el uso de Material Design.</string>
+    <string name="abot_text2">La mayoría de las preguntas ha sido escritas por Jesús Tomás. Aunque también han colaborado otros profesores. Vicente Carbonell: Firebase (notificaciones, almacenamiento, Functions y Dynamic Links), aplicaciones web/hosting, Android TV, Google Cast y Google Play Game. Antonio Albiol: OpenCV. Gonzalo Puga:Android Auto, Hilos. David Santamaría: Testing. Salva Santonja: Android Things (comunicaciones) y algunos más</string>
+    <string name="help_title">Help Android Programing Trivia</string>
+    <string name="help_text1">Expliar los modos.</string>
+    <string name="help_text2">más ...</string>
+    <!--JTG.E-->
 </resources>

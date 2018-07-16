@@ -16,16 +16,21 @@
 
 package com.trivial.upv.android.fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.transition.Transition;
@@ -229,6 +234,7 @@ public class SignInFragment extends Fragment {
 
     private void performSignInWithTransition(View v) {
         final Activity activity = getActivity();
+
         if (v == null || ApiLevelHelper.isLowerThan(Build.VERSION_CODES.LOLLIPOP)) {
             // Don't run a transition if the passed view is null
             CategorySelectionActivity.start(activity, mPlayer);
