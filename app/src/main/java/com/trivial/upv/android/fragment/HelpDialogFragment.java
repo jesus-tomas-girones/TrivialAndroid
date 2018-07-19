@@ -32,7 +32,7 @@ public class HelpDialogFragment extends DialogFragment {
                  public void onClick(DialogInterface dialog, int id) {
                  }
               })
-              .setNegativeButton("Sobre el Master de Android", new DialogInterface.OnClickListener() {
+              .setNeutralButton("Sobre el Master de Android", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int id) {
                     Uri uri = Uri.parse("http://www.androidcurso.com");
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);

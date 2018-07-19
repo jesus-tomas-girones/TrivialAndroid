@@ -12,6 +12,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+
 import com.trivial.upv.android.R;
 
 //JTG.S
@@ -32,11 +33,17 @@ public class MainDialogFragment extends DialogFragment {
                  public void onClick(DialogInterface dialog, int id) {
                  }
               })
-              .setNegativeButton("Quiero recibr información", new DialogInterface.OnClickListener() {
+              .setNeutralButton("Recibir información", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int id) {
                     Uri uri = Uri.parse("http://www.androidcurso.com/index.php/contacto");
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
+                 }
+              })
+              .setNegativeButton("Ayuda", new DialogInterface.OnClickListener() {
+                 public void onClick(DialogInterface dialog, int id) {
+                    //HelpDialogFragment dialog =
+                  new HelpDialogFragment().show(getActivity().getSupportFragmentManager(), "help dialog");
                  }
               });
       return builder.create();

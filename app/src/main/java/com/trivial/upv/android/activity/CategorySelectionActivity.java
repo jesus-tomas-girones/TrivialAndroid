@@ -252,7 +252,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     public interface OnClickSnackBarAction {
-        public void onClickAction();
+        void onClickAction();
     }
 
     public void showSnackbarMessage(final String msg, final String textAction, boolean showAction, final OnClickSnackBarAction action) {
@@ -382,7 +382,6 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             dismissSnackbar();
         } else if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-
         } else {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
             if (fragment instanceof CategorySelectionFragment) {
@@ -397,7 +396,6 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                 super.onBackPressed();
             }
         }
-
     }
 
     private void goToPreviusCategory() {
@@ -451,8 +449,9 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         return (getSupportFragmentManager().findFragmentById(R.id.category_container)) instanceof CategorySelectionFragment;
     }
 
-    @Override
-    protected void onStart() {
+    boolean viewedMainDialog = false;
+
+    @Override protected void onStart() {
         super.onStart();
         // JVG.S
         Log.d("TRAZA", "onStart");
@@ -460,8 +459,11 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         registerReceiver(receiver, filtro);
        // JVG.E
        // JTG.S
-       MainDialogFragment dialog = new MainDialogFragment();
-       dialog.show(getSupportFragmentManager(), "diálogo principal");
+       if (!viewedMainDialog) {
+          viewedMainDialog = true;
+          MainDialogFragment dialog = new MainDialogFragment();
+          dialog.show(getSupportFragmentManager(), "diálogo principal");
+       }
        // JTG.E
     }
 
@@ -604,7 +606,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof CategorySelectionTreeViewFragment) ||
-                ((CategorySelectionTreeViewFragment) fragment).getMode() != mode) {
+                !((CategorySelectionTreeViewFragment) fragment).getMode().equals(mode)) {
             fragment = CategorySelectionTreeViewFragment.newInstance(mode);
         } else {
             ((CategorySelectionTreeViewFragment) fragment).changeMode(mode);
@@ -629,11 +631,11 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             }
         }
 
-        if (mode == QuizActivity.ARG_ONE_PLAYER) {
+        if (mode.equals(QuizActivity.ARG_ONE_PLAYER)) {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.category_container, fragment)
                     .commit();
-        } else if (mode == QuizActivity.ARG_ONLINE) {
+        } else if (mode.equals(QuizActivity.ARG_ONLINE)) {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.category_container, fragment).addToBackStack(null)
                     .commit();
