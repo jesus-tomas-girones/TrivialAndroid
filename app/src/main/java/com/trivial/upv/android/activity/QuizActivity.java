@@ -1053,7 +1053,7 @@ public class QuizActivity extends AppCompatActivity implements
     public void onDisconnectedFromRoom(Room room) {
         Game.mRoomId = null;
         if (!mCategory.isSolved())
-            showGameError("Why: Disconnect From Room", true);
+            showGameError(getString(R.string.disconnect_room_error), true);
     }
 
     @Override
@@ -1094,7 +1094,7 @@ public class QuizActivity extends AppCompatActivity implements
 
         if (statusCode != GamesStatusCodes.STATUS_OK) {
             Log.e(TAG, "*** Error: onRoomCreated, status " + statusCode);
-            showGameError("Why: Room Created With Errors!", true);
+            showGameError(getString(R.string.room_created_error), true);
             return;
         }
 
@@ -1120,7 +1120,7 @@ public class QuizActivity extends AppCompatActivity implements
     @Override
     public void onJoinedRoom(int statusCode, Room room) {
         if (statusCode != STATUS_OK) {
-            showGameError("Why: Join Error", true);
+            showGameError(getString(R.string.join_error), true);
             return;
         }
         showWaitingRoom(room);
@@ -1129,7 +1129,7 @@ public class QuizActivity extends AppCompatActivity implements
     @Override
     public void onRoomConnected(int statusCode, Room room) {
         if (statusCode != STATUS_OK) {
-            showGameError("Why: Connected Error", true);
+            showGameError(getString(R.string.connected_error), true);
             return;
         }
         actualizaRoom(room);
@@ -1158,7 +1158,7 @@ public class QuizActivity extends AppCompatActivity implements
 //        switchToMainScreen();
         cancelPostDelayHandlerPlayGame();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + "Oops! Something wrong happened!" + "\n" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + getString(R.string.oops)  + "\n" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
                 if (exit)

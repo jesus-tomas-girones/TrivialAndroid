@@ -37,7 +37,6 @@ import static android.app.Activity.RESULT_OK;
  * Created by jvg63 on 22/06/2017.
  */
 
-
 public class PlayOnlineFragment extends Fragment
         implements
         GoogleApiClient.ConnectionCallbacks,
@@ -102,7 +101,7 @@ public class PlayOnlineFragment extends Fragment
     }
 
     private void changeTitleActionBar() {
-        ((CategorySelectionActivity) getActivity()).setToolbarTitle("Play Online");
+        ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.play_online));
     }
 
     private SeekBar sbPlayers;
@@ -120,7 +119,7 @@ public class PlayOnlineFragment extends Fragment
         ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
 
         if (Game.listCategories.size() == TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
-            txtListCategories.setText("(All Categories)");
+            txtListCategories.setText(getString(R.string.all_categories));
         } else {
 //            txtListCategories.setText("(Otras)");
 
@@ -195,7 +194,7 @@ public class PlayOnlineFragment extends Fragment
 
                     progress = normalizeProgres2_4_8(progresValue);
                     sbPlayers.setProgress(progress);
-                    txtPlayers.setText("Num. Players: " + progress + "/" + (seekBar.getMax() - 1));
+                    txtPlayers.setText(getString(R.string.num_players) + progress + "/" + (seekBar.getMax() - 1));
                 }
             }
 
@@ -205,7 +204,7 @@ public class PlayOnlineFragment extends Fragment
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) { /* Display the value in textview*/
-                txtPlayers.setText("Num. Players: " + progress + "/" + (seekBar.getMax() - 1));
+                txtPlayers.setText(getString(R.string.num_players) + progress + "/" + (seekBar.getMax() - 1));
             }
         });
 
@@ -566,7 +565,7 @@ public class PlayOnlineFragment extends Fragment
 
 
     private void showSeekbarsProgress() {
-        txtPlayers.setText("Num. Players: " + sbPlayers.getProgress() + "/" + (sbPlayers.getMax() - 1));
+        txtPlayers.setText(getString(R.string.num_players) + sbPlayers.getProgress() + "/" + (sbPlayers.getMax() - 1));
 //        txtTotalTime.setText("Total Time: " + sbTotalTime.getProgress() + "/" + sbTotalTime.getMax());
 //        txtQuizzes.setText("Num. Quizzes: " + sbQuizzes.getProgress() + "/" + sbQuizzes.getMax());
     }
@@ -584,8 +583,7 @@ public class PlayOnlineFragment extends Fragment
 //            switchToScreen(R.id.screen_wait);
             Game.mGoogleApiClient.connect();
         } else {
-            Log.w(TAG,
-                    "GameHelper: client was already connected on onStart()");
+            Log.w(TAG,"GameHelper: client was already connected on onStart()");
         }
         super.onStart();
     }

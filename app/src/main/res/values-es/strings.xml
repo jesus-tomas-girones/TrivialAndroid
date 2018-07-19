@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TrivialAndroid</string>
+    <string name="last_initial">Última inicial</string>
+    <string name="first_name">Nombre de pila</string>
+    <string name="sign_in">Regístrate</string>
+    <string name="choose_avatar">Elige un avatar</string>
+    <string name="an_avatar">Un Avatar</string>
+    <string name="btn_true">Cierto</string>
+    <string name="btn_false">Falso</string>
+    <string name="category">Categoría</string>
+    <string name="sign_out">Desconectar</string>
+    <string name="back">volver</string>
+    <!--JVG.S-->
+    <string name="activity_treeview_label">Jugar sin conexión (verificar una categoría)</string>
+    <string name="title_activity_main">Actividad principal</string>
+    <string name="navigation_drawer_open">Abrir el menú de navegación</string>
+    <string name="navigation_drawer_close">Cerrar el menú de navegación</string>
+    <string name="action_settings">Configuración</string>
+    <!--Navigation Drawer-->
+    <string name="menu_nd_category_review">Modo repaso</string>
+    <string name="menu_nd_one_player">Un jugador</string>
+    <string name="menu_nd_multi_player">Jugar en red</string>
+    <!--GOOGLE PLAY GAMES-->
+    <string name="sign_in_other_error">Hubo un problema con el inicio de sesión. Inténtalo de nuevo más tarde.</string>
+    <string name="sign_in_failed">Error al iniciar sesión. Verifique su conexión de red y vuelva a intentarlo.</string>
+    <string name="app_misconfigured">La aplicación está configurada incorrectamente. Compruebe que el nombre del paquete y el certificado de firma coinciden con la ID del cliente creada en Developer Console. Además, si la aplicación aún no se ha publicado, verifique que la cuenta con la que intenta iniciar sesión aparezca como cuenta de prueba. Ver registros para más información.</string>
+    <string name="license_failed">Verificación de licencia fallida.</string>
+    <string name="unknown_error">Error desconocido.</string>
+    <!--GOOGLE PLAY END-->
+    <string name="game_title">Botón Clicker 2000!</string>
+    <string name="game_blurb">Un juego de muestra que prueba tu habilidad para hacer clic en un botón. ¿Puedes hacer clic más rápido que tus amigos? ¡Sólo hay una forma de averiguarlo! Para jugar este juego con amigos, debes iniciar sesión con Google.</string>
+    <string name="single_player">Un solo jugador</string>
+    <string name="single_player_explanation">¡Practique!</string>
+    <string name="quick_game">Juego rápido</string>
+    <string name="invite_players">Invitar a amigos</string>
+    <string name="see_invitations">Ver invitaciones</string>
+    <string name="quick_game_explanation">Desafía a un oponente al azar.</string>
+    <string name="invite_players_explanation">Invita a tus amigos a jugar.</string>
+    <string name="see_invitations_explanation">Ver quién lo está invitando en este momento.</string>
+    <string name="inv_popup_text">Invitación entrante!</string>
+    <string name="accept_popup_invite">¡Aceptar!</string>
+    <string name="please_wait">Por favor espera…</string>
+    <string name="instructions">¡Haz clic en el botón tan rápido como puedas!</string>
+    <string name="game_problem">Se produjo un error al iniciar el juego. Inténtalo de nuevo.</string>
+    <string name="click_me">¡Haz clic aquí!</string>
+    <string name="is_inviting_you">te desafían a un juego!</string>
+    <string name="signin_other_error">Hubo un problema con el inicio de sesión. Vuelve a intentarlo más tarde.</string>
+    <!--JVG.E-->
+    <!--JTG.S-->
+    <!--Diálogos-->
+    <string name="main_title">Trivial de programación Android</string>
+    <string name="main_text">¿Eres un experto programador de Android? ¿Quieres poner a prueba tus conocimientos y competencia con otros desarrolladores? Descubre los tres modos para revisar, verificar tus conocimientos y competir contra otros programadores (pulsa AYUDA).</string>
+    <string name="main_learm">Si lo que quieres es aprender, en <a href="http://www.androidcurso.com"> www.androidcurso.com </a>, en español, puedes encontrar aquí los cursos de especialización y el máster de la <a href ="http://www.upv.es">Universidad Politécnica de Valencia</a> en desarrollo de aplicaciones Android.</string>
+    <string name="about_title">Acerca de Trivial Android</string>
+    <string name="abot_text1">Programa desarrollado en el <a href="http://www.androidcurso.com\">Máster de Desarrollo de aplicaciones Android</a> de la <a href="www.upv.es">Universidad Politécnica de Valencia</a>. Programación desarrollada por Jordi Vilches, siendo su proyecto final de Master. Dirección a cargo de Jesús Tomás. Interfaz de usuario basado en Topeka, aplicación desarrollada por Google para ilustrar el uso de Material Design.</string>
+    <string name="abot_text2">Preguntas escritas por: Jesús Tomás - más de un 85%; Vicente Carbonell - Firebase (notificaciones, almacenamiento, Funciones y Enlaces Dinámicos), aplicaciones web / hosting, Android TV, Google Cast y Google Play Game; Antonio Albiol - OpenCV. Gonzalo Puga: Android Auto, Hilos. David Santamaría - Prueba. Salva Santonja - Android cosas (comunicaciones) y algunos más.</string>
+    <string name="help_title">Ayuda Trivial Android</string>
+    <string name="help_text1">Selecciona el modo de juego desde el menú de navegación:</string>
+    <string name="help_text2"><b> Modo repaso: </b> navega por todas las materias desarrolladas en el Máster de Android y revisa tus conocimientos. En muchas de las materias primas ver videos explicativos o acceder a tutoriales.</string>
+    <string name="help_text3"><b> Modo un jugador: </b> comodo el conocimiento aleatorio de 10 preguntas. Puedes seleccionar una o más categorías / subcategorías.</string>
+    <string name="help_text4"><b> Modo multijugador: </b>Compite con amigos u otros jugadores para ver quién responde más preguntas en el menor tiempo posible. Puedes configurar las categorías y número de jugadores.</string>
+    <string name="help">Ayuda</string>
+    <string name="about">Acerca de…</string>
+    <!--Modo online-->
+    <string name="choose_category">Selecciona categorías para jugar</string>
+    <string name="choose_category_online">Selecciona categorías para jugar online</string>
+    <string name="play_anyone">Jugadores al azar</string>
+    <string name="select_players">Seleccionar Jugadores</string>
+    <string name="select_categories">Seleccionar Categorías</string>
+    <string name="all_categories">(Todas las Categorías)</string>
+    <string name="total_players">Total PLayers</string>
+    <string name="show_invitations">Mostrar Invitaciones…</string>
+    <string name="play_online">Jugar en red</string>
+    <string name="num_players">Num. Jugadores: </string>
+    <string name="oops">¡Oops! ¡Ha ocurrido un error! </string>
+    <string name="disconnect_room_error">Motivo: Desconexión de otro jugador</string>
+    <string name="connected_error">Motivo: Error de connexión</string>
+    <string name="join_error">Motivo: Error al emparejar</string>
+    <string name="room_created_error">Motivo: Room Creada con errores</string>
+    <!--Preferencias-->
+    <string name="pref_review_mode">Modo Repaso</string>
+    <string name="pref_url_summary">Introduce una URL válida para cargar las Categorías</string>
+    <string name="pref_url_title">Url de Categorías</string>
+    <string name="pref_one_player">Modo Un Jugador</string>
+    <string name="pref_quizzies_one_summary">Total de preguntas en modo un jugador</string>
+    <string name="pref_quizzies_one_title">Num. Preguntas</string>
+    <string name="pref_time_one_summary">Tiempo total en modo un jugador</string>
+    <string name="pref_time_one_title">Tiempo Total (seg.)</string>
+    <string name="pref_mode_online">Modo Jugar En Red</string>
+    <string name="pref_quizzies_online_summary">Total de preguntas en modo jugar en red</string>
+    <string name="pref_quizzies_online_title">Num. Preguntas</string>
+    <string name="pref_time_online_summary">Tiempo total en modo jugar en red</string>
+    <string name="pref_time_online_title">Tiempo Total (seg.)</string>
+    <string name="pref_warning_summary">Cualquier cambio en \'Modo Jugar en Red\' solo afecta en el dispositivo que propone la partida. Es decir, que el jugador que comienzan la partida pone las reglas, y el resto de jugadores aceptan su configuración.</string>
+    <string name="pref_warning_title">Atención:</string>
+    <!--JTG.E-->
+</resources>

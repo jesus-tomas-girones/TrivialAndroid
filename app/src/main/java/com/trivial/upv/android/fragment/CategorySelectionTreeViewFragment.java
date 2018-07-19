@@ -418,10 +418,10 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         switch (mode) {
             case ARG_ONE_PLAYER:
 
-                ((CategorySelectionActivity) getActivity()).setToolbarTitle("Choose Category to Play");
+                ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category));
                 break;
             case ARG_ONLINE:
-                ((CategorySelectionActivity) getActivity()).setToolbarTitle("Choose Category to Play Online");
+                ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category_online));
                 ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(false);
                 break;
             default:

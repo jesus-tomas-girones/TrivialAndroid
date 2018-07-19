@@ -1,19 +1,3 @@
-<!--
-  ~ Copyright 2015 Google Inc.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <resources>
     <string name="app_name">TrivialAndroid</string>
     <string name="last_initial">Last Initial</string>
@@ -43,8 +27,8 @@
     <string name="menu_nd_one_player">One Player</string>
     <string name="menu_nd_multi_player">Play Online</string>
 
-    <!--GOOGLE PLAY GAMES-->
-    <string name="app_id">216806995897</string>
+    <!--GOOGLE PLAY GAMES 216806995897  -->
+    <string name="app_id">211137909087</string>
     <string name="sign_in_other_error">There was an issue with sign-in, please try again later.</string>
     <string name="sign_in_failed">Failed to sign in. Please check your network connection and try again.</string>
     <string name="app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
@@ -52,8 +36,8 @@
     <string name="unknown_error">Unknown error.</string>
     <!--GOOGLE PLAY END-->
     <!--<string name="app_name">Button Clicker</string>-->
-    <string name="game_title">Button Clicker 2000!</string>
-    <string name="game_blurb">A sample game that tests your ability to click a button. Can you click faster than your friends? Only one way to find out! To play this game with friends, you must sign in with Google.</string>
+    <string name="game_title">Trivial Android</string>
+    <string name="game_blurb">Repasa tus conocimientos de programación en Android y juega en red – Master UPV.</string>
     <string name="single_player">Single Player</string>
     <string name="single_player_explanation">Get some practice!</string>
     <string name="quick_game">Quick game</string>
@@ -75,14 +59,51 @@
     <string name="url_categories">http://mmoviles.upv.es/trivial/trivialandroid.json</string>
     <!--JVG.E-->
     <!--JTG.S-->
+    <!--Diálogos-->
     <string name="main_title">Android Programing Trivia</string>
-    <string name="main_text">¿Eres un experto programador de Android? ¿Quieres poner a prueba tus conocimientos y competir con otros desarrolladores? Descubre los tres modos para repasar, comprobar tus conocimientos y competir contra otros programadores.</string>
+    <string name="main_text">¿Eres un experto programador de Android? ¿Quieres poner a prueba tus conocimientos y competir con otros desarrolladores? Descubre los tres modos para repasar, comprobar tus conocimientos y competir contra otros programadores (pulsa AYUDA).</string>
     <string name="main_learm">Si lo que quieres es aprender, en <a href="http://www.androidcurso.com">www.androidcurso.com</a> encontrarás cursos gratuitos, cursos de especialización y el Máster de la <a href="http://www.upv.es">Universidad Politécnica de Valencia</a> en desarrollo de aplicaciones Android.</string>
     <string name="about_title">About Android Programing Trivia</string>
-    <string name="abot_text1">Este programa ha sido desarrollado en el <a href="http://www.androidcurso.com" >Master de Desarrollo de aplicaciones Android</a> de la <a href="www.upv.es">Universidad Politécnica de Valencia</a>. La mayor parte de la programación ha sido desarrollada por Jordi Vilches, y ha sido presentado como proyecto final de este Master. La dirección ha estado a cargo de Jesús Tomás. El interfaz de usuario se ha basado en la Topeka, aplicación desarrollada por Google para ilustrar el uso de Material Design.</string>
-    <string name="abot_text2">La mayoría de las preguntas ha sido escritas por Jesús Tomás. Aunque también han colaborado otros profesores. Vicente Carbonell: Firebase (notificaciones, almacenamiento, Functions y Dynamic Links), aplicaciones web/hosting, Android TV, Google Cast y Google Play Game. Antonio Albiol: OpenCV. Gonzalo Puga:Android Auto, Hilos. David Santamaría: Testing. Salva Santonja: Android Things (comunicaciones) y algunos más</string>
+    <string name="abot_text1">Programa desarrollado en el <a href="http://www.androidcurso.com" >Master de Desarrollo de aplicaciones Android</a> de la <a href="www.upv.es">Universidad Politécnica de Valencia</a>. Programación desarrollada por Jordi Vilches, siendo su proyecto final de Master. Dirección a cargo de Jesús Tomás. Interfaz de usuario basado en Topeka, aplicación desarrollada por Google para ilustrar el uso de Material Design.</string>
+    <string name="abot_text2">Preguntas escritas por: Jesús Tomás - más de un 85%; Vicente Carbonell - Firebase (notificaciones, almacenamiento, Functions y Dynamic Links), aplicaciones web/hosting, Android TV, Google Cast y Google Play Game; Antonio Albiol - OpenCV. Gonzalo Puga:Android Auto, Hilos. David Santamaría - Testing. Salva Santonja - Android Things (comunicaciones) y algunos más.</string>
     <string name="help_title">Help Android Programing Trivia</string>
-    <string name="help_text1">Expliar los modos.</string>
-    <string name="help_text2">más ...</string>
+    <string name="help_text1">Selecciona el modo de juego desde el menú de navegación:</string>
+    <string name="help_text2"><b>Modo repaso:</b> navega por todas las materias desarrolladas en el Master de Android y revisa tus conocimientos. En muchas de las materias podrás ver vídeos explicativos o acceder a tutoriales.</string>
+    <string name="help_text3"><b>Modo un jugador:</b> podrás evaluar tus conocimientos a partir de un test aleatorio de 10 preguntas. Puedes seleccionar una o más categorías / subcategorías.</string>
+    <string name="help_text4"><b>Modo multijugador:</b> Compite con amigos u otros jugadores para ver quien responde más preguntas en el menor tiempo posible. Puedes configurar las categorías y número de jugadores.</string>
+    <string name="help">Help</string>
+    <string name="about">About</string>
+    <!--Modo online-->
+    <string name="choose_category">Choose Category to Play</string>
+    <string name="choose_category_online">Choose Category to Play Online</string>
+    <string name="play_anyone">Play AnyOne</string>
+    <string name="select_players">Select Players</string>
+    <string name="select_categories">Select Categories</string>
+    <string name="all_categories">(All Categories)</string>
+    <string name="total_players">Total PLayers</string>
+    <string name="show_invitations">Show Invitations …</string>
+    <string name="play_online">Play Online</string>
+    <string name="num_players">Num. Players: </string>
+    <string name="oops">"Oops! Something wrong happened!"</string>
+    <string name="disconnect_room_error">Why: Disconnect From Room</string>
+    <string name="connected_error">Why: Connected Error</string>
+    <string name="join_error">Why: Join Error</string>
+    <string name="room_created_error">Why: Room Created With Errors!</string>
+    <!--Preferencias-->
+    <string name="pref_review_mode">Review Mode</string>
+    <string name="pref_url_summary">Choose a valid Url for loading Categories</string>
+    <string name="pref_url_title">Url Categories</string>
+    <string name="pref_one_player">Mode One Player</string>
+    <string name="pref_quizzies_one_summary">Total Quizzies Mode One PLayer</string>
+    <string name="pref_quizzies_one_title">Num. Quizzes</string>
+    <string name="pref_time_one_summary">Total Time Mode One PLayer</string>
+    <string name="pref_time_one_title">Total Time</string>
+    <string name="pref_mode_online">Mode Online</string>
+    <string name="pref_quizzies_online_summary">Total Quizzies Mode One PLayer</string>
+    <string name="pref_quizzies_online_title">Num. Quizzes</string>
+    <string name="pref_time_online_summary">Total Time Mode Online</string>
+    <string name="pref_time_online_title">Total Time</string>
+    <string name="pref_warning_summary">Any change in \'Mode Online\' only takes effect when you start a Game. It means that the player who starts the Game is the Master, and the rest of players take his settings as theirs.</string>
+    <string name="pref_warning_title">Warning:</string>
     <!--JTG.E-->
 </resources>

@@ -61,7 +61,7 @@
                     android:layout_weight="1"
                     android:backgroundTint="@color/theme_purple_background"
                     android:padding="0dp"
-                    android:text="Play AnyOne"
+                    android:text="@string/play_anyone"
                     android:textColor="@android:color/black" />
 
                 <Button
@@ -71,7 +71,7 @@
                     android:layout_weight="1"
                     android:backgroundTint="@color/theme_green_primary_dark"
                     android:padding="0dp"
-                    android:text="Select Players"
+                    android:text="@string/select_players"
                     android:textColor="@android:color/black" />
             </LinearLayout>
 
@@ -92,7 +92,7 @@
                     android:backgroundTint="@color/theme_yellow_primary_dark"
                     android:padding="0dp"
                     android:layout_marginRight="5dp"
-                    android:text="Select Categories"
+                    android:text="@string/select_categories"
                     android:textColor="@android:color/black" />
 
                 <TextView
@@ -104,7 +104,7 @@
                     android:gravity="center"
                     android:layout_gravity="center"
                     android:padding="0dp"
-                    android:text="(All Categories)"
+                    android:text="@string/all_categories"
 />
 
             </LinearLayout>
@@ -126,7 +126,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:gravity="center_horizontal"
-                android:text="Total PLayers" />
+                android:text="@string/total_players" />
 
 
             <!--<SeekBar-->
@@ -186,7 +186,7 @@
                 android:layout_height="45dp"
                 android:backgroundTint="@color/theme_red_background"
                 android:padding="0dp"
-                android:text="Show Invitations ..."
+                android:text="@string/show_invitations"
                 android:textColor="@android:color/black" />
         </LinearLayout>
     </LinearLayout>
