@@ -61,7 +61,6 @@ public class SignInActivity extends AppCompatActivity {
     //JVG.S
     private void createDefaultPreferences() {
         SharedPreferencesStorage.getInstance(getBaseContext()).createDefaultValues();
-
     }
     //JVG.E
 

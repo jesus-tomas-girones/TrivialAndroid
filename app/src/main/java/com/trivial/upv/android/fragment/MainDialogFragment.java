@@ -33,7 +33,7 @@ public class MainDialogFragment extends DialogFragment {
                  public void onClick(DialogInterface dialog, int id) {
                  }
               })
-              .setNeutralButton("Recibir información", new DialogInterface.OnClickListener() {
+              .setNeutralButton("Más info", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int id) {
                     Uri uri = Uri.parse("http://www.androidcurso.com/index.php/contacto");
                     Intent intent = new Intent(Intent.ACTION_VIEW, uri);

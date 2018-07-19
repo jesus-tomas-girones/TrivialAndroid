@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "498506601621-he9jlsehusl923heonipm5vaa9geskqh.apps.googleusercontent.com",
+          "client_id": "498506601621-voo3cgk12emmdi2tl4cemmhic58bvtd6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.trivial.upv.android",
-            "certificate_hash": "66b26eeb600bc3ad1f04941a8d95cbb2b44cc634"
+            "certificate_hash": "95c838cbcf8a7424aa65b24acb7a98df014ff255"
           }
         },
         {
