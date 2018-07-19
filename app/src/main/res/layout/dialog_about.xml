@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--JTG.S-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingEnd="@dimen/spacing_double"
+    android:paddingStart="@dimen/spacing_double"
+    android:paddingTop="@dimen/spacing_double"
+    android:paddingBottom="@dimen/spacing_double">
+    <TextView
+        android:id="@+id/toolbar_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Topeka.TextAppearance.Title"
+        android:elevation="@dimen/elevation_header"
+        android:gravity="center_vertical"
+        android:text="@string/about_title"
+        android:paddingBottom="@dimen/spacing_double" />
+    <TextView
+        android:id="@+id/text1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Topeka.TextAppearance.Subhead"
+        android:gravity="center_vertical"
+        android:text="@string/abot_text1" />
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Topeka.TextAppearance.Subhead"
+        android:elevation="@dimen/elevation_header"
+        android:gravity="center_vertical"
+        android:text="@string/abot_text2" />
+</LinearLayout>
+<!--JTG.E-->

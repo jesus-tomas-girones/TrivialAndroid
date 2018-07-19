@@ -42,7 +42,6 @@
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -56,14 +55,14 @@
             android:screenOrientation="portrait"
             android:theme="@style/Topeka.QuizActivity"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".activity.GPGActivity" />
-        <activity android:name=".activity.MainActivity">
+        <!--activity android:name=".activity.GPGActivity" /-->
+        <!--activity android:name=".activity.MainActivity"-->
             <!--<intent-filter>-->
             <!--<action android:name="android.intent.action.MAIN" />-->
 
             <!--<category android:name="android.intent.category.LAUNCHER" />-->
             <!--</intent-filter>-->
-        </activity>
+        <!--/activity-->
         <activity
             android:name=".activity.SettingsActivity"
             android:theme="@style/Topeka.Settings">

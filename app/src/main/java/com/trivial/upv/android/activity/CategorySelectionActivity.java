@@ -43,6 +43,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.LinkMovementMethod;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.TransitionInflater;
@@ -59,8 +60,11 @@ import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ActivityCategorySelectionBinding;
 import com.trivial.upv.android.databinding.NavHeaderCategorySelectionBinding;
+import com.trivial.upv.android.fragment.AboutDialogFragment;
 import com.trivial.upv.android.fragment.CategorySelectionFragment;
 import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
+import com.trivial.upv.android.fragment.HelpDialogFragment;
+import com.trivial.upv.android.fragment.MainDialogFragment;
 import com.trivial.upv.android.fragment.PlayOnlineFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
@@ -454,7 +458,11 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         Log.d("TRAZA", "onStart");
         loadCategories();
         registerReceiver(receiver, filtro);
-        //JVG.E
+       // JVG.E
+       // JTG.S
+       MainDialogFragment dialog = new MainDialogFragment();
+       dialog.show(getSupportFragmentManager(), "diálogo principal");
+       // JTG.E
     }
 
     private void setUpToolbar() {
@@ -761,16 +769,21 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         } else if (id == R.id.nav_signout) {
             signOut();
         } else if (id == R.id.nav_settings) {
-
             Intent startIntent = SettingsActivity.getStartIntent(this);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 ActivityCompat.startActivity(this, startIntent, null);
             } else {
                 ActivityCompat.startActivity(this, startIntent, null);
             }
+//JTG.S
+        } else if (id == R.id.nav_about) {
+            AboutDialogFragment dialog = new AboutDialogFragment();
+            dialog.show(getSupportFragmentManager(), "about dialog");
+        } else if (id == R.id.nav_help) {
+           HelpDialogFragment dialog = new HelpDialogFragment();
+           dialog.show(getSupportFragmentManager(), "help dialog");
         }
-
-
+//JTG.E
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
