@@ -30,32 +30,25 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
-    signingConfigs {
-        config1 {
-            storeFile file('trivialandroid.jks')
-            keyAlias 'TrivialAndroid'
-            keyPassword 'jvg637upv'
-            storePassword 'jvg637upv'
-        }
-    }
-
     buildTypes {
+        debug {
+            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled true
-//            signingConfig signingConfigs.config1
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 //    packagingOptions {
 //        exclude 'LICENSE.txt'
 //    }
-
 }
 
 ext {
     androidVesion = "27.1.1"
     supportLibVersion = "27.1.1"
-    espressoVersion = "2.2.2"
+    espressoVersion = "3.0.2"
     androidTestVersion = "0.5"
     hamcrestVersion = "1.3"
     junitVersion = "4.12"
@@ -73,30 +66,7 @@ dependencies {
     implementation "com.android.support.test.espresso:espresso-idling-resource:${espressoVersion}"
     testImplementation "junit:junit:${junitVersion}"
 
-    //    androidTestImplementation("com.android.support.test.espresso:espresso-core:${espressoVersion}") {
-
-    //        exclude module: "espresso-idling-resource"
-
-    //        exclude group: "com.android.support"
-
-    //    }
-
-    //    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:${espressoVersion}") {
-
-    //        exclude module: "espresso-core"
-
-    //        exclude module: "recyclerview-v7"
-
-    //        exclude group: "com.android.support"
-
-    //    }
-
-    //    androidTestImplementation("com.android.support.test:rules:${androidTestVersion}") {
-
-    //        exclude group: "com.android.support"
-
-    //    }
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation "org.hamcrest:hamcrest-core:${hamcrestVersion}"
     implementation 'me.texy.treeview:treeview_lib:1.0.3'

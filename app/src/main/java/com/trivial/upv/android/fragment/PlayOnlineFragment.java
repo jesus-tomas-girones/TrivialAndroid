@@ -270,22 +270,23 @@ public class PlayOnlineFragment extends Fragment
     }
 
     private int normalizeProgres2_4_8(int progresValue) {
-        int diff_2 = Math.abs(progresValue - 2);
-        int diff_4 = Math.abs(progresValue - 4);
-        int diff_8 = Math.abs(progresValue - 8);
-        int minDiff = Math.min(diff_2, diff_4);
-        minDiff = Math.min(minDiff, diff_8);
+//        int diff_2 = Math.abs(progresValue - 2);
+//        int diff_4 = Math.abs(progresValue - 4);
+//        int diff_8 = Math.abs(progresValue - 8);
+//        int minDiff = Math.min(diff_2, diff_4);
+//        minDiff = Math.min(minDiff, diff_8);
+//
+//        int tmpValue = 0;
+//        if (minDiff == diff_8) {
+//            tmpValue = 8;
+//        } else if (minDiff == diff_4) {
+//            tmpValue = 4;
+//        } else if (minDiff == diff_2) {
+//            tmpValue = 2;
+//        }
 
-        int tmpValue = 0;
-        if (minDiff == diff_8) {
-            tmpValue = 8;
-        } else if (minDiff == diff_4) {
-            tmpValue = 4;
-        } else if (minDiff == diff_2) {
-            tmpValue = 2;
-        }
-
-        return tmpValue;
+//        return tmpValue;
+        return progresValue;
     }
 
     final static int RC_SELECT_PLAYERS = 10000;
