@@ -286,6 +286,9 @@ public class PlayOnlineFragment extends Fragment
 //        }
 
 //        return tmpValue;
+        if (progresValue>8)
+            progresValue = 8;
+
         return progresValue;
     }
 
