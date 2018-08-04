@@ -1,9 +1,10 @@
 package com.trivial.upv.android.fragment;
 
+import android.app.ActivityOptions;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,16 +15,29 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesClient;
+import com.google.android.gms.games.InvitationsClient;
+import com.google.android.gms.games.Player;
+import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.games.multiplayer.Invitation;
+import com.google.android.gms.games.multiplayer.InvitationCallback;
 import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
-import com.trivial.upv.android.helper.gpg.BaseGameUtils;
 import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.json.CategoryJSON;
@@ -37,39 +51,33 @@ import static android.app.Activity.RESULT_OK;
  * Created by jvg63 on 22/06/2017.
  */
 
-public class PlayOnlineFragment extends Fragment
+public class PlayRealTimeFragment extends Fragment
         implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
+
         View.OnClickListener {
 
     private static final String QUICK_GAME = "QUICK_GAME";
     private static final String CUSTOM_GAME = "CUSTOM_GAME";
-    private Button btnPartidasGuardadas;
-    private Button btnJugar;
     private Button btnNewGame;
 
     private static final int RC_SIGN_IN = 9001;
 
     final static int RC_INVITATION_INBOX = 10001;
 
-    private boolean mResolvingConnectionFailure = false;
-    private boolean mAutoStartSignInFlow = true;
-    private boolean mSignInClicked = false;
-
     private com.google.android.gms.common.SignInButton btnConectar;
-    //    private Button btnDesconectar;
+
     private Button btnShowIntitations;
     private Button btnQuickGame;
 
     private LinearLayout globalActions;
     private LinearLayout newGameActions;
     private LinearLayout loginActions;
-    private static String NAME_PREFERENCES = "TrivialAndroid";
-    private static String NAME_PREFERENCES_CONNECTED = "conectado";
-    private TextView txtListCategories;
 
-    public PlayOnlineFragment() {
+    private TextView txtListCategories;
+    private String mPlayerId;
+    private GoogleSignInClient mGoogleSignInClient;
+
+    public PlayRealTimeFragment() {
         Game.resetGameVars();
         Game.listCategories.clear();
         List<CategoryJSON> categoriesJSON = TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON();
@@ -81,8 +89,8 @@ public class PlayOnlineFragment extends Fragment
     }
 
 
-    public static PlayOnlineFragment newInstance() {
-        return new PlayOnlineFragment();
+    public static PlayRealTimeFragment newInstance() {
+        return new PlayRealTimeFragment();
     }
 
     @Override
@@ -114,9 +122,7 @@ public class PlayOnlineFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-
-        showSeekbarsProgress();
-        ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
+        signInSilently();
 
         if (Game.listCategories.size() == TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
             txtListCategories.setText(getString(R.string.all_categories));
@@ -133,6 +139,24 @@ public class PlayOnlineFragment extends Fragment
             }
             txtListCategories.setText(sb.toString());
         }
+    }
+
+    public void signInSilently() {
+        Log.d(TAG, "signInSilently()");
+        mGoogleSignInClient.silentSignIn().addOnCompleteListener(getActivity(),
+                new OnCompleteListener<GoogleSignInAccount>() {
+                    @Override
+                    public void onComplete(
+                            @NonNull Task<GoogleSignInAccount> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "signInSilently(): success");
+                            onConnected(task.getResult());
+                        } else {
+                            Log.d(TAG, "signInSilently(): failure", task.getException());
+                            onDisconnected();
+                        }
+                    }
+                });
     }
 
     private void setUpView(final View view) {
@@ -162,12 +186,9 @@ public class PlayOnlineFragment extends Fragment
         newGameActions.setVisibility(View.GONE);
         globalActions.setVisibility(View.GONE);
 
-        Game.mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Games.API).addScope(Games.SCOPE_GAMES)
-                .build();
-
+        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(),
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
+        startSignInIntent();
 
         btnNewGame = (Button) view.findViewById(R.id.btnSelectCategories);
         btnNewGame.setOnClickListener(this);
@@ -269,6 +290,12 @@ public class PlayOnlineFragment extends Fragment
 
     }
 
+    public void startSignInIntent() {
+        startActivityForResult(mGoogleSignInClient.getSignInIntent(),
+                RC_SIGN_IN);
+    }
+
+
     private int normalizeProgres2_4_8(int progresValue) {
 //        int diff_2 = Math.abs(progresValue - 2);
 //        int diff_4 = Math.abs(progresValue - 4);
@@ -286,7 +313,7 @@ public class PlayOnlineFragment extends Fragment
 //        }
 
 //        return tmpValue;
-        if (progresValue>8)
+        if (progresValue > 8)
             progresValue = 8;
 
         return progresValue;
@@ -309,12 +336,87 @@ public class PlayOnlineFragment extends Fragment
         Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
 
         // Choose category in custom Game
-        ((CategorySelectionActivity) getActivity()).attachTreeViewFragment(QuizActivity.ARG_ONLINE);
+        ((CategorySelectionActivity) getActivity()).attachTreeViewFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
     }
 
 
-    @Override
-    public void onConnected(@Nullable Bundle connectionHint) {
+    private void onConnected(GoogleSignInAccount googleSignInAccount) {
+
+        mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
+
+
+        PlayersClient playersClient = Games.getPlayersClient(getActivity(),
+                googleSignInAccount);
+        playersClient.getCurrentPlayer()
+                .addOnSuccessListener(new OnSuccessListener<Player>() {
+                    @Override
+                    public void onSuccess(Player player) {
+                        mPlayerId = player.getPlayerId();
+
+                        inicializarRealTimeGameOnConnected();
+
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(),
+                                "Hay un problema para obtener el id del jugador!"
+                                , Toast.LENGTH_LONG).show();
+                    }
+                });
+
+        // Retrieve the TurnBasedMatch from the connectionHint
+        GamesClient gamesClient = Games.getGamesClient(getActivity(), googleSignInAccount);
+        gamesClient.getActivationHint()
+                .addOnSuccessListener(new OnSuccessListener<Bundle>() {
+                    @Override
+                    public void onSuccess(Bundle bundle) {
+                        if (bundle != null) {
+                            TurnBasedMatch match = bundle.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
+                            if (match != null)
+                                Game.pendingTurnBasedMatch = match;
+                            Invitation invitation = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
+                            if (invitation != null) {
+                                manageInvitation(invitation);
+                            } else if (Game.pendingInvitation != null) {
+                                manageInvitation(Game.pendingInvitation);
+                                Game.pendingInvitation = null;
+                            }
+                        } else {
+                            if (Game.pendingInvitation != null) {
+                                manageInvitation(Game.pendingInvitation);
+                                Game.pendingInvitation = null;
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(),
+                                "There was a problem getting the activation hint!"
+                                , Toast.LENGTH_LONG).show();
+
+                    }
+                });
+
+
+        // As a demonstration, we are registering this activity as a handler for
+        // invitation and match events.
+
+        // This is *NOT* required; if you do not register a handler for
+        // invitation events, you will get standard notifications instead.
+        // Standard notifications may be preferable behavior in many cases.
+        mInvitationsClient.registerInvitationCallback(mInvitationCallback);
+
+        showSeekbarsProgress();
+        ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
+
+    }
+
+
+    public void inicializarRealTimeGameOnConnected() {
 //        Toast.makeText(this, "CONECTADO", Toast.LENGTH_SHORT).show();
 //        btnConectar.setVisibility(View.GONE);
         loginActions.setVisibility(View.GONE);
@@ -334,70 +436,53 @@ public class PlayOnlineFragment extends Fragment
 
         // register listener so we are notified if we receive an invitation to play
         // while we are in the game
-        Games.Invitations.registerInvitationListener(Game.mGoogleApiClient, (CategorySelectionActivity) getActivity());
-
-        if (connectionHint != null) {
-            Log.d(TAG, "onConnected: connection hint provided. Checking for invite.");
-            final Invitation inv = connectionHint
-                    .getParcelable(Multiplayer.EXTRA_INVITATION);
-            if (inv != null && inv.getInvitationId() != null) {
-                // retrieve and cache the invitation ID
-                Log.d(TAG, "onConnected: connection hint has a room invite!");
-
-
-                CategorySelectionActivity.OnClickSnackBarAction actionInvitation = new CategorySelectionActivity.OnClickSnackBarAction() {
-                    @Override
-                    public void onClickAction() {
-                        acceptInviteToRoom(inv.getInvitationId());
-                    }
-                };
-
-                ((CategorySelectionActivity) getActivity()).showSnackbarMessage("Invitation Received from " + inv.getInviter().getDisplayName(), "Accept?", true, actionInvitation);
-
-                return;
-            }
-        }
+//        Games.Invitations.registerInvitationListener(Game.mGoogleApiClient, (CategorySelectionActivity) getActivity());
+//
+//        if (connectionHint != null) {
+//            Log.d(TAG, "onConnected: connection hint provided. Checking for invite.");
+//            final Invitation inv = connectionHint
+//                    .getParcelable(Multiplayer.EXTRA_INVITATION);
+//            if (inv != null && inv.getInvitationId() != null) {
+//                // retrieve and cache the invitation ID
+//                Log.d(TAG, "onConnected: connection hint has a room invite!");
+//
+//
+//                CategorySelectionActivity.OnClickSnackBarAction actionInvitation = new CategorySelectionActivity.OnClickSnackBarAction() {
+//                    @Override
+//                    public void onClickAction() {
+//                        acceptInviteToRoom(inv.getInvitationId());
+//                    }
+//                };
+//
+//                ((CategorySelectionActivity) getActivity()).showSnackbarMessage("Invitation Received from " + inv.getInviter().getDisplayName(), "Accept?", true, actionInvitation);
+//
+//                return;
+//            }
+//        }
 //        switchToMainScreen();
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "onConnectionSuspended() called. Trying to reconnect.");
-        Game.mGoogleApiClient.connect();
-    }
-
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(TAG, "onConnectionFailed() called, result: " + connectionResult);
-
-        if (mResolvingConnectionFailure) {
-            Log.d(TAG, "onConnectionFailed() ignoring connection failure; already resolving.");
-            return;
-        }
-
-        if (mSignInClicked || mAutoStartSignInFlow) {
-            mAutoStartSignInFlow = false;
-            mSignInClicked = false;
-            mResolvingConnectionFailure = BaseGameUtils.resolveConnectionFailure(getActivity(), Game.mGoogleApiClient,
-                    connectionResult, RC_SIGN_IN, R.string.signin_other_error);
-        }
-
-    }
 
     @Override
     public void onActivityResult(int requestCode, int responseCode, Intent intent) {
         switch (requestCode) {
             case RC_SIGN_IN:
-                mSignInClicked = false;
-                mResolvingConnectionFailure = false;
-                if (responseCode == RESULT_OK) {
-                    Game.mGoogleApiClient.connect();
-//                    SharedPreferences.Editor editor = getContext().getSharedPreferences(NAME_PREFERENCES, MODE_PRIVATE).edit();
-//                    editor.putInt(NAME_PREFERENCES_CONNECTED, 1);
-//                    editor.commit();
-                } else {
-                    BaseGameUtils.showActivityResultError(getActivity(), requestCode, responseCode, R.string.unknown_error);
+                Task<GoogleSignInAccount> task =
+                        GoogleSignIn.getSignedInAccountFromIntent(intent);
+                try {
+                    GoogleSignInAccount account =
+                            task.getResult(ApiException.class);
+                    onConnected(account);
+                } catch (ApiException apiException) {
+                    String message = apiException.getMessage();
+                    if (message == null || message.isEmpty()) {
+                        message = "Error al conectar el cliente.";
+                    }
+                    onDisconnected();
+                    new AlertDialog.Builder(getActivity())
+                            .setMessage(message)
+                            .setNeutralButton(android.R.string.ok, null)
+                            .show();
                 }
                 break;
 
@@ -414,6 +499,9 @@ public class PlayOnlineFragment extends Fragment
                 break;
         }
         super.onActivityResult(requestCode, responseCode, intent);
+    }
+
+    private void onDisconnected() {
     }
 
 
@@ -464,7 +552,17 @@ public class PlayOnlineFragment extends Fragment
         Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
 
         // accept invitation
-        acceptInviteToRoom(inv.getInvitationId());
+        if (inv != null)
+            acceptInviteToRoom(inv.getInvitationId());
+        else {
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("La invitación no corresponde a una REALTIME invitation!")
+                    .setNeutralButton(android.R.string.ok, null)
+                    .show();
+            Game.pendingTurnBasedMatch = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
+            ((CategorySelectionActivity)getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);;
+        }
+
     }
 
 
@@ -492,24 +590,6 @@ public class PlayOnlineFragment extends Fragment
         }
     }
 
-    public void btnInvitar_Click() {
-        final int NUMERO_MINIMO_OPONENTES = sbPlayers.getProgress() - 1, NUMERO_MAXIMO_OPONENTES = sbPlayers.getProgress() - 1;
-        // show list of invitable players
-        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(Game.mGoogleApiClient, NUMERO_MINIMO_OPONENTES, NUMERO_MAXIMO_OPONENTES);
-        //switchToScreen(R.id.screen_wait);
-        getActivity().startActivityForResult(intent, RC_SELECT_PLAYERS);
-//        Games.Achievements.unlock(Game.mGoogleApiClient, getString(R.string.logro_invitar));
-    }
-
-
-    final static int REQUEST_LEADERBOARD = 100;
-    final static int REQUEST_ACHIEVEMENTS = 101;
-    final static int REQUEST_QUESTS = 102;
-    private Button btnMarcadores;
-    private Button btnLogros;
-    private Button btnMisiones;
-
-
     @Override
     public void onClick(View v) {
 
@@ -530,8 +610,8 @@ public class PlayOnlineFragment extends Fragment
             case R.id.sign_in_button:
                 // start the sign-in flow
                 Log.d(TAG, "Sign-in button clicked");
-                mSignInClicked = true;
-                Game.mGoogleApiClient.connect();
+//                mSignInClicked = true;
+                startSignInIntent();
                 break;
 //            case R.id.sign_out_button:
 //                Log.d(TAG, "Sign-out button clicked");
@@ -574,28 +654,101 @@ public class PlayOnlineFragment extends Fragment
 //        txtQuizzes.setText("Num. Quizzes: " + sbQuizzes.getProgress() + "/" + sbQuizzes.getMax());
     }
 
-    // Activity just got to the foreground. We switch to the wait screen because we will now
-    // go through the sign-in flow (remember that, yes, every time the Activity comes back to the
-    // foreground we go through the sign-in flow -- but if the user is already authenticated,
-    // this flow simply succeeds and is imperceptible).
-    @Override
-    public void onStart() {
-        if (Game.mGoogleApiClient == null) {
-//            switchToScreen(R.id.screen_sign_in);
-        } else if (!Game.mGoogleApiClient.isConnected()) {
-            Log.d(TAG, "Connecting client.");
-//            switchToScreen(R.id.screen_wait);
-            Game.mGoogleApiClient.connect();
-        } else {
-            Log.w(TAG,"GameHelper: client was already connected on onStart()");
-        }
-        super.onStart();
+
+    public void btnInvitar_Click() {
+        final int NUMERO_MINIMO_OPONENTES = sbPlayers.getProgress() - 1, NUMERO_MAXIMO_OPONENTES = sbPlayers.getProgress() - 1;
+        // show list of invitable players
+//        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(Game.mGoogleApiClient, NUMERO_MINIMO_OPONENTES, NUMERO_MAXIMO_OPONENTES);
+//        switchToScreen(R.id.screen_wait);
+//        startActivityForResult(intent, RC_SELECT_PLAYERS);
+//        Games.Achievements.unlock(Game.mGoogleApiClient, getString(R.string.logro_invitar));
+
+        boolean allowAutoMatch = false;
+        Games.getTurnBasedMultiplayerClient(getActivity(),
+                GoogleSignIn.getLastSignedInAccount(getActivity()))
+                .getSelectOpponentsIntent(NUMERO_MINIMO_OPONENTES,
+                        NUMERO_MAXIMO_OPONENTES, allowAutoMatch)
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        startActivityForResult(intent, RC_SELECT_PLAYERS);
+                    }
+                });
     }
 
+
+    //// TODO LIST INVITACIONES
+    private InvitationCallback mInvitationCallback = new InvitationCallback() {
+        // Handle notification events.
+        @Override
+        public void onInvitationReceived(@NonNull Invitation invitation) {
+            Toast.makeText(
+                    getActivity(),
+                    "An invitation has arrived from "
+                            + invitation.getInviter().getDisplayName(), Toast.LENGTH_SHORT)
+                    .show();
+
+            if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_REAL_TIME) {
+                manageInvitation(invitation);
+            }
+        }
+
+        @Override
+        public void onInvitationRemoved(@NonNull String invitationId) {
+            Toast.makeText(getActivity(), "An invitation was removed.", Toast.LENGTH_SHORT)
+                    .show();
+            if (Game.mIncomingInvitationId != null && Game.mIncomingInvitationId.equals(invitationId)) {
+                Game.mIncomingInvitationId = null;
+            }
+        }
+    };
+
+
+    public void manageInvitation(final Invitation invitation) {
+        CategorySelectionActivity.OnClickSnackBarAction actionInvitation = new CategorySelectionActivity.OnClickSnackBarAction() {
+            @Override
+            public void onClickAction() {
+                Log.d("TRAZA", "OnInvitationReceived");
+                Game.mIncomingInvitationId = invitation.getInvitationId();
+                Game.category = TopekaJSonHelper.getInstance(getActivity(), false).createCategoryPlayTimeReal(10, null);
+                Intent startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
+                    ActivityCompat.startActivity(getActivity(), startIntent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+                else {
+                    ActivityCompat.startActivity(getActivity(), startIntent, null);
+                }
+            }
+        };
+
+        if (invitation != null && invitation.getInvitationId() != null)
+            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("Invitation Received from " + invitation.getInviter().getDisplayName(), "Accept?", true, actionInvitation);
+
+    }
+
+
+    // Client used to interact with the Invitation system.
+    private InvitationsClient mInvitationsClient = null;
+
+
     public void btnVer_Invitaciones_Click(View view) {
-        // show list of pending invitations
-        Intent intent = Games.Invitations.getInvitationInboxIntent(Game.mGoogleApiClient);
-//        switchToScreen(R.id.screen_wait);
-        getActivity().startActivityForResult(intent, RC_INVITATION_INBOX);
+        Games.getInvitationsClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
+                .getInvitationInboxIntent()
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        startActivityForResult(intent, RC_INVITATION_INBOX);
+                    }
+                });
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Unregister the invitation callbacks; they will be re-registered via
+        // onResume->signInSilently->onConnected.
+        if (mInvitationsClient != null) {
+            mInvitationsClient.unregisterInvitationCallback(mInvitationCallback);
+        }
     }
 }

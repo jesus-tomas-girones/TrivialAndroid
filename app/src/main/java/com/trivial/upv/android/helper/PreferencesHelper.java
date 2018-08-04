@@ -18,11 +18,14 @@ package com.trivial.upv.android.helper;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
 import com.trivial.upv.android.model.Avatar;
 import com.trivial.upv.android.model.Player;
 import com.trivial.upv.android.model.Player;
+
+import java.util.Random;
 
 /**
  * Easy storage and retrieval of preferences.
@@ -136,4 +139,27 @@ public class PreferencesHelper {
     private static SharedPreferences getSharedPreferences(Context context) {
         return context.getSharedPreferences(PLAYER_PREFERENCES, Context.MODE_PRIVATE);
     }
+
+    // JVG.S
+    public static Player getDummyPlayer(FragmentActivity activity) {
+        final String firstName = "Android";
+        final String lastInitial = "Curso.com";
+
+        Random rand = new Random();
+        int pos = rand.nextInt(16);
+        final String avatarPreference = (Avatar.values())[pos].toString();
+
+        final Avatar avatar;
+        if (null != avatarPreference) {
+            avatar = Avatar.valueOf(avatarPreference);
+        } else {
+            avatar = null;
+        }
+
+        if (null == firstName || null == lastInitial || null == avatar) {
+            return null;
+        }
+        return new Player(firstName, lastInitial, avatar);
+    }
+    // JVG.E
 }

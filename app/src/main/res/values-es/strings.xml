@@ -9,7 +9,7 @@
     <string name="btn_true">Cierto</string>
     <string name="btn_false">Falso</string>
     <string name="category">Categoría</string>
-    <string name="sign_out">Desconectar</string>
+    <string name="sign_out">Reiniciar Puntuación</string>
     <string name="back">volver</string>
     <!--JVG.S-->
     <string name="activity_treeview_label">Jugar sin conexión (verificar una categoría)</string>
@@ -21,6 +21,7 @@
     <string name="menu_nd_category_review">Modo repaso</string>
     <string name="menu_nd_one_player">Un jugador</string>
     <string name="menu_nd_multi_player">Jugar en red</string>
+    <string name="menu_nd_multi_turn_based_multplayer">Jugar por turnos</string>
     <!--GOOGLE PLAY GAMES-->
     <string name="sign_in_other_error">Hubo un problema con el inicio de sesión. Inténtalo de nuevo más tarde.</string>
     <string name="sign_in_failed">Error al iniciar sesión. Verifique su conexión de red y vuelva a intentarlo.</string>
@@ -66,7 +67,7 @@
     <string name="choose_category">Selecciona categorías para jugar</string>
     <string name="choose_category_online">Selecciona categorías para jugar online</string>
     <string name="play_anyone">Jugadores al azar</string>
-    <string name="select_players">Seleccionar Jugadores</string>
+    <string name="select_players">Seleccionar Jdores.</string>
     <string name="select_categories">Seleccionar Categorías</string>
     <string name="all_categories">(Todas las Categorías)</string>
     <string name="total_players">Total PLayers</string>
@@ -94,5 +95,8 @@
     <string name="pref_time_online_title">Tiempo Total (seg.)</string>
     <string name="pref_warning_summary">Cualquier cambio en \'Modo Jugar en Red\' solo afecta en el dispositivo que propone la partida. Es decir, que el jugador que comienzan la partida pone las reglas, y el resto de jugadores aceptan su configuración.</string>
     <string name="pref_warning_title">Atención:</string>
+    <string name="select_partida">Selec. Partida</string>
+    <string name="new_match">Nueva Partida</string>
+    <string name="num_quizzes">Num Preguntas</string>
     <!--JTG.E-->
 </resources>

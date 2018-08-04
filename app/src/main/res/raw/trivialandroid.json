@@ -1,0 +1,880 @@
+{
+  "categories": {
+    "0_mooc": {
+      "category": "MOOC Introducción",
+      "description": "Preguntas relacionadas con el curso de EdX \"Android: Introducción a la programación\"",
+      "theme": "blue",
+      "img": "http://mmoviles.upv.es/trivial/img/edx.png",
+      "video": "",
+      "moreinfo": "https://www.edx.org/course/android-introduccion-la-programacion-upvalenciax-aip201x-1",
+      "subcategories": {
+        "0_java": {
+          "category": "Java y POO",
+          "description": "Comprueba tus conocimientos sobre Java y Programación Orientada a Objetos.",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/java.png",
+          "video": "https://youtu.be/nGVmgHUo7sA",
+          "moreinfo": "http://www.androidcurso.com/index.php/21",
+          "subcategories": {
+            "0_java_conocimientos": {
+              "category": "Conocimientos previos en C, Java y POO",
+              "description": "Comprueba tus conocimientos sobre Java y Programación Orientada a Objetos.",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_0%20Conocimientos%20previos%20en%20C%20Java%20y%20POO.txt"
+            },
+            "1_java_caracteriasticas": {
+              "video": "https://youtu.be/Mmmrp8PRLOo",
+              "moreinfo": "http://www.dcomg.upv.es/~jtomas/android/unidad_0/Caracter%C3%ADsticas%20de%20Java.pdf",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_1%20caracteristicas%20de%20Java.txt"
+            },
+            "2_java_instalacion": {
+              "theme": "green",
+              "img": "http://mmoviles.upv.es/trivial/img/Android_Studio.png",
+              "moreinfo": "http://www.dcomg.upv.es/~jtomas/android/unidad_0/Caracter%C3%ADsticas%20de%20Java.pdf",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_2%20Instalacion%20y%20entorno%20de%20desarrollo.txt"
+            },
+            "3_java_clases": {
+              "video": "https://youtu.be/yIeHtnwTN_M",
+              "moreinfo": "http://www.androidcurso.com/index.php/24",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_3%20Creacion%20de%20clases%20en%20Java.txt"
+            },
+            "4_java_objetos": {
+              "moreinfo": "http://www.androidcurso.com/index.php/25",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_4%20Creacion%20y%20utilizaci%C3%B3n%20de%20objetos.txt"
+            },
+            "5_java_encapsulamiento": {
+              "video": "https://youtu.be/HS9jaDsTyTw",
+              "moreinfo": "http://www.androidcurso.com/index.php/32",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_5%20Encapsulamiento%20y%20visibilidad.txt"
+            },
+            "6_java_herencia": {
+              "video": "https://youtu.be/MG0hOuk6fqU",
+              "moreinfo": "http://www.androidcurso.com/index.php/29",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_6%20Herencia%20en%20Java.txt"
+            },
+            "7_java_polimorfismo": {
+              "video": "https://youtu.be/8HDLKH3KF2U",
+              "moreinfo": "http://www.androidcurso.com/index.php/31",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_7%20Polimorfismo.txt"
+            },
+            "8_java_interfaces": {
+              "category": "Clases abstractas, interfaces y herencia múltiple",
+              "moreinfo": "http://www.androidcurso.com/index.php/686"
+            },
+            "9_java_enumerados": {
+              "video": "https://youtu.be/l_bNjdsXi68",
+              "moreinfo": "http://www.androidcurso.com/index.php/461",
+              "quiz": "http://mmoviles.upv.es/test_fundamentos/0_8%20Tipos%20de%20enumerados%20en%20Java.txt"
+            },
+            "10_java_colecciones": {
+              "category": "Las colecciones en Java",
+              "video": "https://youtu.be/zXZ1qSeuO90",
+              "moreinfo": "http://www.androidcurso.com/index.php/462"
+            }
+          }
+        },
+        "1_intro": {
+          "category": "Introducción a Android y entorno de desarrollo",
+          "description": "Introducción a la plataforma android y al entorno de desarrollo Android Studio.",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/Android_Studio.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/96",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/1_1 Que hace de_ y Origenes.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_2 Comparativa.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_3 Arquitectura.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_4 Instalacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_5 Plataformas de desarrollo.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_6 Elegir una version de Android.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_7 Componentes de una aplicacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_8 Elementos de un proyecto.txt"
+          ]
+        },
+        "2_interfaz": {
+          "category": "Interfaz de usuario",
+          "description": "Crear una interfaz de usuario por código y usando XML, tipos de vistas y layouts, recursos alternativos, estilos y temas,...",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/diseno_iu.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/110",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/2_1 Interfaz de usuario en XML y en codigo.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_10 Uso practico de Vistas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_2 R.java.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_3 Edicion visual de vistas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_4 Atributos de las vistas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_6 Tipos de Layouts.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_7 Layouts atributos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_8 Recursos alternativos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_9 Estilos y temas.txt"
+          ]
+        },
+        "3_actividades": {
+          "category": "Actividades",
+          "description": "crear nuevas actividades, barra de acciones, iconos y preferencias",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/actividad.jpg",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/475",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/3_1 Actividades.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_2 Comunicacion entre Actividades.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_3 Menus.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_4 Iconos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_5 Preferencias.txt"
+          ]
+        },
+        "4_recyclerview": {
+          "category": "RecyclerView e Intenciones",
+          "description": "La vista RecyclerView, uso de intenciones, añadir fotografías...",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/recyclerview.jpg",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/482",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_avanzado/1_2 RecyclerView.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_7 Intenciones.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_8 Repaso y temas varios.txt"
+          ]
+        },
+        "5_seguridad": {
+          "category": "Ciclo de vida, multimedia y seguridad",
+          "description": "Ciclo de vida de una actividad, guardar estado, multimedia en Android, Los tres pilares de la seguridad, Permisos en Android, ...",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/seguridad.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/488",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/6_1 Ciclo de vida actividades.txt",
+            "http://mmoviles.upv.es/test_fundamentos/6_2 Ciclo de vida aplicaciones.txt",
+            "http://mmoviles.upv.es/test_fundamentos/6_3 Guardar estado.txt",
+            "http://mmoviles.upv.es/test_fundamentos/6_4_multimedia.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_1 Los tres pilares de la seguridad.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_2 Usuario Linux.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_3 Los permisos en Android.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_3b Los permisos en Android 6.txt"
+          ]
+        },
+        "6_posicionamiento": {
+          "category": "Posicionamiento y mapas",
+          "description": ", API de localización y Google Maps",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/mapas.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/490",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/7_4 Sistemas localizacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_5 GPS.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_6 API Localizacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_7 Google Maps.txt"
+          ]
+        },
+        "7_bases_de_datos": {
+          "category": "Bases de datos y Fragments",
+          "description": "Almacenamiento Datos en Android, Bases de datos con SQLite y uso de Fragments",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/almacenamiento.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/494",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/7_1 SQLite I.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_2 SQLite II.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_3 Fragments.txt"
+          ]
+        }
+      }
+    },
+
+    "1_fundamentos": {
+      "category": "Android Fundamentos",
+      "description": "Preguntas relacionadas con el curso \"Android: Fundamentos\" o El Gran Libro de Amdroid",
+      "theme": "green",
+      "img": "http://mmoviles.upv.es/trivial/img/android.png",
+      "video": "",
+      "moreinfo": "http://www.androidcurso.com/index.php/modulo-avanzado/programa-fundamentos",
+      "subcategories": {
+        "1_intro": {
+          "category": "La plataforma Android",
+          "description": "Introducción a la plataforma android y al entorno de desarrollo Android Studio.",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/Android_Studio.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/96",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/1_1%20Que%20hace%20de_%20y%20Origenes.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_2 Comparativa.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_1 Que hace de_ y Origenes.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_2 Comparativa.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_3 Arquitectura.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_4 Instalacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_5 Plataformas de desarrollo.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_6 Elegir una version de Android.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_7 Componentes de una aplicacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/1_8 Elementos de un proyecto.txt"
+          ]
+        },
+        "2_": {
+          "category": "Diseño de la interfaz de usuario",
+          "description": "crear una interfaz de usuario por código y usando XML, tipos de vistas y layouts, recursos alternativos, estilos y temas,...",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/diseno_iu.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/110",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/2_1 Interfaz de usuario en XML y en codigo.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_10 Uso practico de Vistas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_2 R.java.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_3 Edicion visual de vistas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_4 Atributos de las vistas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_6 Tipos de Layouts.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_7 Layouts atributos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_8 Recursos alternativos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/2_9 Estilos y temas.txt"
+          ]
+        },
+        "3_": {
+          "category": "Actividades e Intenciones",
+          "description": "crear nuevas actividades, menús, iconos y preferencias, RecyclerView, intenciones,...",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/actividad.jpg",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/34",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/3_1 Actividades.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_2 Comunicacion entre Actividades.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_3 Menus.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_4 Iconos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_5 Preferencias.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_2 RecyclerView.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_7 Intenciones.txt",
+            "http://mmoviles.upv.es/test_fundamentos/3_8 Repaso y temas varios.txt"
+          ]
+        },
+        "4_": {
+          "category": "Gráficos en Android",
+          "description": "Clases para gráficos en Android: Canvas, Paint, Path, Drawable…",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/graficos.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/35-unidad-4-graficos-en-android",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/4_1_Clases Graficas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/4_2_Canvas.txt",
+            "http://mmoviles.upv.es/test_fundamentos/4_3_Paint.txt",
+            "http://mmoviles.upv.es/test_fundamentos/4_4_Path.txt",
+            "http://mmoviles.upv.es/test_fundamentos/4_5_Drawable.txt",
+            "http://mmoviles.upv.es/test_fundamentos/4_6_BitMap_Vector_Drawable.txt",
+            "http://mmoviles.upv.es/test_fundamentos/4_7_Otros_Drawable.txt"
+          ]
+        },
+        "5_": {
+          "category": "Hilos de ejecución y entradas en Android",
+          "description": "Hilos de ejecución, AsyncTask, pantalla táctil, sensores, ...",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/thread.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/36-unidad-5-entradas-en-android-teclado-pantalla-tactil-y-sensores",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/5_1_1_Hilos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/5_1_2_ActualizaFisica.txt",
+            "http://mmoviles.upv.es/test_fundamentos/5_2_Manejo_de_eventos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/5_3_AsyncTask.txt",
+            "http://mmoviles.upv.es/test_fundamentos/5_6_Sensores.txt"
+          ]
+        },
+        "6_": {
+          "category": "Multimedia y ciclo de vida de una actividad",
+          "description": "Ciclo de vida de una actividad, guardar estado, multimedia en Android, MediaPlayer, ...",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/multimedia.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/37-unidad-6-multimedia-y-ciclo-de-vida",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/6_1 Ciclo de vida actividades.txt",
+            "http://mmoviles.upv.es/test_fundamentos/6_2 Ciclo de vida aplicaciones.txt",
+            "http://mmoviles.upv.es/test_fundamentos/6_3 Guardar estado.txt",
+            "http://mmoviles.upv.es/test_fundamentos/6_4_multimedia.txt"
+          ]
+        },
+        "7_": {
+          "category": "Seguridad y posicionamiento",
+          "description": "Los tres pilares de la seguridad, Permisos en Android, API de localización y Google Maps",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/seguridad.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/41-unidad-7-seguridad-y-posicionamiento",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/7_1 Los tres pilares de la seguridad.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_2 Usuario Linux.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_3 Los permisos en Android.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_3b Los permisos en Android 6.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_4 Sistemas localizacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_5 GPS.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_6 API Localizacion.txt",
+            "http://mmoviles.upv.es/test_fundamentos/7_7 Google Maps.txt"
+          ]
+        },
+        "8_": {
+          "category": "Servicios, notificaciones y receptores de anuncios",
+          "description": "Uso de servicios en Android, las notificaciones de la barra de estado, receptores de anuncios,... ",
+          "theme": "red",
+          "img": "http://www.androidcurso.com/images/LogosCursos/fundamentos.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/38-unidad-8-servicios-notificaciones-y-receptores-de-anuncios",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/8_1 Servicios.txt",
+            "http://mmoviles.upv.es/test_fundamentos/8_2 Servicios e hilos.txt",
+            "http://mmoviles.upv.es/test_fundamentos/8_3 Notificaciones.txt",
+            "http://mmoviles.upv.es/test_fundamentos/8_4 Receptores de anuncios.txt",
+            "http://mmoviles.upv.es/test_fundamentos/8_5 Receptor comunicacion.txt"
+          ]
+        },
+        "9_": {
+          "category": "Almacenamiento de datos",
+          "description": "Preferencias, Ficheros, XML, JSON, SQLite y ContentProvider",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/almacenamiento.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/42-unidad-9-almacenamiento-de-datos",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/9_1 Ficheros.txt",
+            "http://mmoviles.upv.es/test_fundamentos/9_2 La memoria externa.txt",
+            "http://mmoviles.upv.es/test_fundamentos/9_3 XML.txt",
+            "http://mmoviles.upv.es/test_fundamentos/9_3b JSON.txt",
+            "http://mmoviles.upv.es/test_fundamentos/9_4 SQLite I.txt",
+            "http://mmoviles.upv.es/test_fundamentos/9_5 SQLite II.txt",
+            "http://mmoviles.upv.es/test_fundamentos/9_7 ContentProvider.txt"
+          ]
+        },
+        "10_": {
+          "category": "Internet: sockets, HTTP y servicios web",
+          "description": "Protocolos de comunicaciones mediante sockets, HTTP, servicios web basados en SOAP y en REST, Acceder a servicios web de terceros y un servicio Web con PHP y MySQL",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/internet.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-fundamentos/43-unidad-10-internet-sockets-http-y-servicios-webhttp://www.androidcurso.com/index.php/modulo-fundamentos/43-unidad-10-internet-sockets-http-y-servicios-web",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_fundamentos/10_1 Sockets.txt",
+            "http://mmoviles.upv.es/test_fundamentos/10_2 El protocolo HTTP.txt",
+            "http://mmoviles.upv.es/test_fundamentos/10_3 Servicios Web.txt"
+          ]
+        }
+      }
+    },
+
+    "2_firebase": {
+      "category": "Firebase",
+      "description": "Preguntas relacionadas con el curso \"Firebase\" o el libro \"Firebase: Traabajando en la nube\"",
+      "theme": "yellow",
+      "img": "http://mmoviles.upv.es/trivial/img/firebase.png",
+      "video": "",
+      "moreinfo": "http://www.androidcurso.com/index.php/libros-android/firebase",
+      "subcategories": {
+        "1_introduccion": {
+          "category": "Introducción a Firebase",
+          "description": "funcionalidades de Firebase",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/firebase.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/1_1_intro Servicios en la nube.txt",
+            "http://mmoviles.upv.es/test/firebase/1_2_intro BMaaS.txt",
+            "http://mmoviles.upv.es/test/firebase/1_3_intro Genera.txt",
+            "http://mmoviles.upv.es/test/firebase/1_4_intro Servicios.txt",
+            "http://mmoviles.upv.es/test/firebase/1_5_intro Instalacion.txt"
+          ]
+        },
+        "2_autentificacion": {
+          "category": "Autentificación",
+          "description": "Firebase",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/firebase_auth.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/2_1_auth General.txt",
+            "http://mmoviles.upv.es/test/firebase/2_5_auth Unificar.txt"
+          ]
+        },
+        "3_firestore": {
+          "category": "Bases de datos",
+          "description": "Firestore: Bases de datos en Firebase",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/firestore.jpeg",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/3_2_firestore colecciones.txt",
+            "http://mmoviles.upv.es/test/firebase/3_3_firestore operaciones.txt",
+            "http://mmoviles.upv.es/test/firebase/3_4_firestore escuchadores.txt",
+            "http://mmoviles.upv.es/test/firebase/3_5_firestore recyclerview.txt",
+            "http://mmoviles.upv.es/test/firebase/3_6_firestore organizar datos.txt",
+            "http://mmoviles.upv.es/test/firebase/3_7_firestore consultas.txt",
+            "http://mmoviles.upv.es/test/firebase/3_8_firestore reglas.txt"
+          ]
+        },
+        "4_fcm": {
+          "category": "Firebase Cloud Messaging",
+          "description": "Envío de mensajes en la nube",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/firebase_messag.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/4_1_mensajes.txt"
+          ]
+        },
+        "5_storage": {
+          "category": "Almacenamiento",
+          "description": "Almacenamiento en Firebase y Google Drive",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/almacenamiento.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/5_1_storage.txt",
+            "http://mmoviles.upv.es/test/firebase/6_1_GoogleDrive.txt"
+          ]
+        },
+        "6_app_webs": {
+          "category": "Aplicaciones Web",
+          "description": "Aplicaciones Web, Firebase Hosting y Analytics",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/webapp.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/7_1_AppWeb_FirebaseHosting.txt",
+            "http://mmoviles.upv.es/test/firebase/7_2_WebView.txt",
+            "http://mmoviles.upv.es/test/firebase/7_3_AppHibridas.txt",
+            "http://mmoviles.upv.es/test/firebase/7_4_ProgramacionIndependiente.txt",
+            "http://mmoviles.upv.es/test/firebase/7_5_Analytics.txt"
+          ]
+        },
+        "7_otras": {
+          "category": "Otras funciones Firebase",
+          "description": "Functions, Enlaces dinámicos, Remoteconfig, Stability, Android Backup,...",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/firebase.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/firebase/8_1_functions.txt",
+            "http://mmoviles.upv.es/test/firebase/8_2_enlacesdinamicos.txt",
+            "http://mmoviles.upv.es/test/firebase/8_3_remoteconfig.txt",
+            "http://mmoviles.upv.es/test/firebase/8_4_stability.txt",
+            "http://mmoviles.upv.es/test/firebase/8_5_androidbackup.txt"
+          ]
+        },
+        "8_redes_sociales": {
+          "category": "Redes sociales",
+          "description": "Facebook y Twitter",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/facebook.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_avanzado/8_1 Facebook.txt",
+            "http://mmoviles.upv.es/test_avanzado/8_2 Twitter.txt"
+          ]
+        }
+      }
+    },
+
+    "3_arquitectura": {
+      "category": "Arquitecturas",
+      "description": "Arquitecturas software y diseño avanzado de interfaces de usuario",
+      "theme": "purple",
+      "img": "http://mmoviles.upv.es/trivial/img/arquitectura.png",
+      "video": "",
+      "moreinfo": "http://www.androidcurso.com/index.php/asignaturas/arquitecturas-de-software",
+      "subcategories": {
+        "1_interfaz_usuario": {
+          "category": "diseño avanzado de interfaz de usuario",
+          "description": "funcionamiento de Fragments, uso avanzado de RecyclerView, inserción de barra de acciones y Navigation Drawer, animación de propiedades",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/diseno_iu.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/96",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_avanzado/1_1 Application y Singleton.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_2 RecyclerView.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_3 Fragments.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_4 ActionBar.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_6 Navigation Drawer.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_7 Animaciones de Vistas.txt",
+            "http://mmoviles.upv.es/test_avanzado/1_8 Animaciones de Propiedades.txt"
+          ]
+        },
+        "2_vistas": {
+          "category": "Diseño personalizado de vistas",
+          "description": "Crear nuevas vistas modificando o combinando vistas existentes, integrar widgets en el escritorio y en una notificación.",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/widget.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/96",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_avanzado/2_1 Vistas.txt",
+            "http://mmoviles.upv.es/test_avanzado/2_2 Escuchador de Eventos.txt",
+            "http://mmoviles.upv.es/test_avanzado/2_3 Modificacion de las Vistas.txt",
+            "http://mmoviles.upv.es/test_avanzado/2_4 Atributos XML.txt",
+            "http://mmoviles.upv.es/test_avanzado/2_5 Creacion de una Vista desde cero.txt",
+            "http://mmoviles.upv.es/test_avanzado/2_6 Widget de Escritorio.txt"
+          ]
+        },
+        "3_hilos": {
+          "category": "Hilos de ejecución",
+          "description": "Programación concurrente, AsyncTask, servicios, SurfaceView.",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/thread.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/hilos/1_hilo_iu.txt",
+            "http://mmoviles.upv.es/test/hilos/2_asynctask.txt",
+            "http://mmoviles.upv.es/test/hilos/3_servicios.txt",
+            "http://mmoviles.upv.es/test/hilos/4_surfaceview.txt"
+          ]
+        },
+        "4_testing": {
+          "category": "Testing",
+          "description": "Test unitario y de instrumentación, Text de IU con Expresso",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/testing.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/testing/1_intro.txt",
+            "http://mmoviles.upv.es/test/testing/2_test unitario.txt",
+            "http://mmoviles.upv.es/test/testing/3_test doble.txt",
+            "http://mmoviles.upv.es/test/testing/4_espresso.txt"
+          ]
+        },
+        "5_kotling": {
+          "category": "Kotlin",
+          "description": "Programación en Kotlin",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/kotlin.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/kotlin/1_caracteristicas.txt",
+            "http://mmoviles.upv.es/test/kotlin/2_funciones.txt",
+            "http://mmoviles.upv.es/test/kotlin/3_lambdas.txt",
+            "http://mmoviles.upv.es/test/kotlin/5_tratamiento de null.txt",
+            "http://mmoviles.upv.es/test/kotlin/6_chequeo de tipos.txt",
+            "http://mmoviles.upv.es/test/kotlin/8_apply y with.txt",
+            "http://mmoviles.upv.es/test/kotlin/9_clases selladas y enumeradas.txt"
+          ]
+        },
+        "6_arquitecturas": {
+          "category": "Arquitecturas de software",
+          "description": "Principales patrones de diseño. Buenas prácticas de programación: SOLID y STUPID. Arquitecturas de software.",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/arquitectura.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/arquitectura/1_stupid.txt",
+            "http://mmoviles.upv.es/test/arquitectura/9_singleton.txt"
+          ]
+        }
+      }
+    },
+
+    "4_plataformas": {
+      "category": "Plataformas Android",
+      "description": "Domina los diferentes ecosistemas Android: Wear, Auto y TV. Desarrolla aplicacionees para ChromeCast y Miracast. Crea tus juegos con la ayuda de Google Play Games",
+      "theme": "red",
+      "img": "http://mmoviles.upv.es/trivial/img/plataformas.png",
+      "video": "",
+      "moreinfo": "http://www.androidcurso.com/index.php/modulo-avanzado/plataformas-android",
+      "subcategories": {
+        "1_wear_1": {
+          "category": "Wear: Toma de contacto y notificaciones",
+          "description": "",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/wear.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/Wearable/8.1_Tipos-de-Wearable.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.2_SO_ para_relojes.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.3_ Caracteristicas-de-Android-Wear.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.4_ El-interfaz-de-usuario-Android-Wear.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.5_ Instalacion-Android-Wear.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.6_ Notificaciones_Android_y_Wear.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.7_Notificaciones_anadir_paginas _y _apilar.txt",
+            "http://mmoviles.upv.es/test/Wearable/8.8_Notificaciones_contestar_por_voz.txt"
+          ]
+        },
+        "1_wear_2": {
+          "category": "Wear: Programación",
+          "description": "",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/wear.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/Wearable/9.1_Aplicaciones para Wear.txt",
+            "http://mmoviles.upv.es/test/Wearable/9.2_Layouts en pantalla cuadrada y redonda.txt",
+            "http://mmoviles.upv.es/test/Wearable/9.3_Listas tarjetas y selectores 2D.txt",
+            "http://mmoviles.upv.es/test/Wearable/9.5_Sincronizacion de datos.txt",
+            "http://mmoviles.upv.es/test/Wearable/9.6_Reconocimiento de voz.txt",
+            "http://mmoviles.upv.es/test/Wearable/9.7_Sensores.txt"
+          ]
+        },
+        "3_auto": {
+          "category": "Android Auto",
+          "description": "",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/auto.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/Auto/1_introduccion.txt",
+            "http://mmoviles.upv.es/test/Auto/2_patrones_diseno.txt",
+            "http://mmoviles.upv.es/test/Auto/3_instalacion.txt",
+            "http://mmoviles.upv.es/test/Auto/4_mensajeria.txt",
+            "http://mmoviles.upv.es/test/Auto/5_multimedia.txt",
+            "http://mmoviles.upv.es/test/Auto/6_publicacion.txt"
+          ]
+        },
+        "4_tv": {
+          "category": "Android TV",
+          "description": "",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/tv.jpg",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/AndroidTV/6.1_AndroidTV-Entorno.txt",
+            "http://mmoviles.upv.es/test/AndroidTV/6.2_AndroidTV-Aplicaciones.txt",
+            "http://mmoviles.upv.es/test/AndroidTV/6.3_AndroidTV-Aplicaciones_con_AndroidStudio.txt",
+            "http://mmoviles.upv.es/test/AndroidTV/6.4_AndroidTV-Recomendaciones.txt",
+            "http://mmoviles.upv.es/test/AndroidTV/6.5_AndroidTV-Busquedas.txt",
+            "http://mmoviles.upv.es/test/AndroidTV/6.6_AndroidTV-Juegos.txt",
+            "http://mmoviles.upv.es/test/AndroidTV/6.7_AndroidTV-Requisitos.txt"
+          ]
+        },
+        "5_cast": {
+          "category": "ChromCast y Miracast",
+          "description": "",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/cast.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/MiraCast/7.1_Google_Cast-Introduccion.txt",
+            "http://mmoviles.upv.es/test/MiraCast/7.2_Google_Cast-Aplicacion_Emisora.txt",
+            "http://mmoviles.upv.es/test/MiraCast/7.3_Google_Cast-Aplicacion_Receptora.txt",
+            "http://mmoviles.upv.es/test/MiraCast/7.4_MiraCast.txt"
+          ]
+        },
+        "6_google_play_games": {
+          "category": "Google Play Games",
+          "description": "",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/gpgames.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/GPGames/9.1_ConceptosGenerales.txt",
+            "http://mmoviles.upv.es/test/GPGames/9.2_Guardar datos en la nube.txt",
+            "http://mmoviles.upv.es/test/GPGames/9.3_MultijugadorTiempoReal.txt",
+            "http://mmoviles.upv.es/test/GPGames/9.4_MultijugadorPorTurnos.txt",
+            "http://mmoviles.upv.es/test/GPGames/9.5_Marcadores Logros etc.txt"
+          ]
+        }
+      }
+    },
+
+    "5_iot": {
+      "category": "Android Things y Visión Artificial",
+      "description": "Arquitecturas software y diseño avanzado de interfaces de usuario",
+      "theme": "blue",
+      "img": "http://mmoviles.upv.es/trivial/img/IoT.png",
+      "video": "",
+      "moreinfo": "http://www.androidcurso.com/index.php/asignaturas/iot-y-vision-artificial",
+      "subcategories": {
+        "1_opencv": {
+          "category": "OpenCV",
+          "description": "Procesado de imágenes en Android con OpenCV",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/opencv.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/modulo-avanzado/iot-y-vision-artificial",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/OpenCV/1.1_OpenCV-Instalacion.txt",
+            "http://mmoviles.upv.es/test/OpenCV/1.2_OpenCV-ClaseMat.txt",
+            "http://mmoviles.upv.es/test/OpenCV/1.3_OpenCV-ProgramaBasico.txt",
+            "http://mmoviles.upv.es/test/OpenCV/2.1_OpenCV-TransformacionesIntensidad.txt",
+            "http://mmoviles.upv.es/test/OpenCV/2.2_OpenCV-filtros_lineales.txt",
+            "http://mmoviles.upv.es/test/OpenCV/2.3_OpenCV-Morfologia.txt",
+            "http://mmoviles.upv.es/test/OpenCV/3.1_OpenCV-Binarizacion.txt",
+            "http://mmoviles.upv.es/test/OpenCV/3.2_OpenCV-Segmentacion.txt",
+            "http://mmoviles.upv.es/test/OpenCV/3.3_OpenCV-OCR.txt"
+          ]
+        },
+        "2_things": {
+          "category": "Android Things",
+          "description": "Implementa dispositivos de Internet de las Cosas basados en Android Things",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/things.png",
+          "video": "",
+          "moreinfo": "",
+          "subcategories": {
+            "1_things_io": {
+              "category": "Android Things: Entradas/Salidas",
+              "description": "Conecta sensores a una Raspberry Pi y realiza antradas / salidas usando Android Things",
+              "theme": "red",
+              "img": "http://mmoviles.upv.es/trivial/img/things.png",
+              "video": "",
+              "moreinfo": "",
+              "quizzes": [
+                "http://mmoviles.upv.es/test/things/1.1_intro.txt",
+                "http://mmoviles.upv.es/test/things/1.2_plataformas.txt",
+                "http://mmoviles.upv.es/test/things/1.3_sdk.txt",
+                "http://mmoviles.upv.es/test/things/1.4_raspberrypi.txt",
+                "http://mmoviles.upv.es/test/things/1.5_electronica.txt",
+                "http://mmoviles.upv.es/test/things/1.6_entradas_salidas.txt",
+                "http://mmoviles.upv.es/test/things/1.7_microcontroladores.txt",
+                "http://mmoviles.upv.es/test/things/1.8_controladores.txt",
+                "http://mmoviles.upv.es/test/things/1.9_assistant.txt"
+              ]
+            },
+            "2_things_com": {
+              "category": "Android Things: Entradas/Salidas",
+              "description": "Comunicaciones en Internet de las Cosas utilizando Android Things",
+              "theme": "red",
+              "img": "http://mmoviles.upv.es/trivial/img/things.png",
+              "video": "",
+              "moreinfo": "",
+              "quizzes": [
+                "http://mmoviles.upv.es/test/things/2.1_comunicaciones_offline.txt",
+                "http://mmoviles.upv.es/test/things/2.2_nearby_communications.txt",
+                "http://mmoviles.upv.es/test/things/2.3_comunicaciones_online.txt",
+                "http://mmoviles.upv.es/test/things/2.4_http.txt",
+                "http://mmoviles.upv.es/test/things/2.5_rest.txt",
+                "http://mmoviles.upv.es/test/things/2.6_cloud_iot.txt",
+                "http://mmoviles.upv.es/test/things/2.7_mqtt.txt"
+              ]
+            }
+          }
+        },
+        "3_codigo_nativo": {
+          "category": "Programación en código nativo",
+          "description": "",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/cpp.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_avanzado/7_1 Android NDK.txt",
+            "http://mmoviles.upv.es/test_avanzado/7_2 Funcionamiento y estructura de Android NDK.txt",
+            "http://mmoviles.upv.es/test_avanzado/7_3 Interfaz entre Java y CC (JNI).txt"
+          ]
+        },
+        "4_ingenieria inversa": {
+          "category": "Ingenieria inversa",
+          "description": "Aprender a obtener el código Java de aplicaciones publicadas. Modificar aplicaciones de terceros. Ofuscar el código de tus aplicaciones. Usar licencias con Google Play. Evitar usos no autorizados de tus aplicaciones.",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/ingenieriainversa.png",
+          "video": "",
+          "moreinfo": "http://www.androidcurso.com/index.php/",
+          "quizzes": [
+            "http://mmoviles.upv.es/test_avanzado/9_1 Formato APK.txt",
+            "http://mmoviles.upv.es/test_avanzado/9_2 Decompilando.txt",
+            "http://mmoviles.upv.es/test_avanzado/9_3 Modificando aplicaciones.txt",
+            "http://mmoviles.upv.es/test_avanzado/9_4 Ofuscacion.txt",
+            "http://mmoviles.upv.es/test_avanzado/9_5 Licencias.txt",
+            "http://mmoviles.upv.es/test_avanzado/9_6 Evitar que pirateen nuestra aplicacion.txt"
+          ]
+        }
+      }
+    },
+
+    "6_herramientas": {
+      "category": "Herramientas de Gestión de Proyectos",
+      "description": "Se abordan aspectos que cubren desde la concepción del producto usando metodologías ágiles, pasando por el prototipado y diseño del interfaz de usuario, la fase de implementación con el control de versiones, hasta llegar a la publicación, posicionamiento en tiendas de Apps (ASO), promoción y monetización.",
+      "theme": "green",
+      "img": "http://mmoviles.upv.es/trivial/img/herramientas.png",
+      "video": "https://youtu.be/l0PHVAOSHW8",
+      "moreinfo": "http://www.androidcurso.com/index.php/asignaturas/herramientas-gestion-proyectos",
+      "subcategories": {
+        "1_metodos_agiles": {
+          "category": "Métodos Ágiles",
+          "description": "Las metodologías ágiles se caracterizan por adoptar una estrategia de desarrollo incremental, en lugar de la planificación y ejecución completa del producto.",
+          "theme": "yellow",
+          "img": "http://mmoviles.upv.es/trivial/img/scrum.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/metodos_agiles/1_metodos_agiles.txt",
+            "http://mmoviles.upv.es/test/metodos_agiles/2_personas_historias_y_story_map.txt",
+            "http://mmoviles.upv.es/test/metodos_agiles/3_scrum.txt",
+            "http://mmoviles.upv.es/test/metodos_agiles/4_planificacion_y_estimacion.txt"
+          ]
+        },
+        "2_git": {
+          "category": "Control de Versiones",
+          "description": "Trabajando con Git en Android Studio",
+          "theme": "blue",
+          "img": "http://mmoviles.upv.es/trivial/img/git.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/git/1_git_conceptos.txt",
+            "http://mmoviles.upv.es/test/git/2_git_comandos.txt",
+            "http://mmoviles.upv.es/test/git/3_git_ramas.txt",
+            "http://mmoviles.upv.es/test/git/4_git_github.txt"
+          ]
+        },
+        "3_ux": {
+          "category": "Experiencia de Usuario",
+          "description": "Diseña un producto intuitivo, sencillo de utilizar, con un diseño adecuado y que siga las recomendaciones de Material Design.",
+          "theme": "green",
+          "img": "http://mmoviles.upv.es/trivial/img/ux.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/ux/1_ux.txt",
+            "http://mmoviles.upv.es/test/ux/2_material_design.txt",
+            "http://mmoviles.upv.es/test/ux/4_ux_analytics.txt",
+            "http://mmoviles.upv.es/test/ux/5_test_a_b.txt"
+          ]
+        },
+        "4_aso": {
+          "category": "App Store Optimization",
+          "description": "optimización en tiendas de aplicaciones (ASO)",
+          "theme": "red",
+          "img": "http://mmoviles.upv.es/trivial/img/aso.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/aso/1_preparar_apk.txt",
+            "http://mmoviles.upv.es/test/aso/2_firmar_apk.txt",
+            "http://mmoviles.upv.es/test/aso/3_canales_distribucion.txt",
+            "http://mmoviles.upv.es/test/aso/4_publicar_google_play.txt",
+            "http://mmoviles.upv.es/test/aso/8_factores_aso.txt",
+            "http://mmoviles.upv.es/test/aso/9_optimizar_aso.txt"
+          ]
+        },
+        "5_promo_monetiz": {
+          "category": "Promoción y Monetización",
+          "description": "Promoción In-App y Out-App, Modelos de negocio, Inclusión de publicidad y Micropagos",
+          "theme": "purple",
+          "img": "http://mmoviles.upv.es/trivial/img/promo.png",
+          "video": "",
+          "moreinfo": "",
+          "quizzes": [
+            "http://mmoviles.upv.es/test/promo_monetiz/2_promo_out_app.txt",
+            "http://mmoviles.upv.es/test/promo_monetiz/3_modelo_negocio.txt"
+          ]
+        }
+      }
+    }
+  }
+}
+

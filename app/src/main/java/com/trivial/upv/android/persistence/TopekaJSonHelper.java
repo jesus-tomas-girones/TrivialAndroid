@@ -153,7 +153,7 @@ public class TopekaJSonHelper {
                                 br.close();
 
                                 if (contador > 0 && iguales && contador == preguntas.length && line == null) {
-                            /* The same file  Take information from cache*/
+                                    /* The same file  Take information from cache*/
                                     Log.d("TRAZA", "fichero no se ha modificado");
                                     new Thread(new Runnable() {
                                         @Override
@@ -241,7 +241,7 @@ public class TopekaJSonHelper {
 
 
     private void newFileJson(String[] preguntas) throws FileNotFoundException {
-         /* New File*/
+        /* New File*/
 
         PrintWriter pw = null;
         pw = new PrintWriter(mContext.openFileOutput("categories.json", Context.MODE_PRIVATE));
@@ -498,10 +498,10 @@ public class TopekaJSonHelper {
     }
 
     private static Quiz createTrueFalseQuiz(String question, String answer, boolean solved) {
-    /*
-     * parsing json with the potential values "true" and "false"
-     * see res/raw/subtemas.json for reference
-     */
+        /*
+         * parsing json with the potential values "true" and "false"
+         * see res/raw/subtemas.json for reference
+         */
         final boolean answerValue = "true".equals(answer);
         return new TrueFalseQuiz(question, answerValue, solved);
     }
@@ -1005,7 +1005,7 @@ public class TopekaJSonHelper {
         if (categoriesJSON != null) {
             for (CategoryJSON category : categoriesJSON) {
                 if (category != null &&
-                        ( (categoriesSelected!=null && categoriesSelected.indexOf(category.getCategory()) >= 0) || categoriesSelected == null)) {
+                        ((categoriesSelected != null && categoriesSelected.indexOf(category.getCategory()) >= 0) || categoriesSelected == null)) {
 //                    Log.d("CATEGORY", category.getCategory());
                     if (category.getSubcategories() != null) {
                         getCategoryPlayTimeRealSubcategories(allQuizzes, category.getSubcategories());
@@ -1081,7 +1081,7 @@ public class TopekaJSonHelper {
         allQuizzes.clear();
         // Choose n random quizzes
 
-        final String id = QuizActivity.ARG_ONLINE;
+        final String id = QuizActivity.ARG_REAL_TIME_ONLINE;
         final String name = mContext.getResources().getString(R.string.menu_nd_multi_player);
         final Theme theme = Theme.valueOf("topeka");
         final int[] scores = new int[numQuizzes];
@@ -1175,8 +1175,8 @@ public class TopekaJSonHelper {
         if (mode.equals(QuizActivity.ARG_ONE_PLAYER)) {
             id = QuizActivity.ARG_ONE_PLAYER;
             name = mContext.getResources().getString(R.string.menu_nd_one_player);
-        } else if (mode.equals(QuizActivity.ARG_ONLINE)) {
-            id = QuizActivity.ARG_ONLINE;
+        } else if (mode.equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
+            id = QuizActivity.ARG_REAL_TIME_ONLINE;
             name = mContext.getResources().getString(R.string.menu_nd_multi_player);
             themeName = "topeka";
             img = "http://mmoviles.upv.es/trivial/img/gpgames.png";
@@ -1286,6 +1286,11 @@ public class TopekaJSonHelper {
         return -1;
     }
 
+    public Category createCategoryTurnBased(String categorySelected) {
+        List<String> category = new ArrayList<>();
+        category.add(categorySelected);
+        return createCategoryPlayTimeReal(1,category );
+    }
 
     public static class QuizDeserializer implements JsonDeserializer<Quiz> {
         @Override
@@ -1299,7 +1304,11 @@ public class TopekaJSonHelper {
 
             Quiz tmpQuiz = null;
 
-            tmpQuiz = TopekaJSonHelper.createQuizDueToTypeJson(quiz, type);
+            try {
+                tmpQuiz = TopekaJSonHelper.createQuizDueToTypeJson(quiz, type);
+            }catch (Exception e) {
+                Log.e(getClass().getSimpleName(),"Error loazin Quiz: " + e.getMessage() );
+            }
 
             return tmpQuiz;
         }

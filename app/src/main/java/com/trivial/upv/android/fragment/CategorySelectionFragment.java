@@ -174,7 +174,7 @@ public class CategorySelectionFragment extends Fragment {
         // Start the activity with the participants, animating from one to the other.
         final Bundle transitionBundle = sceneTransitionAnimation.toBundle();
         Intent startIntent = QuizActivity.getStartIntent(activity, category);
-        ActivityCompat.startActivityForResult(activity,
+        startActivityForResult(
                 startIntent,
                 REQUEST_CATEGORY,
                 transitionBundle);

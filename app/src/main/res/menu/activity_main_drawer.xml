@@ -16,6 +16,10 @@
             android:id="@+id/nav_tree_view_quick_match"
             android:icon="@drawable/ic_play_arrow_black"
                 android:title="@string/menu_nd_multi_player" />
+        <item
+            android:id="@+id/nav_tree_view_turn_base_multplayer"
+            android:icon="@drawable/ic_check_black"
+            android:title="@string/menu_nd_multi_turn_based_multplayer" />
         <!--<item-->
             <!--android:id="@+id/nav_manage"-->
             <!--android:icon="@drawable/ic_menu_manage"-->
@@ -38,7 +42,7 @@
                 android:title="@string/about" />
             <item
                 android:id="@+id/nav_signout"
-                android:icon="@drawable/ic_exit_to_app_black_24px"
+                android:icon="@android:drawable/ic_delete"
                 android:title="@string/sign_out" />
         </menu>
     </item>

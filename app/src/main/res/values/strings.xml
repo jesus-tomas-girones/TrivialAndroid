@@ -9,7 +9,7 @@
     <string name="btn_true">True</string>
     <string name="btn_false">False</string>
     <string name="category">Category</string>
-    <string name="sign_out">Sign out</string>
+    <string name="sign_out">Reset points</string>
     <string name="x_points">%1$d pts</string>
     <string name="back">back</string>
 
@@ -26,7 +26,7 @@
     <string name="menu_nd_category_review">Review Mode</string>
     <string name="menu_nd_one_player">One Player</string>
     <string name="menu_nd_multi_player">Play Online</string>
-
+    <string name="menu_nd_multi_turn_based_multplayer">Play Turn-Based</string>
     <!--GOOGLE PLAY GAMES 216806995897  -->
     <string name="app_id">211137909087</string>
     <string name="sign_in_other_error">There was an issue with sign-in, please try again later.</string>
@@ -88,7 +88,31 @@
     <string name="disconnect_room_error">Why: Disconnect From Room</string>
     <string name="connected_error">Why: Connected Error</string>
     <string name="join_error">Why: Join Error</string>
+    <!-- Turn based-->
+    <string name="welcome_to_our_skeleton_app_">Welcome to our skeleton app!</string>
+    <string name="check_games">Check games</string>
+    <string name="start_match">Start Match</string>
+    <string name="turn_counter">Turn counter</string>
+    <string name="error_get_inbox_intent">There was a problem getting the inbox intent!</string>
+    <string name="error_get_select_opponents">There was a problem getting the select opponents intent!</string>
+    <string name="turn_label">Turn %1$d</string>
+    <string name="match_instructions">Type in a new word for the data in this game, then hit done.</string>
+    <string name="quick_match">Quick match</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="done">Done</string>
+    <string name="leave">Leave</string>
+    <string name="cancel">Cancel</string>
+    <string name="finish">Finish</string>
     <string name="room_created_error">Why: Room Created With Errors!</string>
+    <string name="status_multiplayer_error_not_trusted_tester">Anyone you invite must be a trusted tester</string>
+    <string name="match_error_already_rematched">This rematch has already been started!</string>
+    <string name="client_reconnect_required">Games client reconnect required</string>
+    <string name="network_error_operation_failed">Network error: Operation failed</string>
+    <string name="internal_error">Internal error</string>
+    <string name="unexpected_status">Unexpected status</string>
+    <string name="match_error_inactive_match">This match is inactive.</string>
+    <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
+    <string name='match_error_locally_modified'>This match has locally-modified data.  This operation cannot be performed until the match is sent to the server.</string>
     <!--Preferencias-->
     <string name="pref_review_mode">Review Mode</string>
     <string name="pref_url_summary">Choose a valid Url for loading Categories</string>
@@ -105,5 +129,9 @@
     <string name="pref_time_online_title">Total Time</string>
     <string name="pref_warning_summary">Any change in \'Mode Online\' only takes effect when you start a Game. It means that the player who starts the Game is the Master, and the rest of players take his settings as theirs.</string>
     <string name="pref_warning_title">Warning:</string>
+    <string name="play_turn_based">Jugar Por Turnos</string>
+    <string name="select_partida">Select Match</string>
+    <string name="new_match">New Game</string>
+    <string name="num_quizzes">Num Quizzes</string>
     <!--JTG.E-->
 </resources>

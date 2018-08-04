@@ -18,7 +18,6 @@ package com.trivial.upv.android.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -43,7 +42,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.method.LinkMovementMethod;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.TransitionInflater;
@@ -55,8 +53,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.android.gms.games.multiplayer.Invitation;
-import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ActivityCategorySelectionBinding;
 import com.trivial.upv.android.databinding.NavHeaderCategorySelectionBinding;
@@ -65,18 +61,18 @@ import com.trivial.upv.android.fragment.CategorySelectionFragment;
 import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
 import com.trivial.upv.android.fragment.HelpDialogFragment;
 import com.trivial.upv.android.fragment.MainDialogFragment;
-import com.trivial.upv.android.fragment.PlayOnlineFragment;
+import com.trivial.upv.android.fragment.PlayRealTimeFragment;
+import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
 import com.trivial.upv.android.model.Player;
-import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
 import static com.trivial.upv.android.persistence.TopekaJSonHelper.ACTION_RESP;
 
-public class CategorySelectionActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnInvitationReceivedListener {
+public class CategorySelectionActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String EXTRA_PLAYER = "player";
     private TextView scoreView;
@@ -135,6 +131,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             fragmentNameSaved = savedInstanceState.getString("fragment", "");
 
         initActivity(savedInstanceState);
+
+//         JTG.S
+        if (!viewedMainDialog) {
+            viewedMainDialog = true;
+            MainDialogFragment dialog = new MainDialogFragment();
+            dialog.show(getSupportFragmentManager(), "diálogo principal");
+        }
+//         JTG.E
     }
 
     // JVG.S
@@ -221,35 +225,6 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         snackbar.show();
     }
 
-    @Override
-    public void onInvitationReceived(final Invitation invitation) {
-        OnClickSnackBarAction actionInvitation = new OnClickSnackBarAction() {
-            @Override
-            public void onClickAction() {
-                Log.d("TRAZA", "OnInvitationReceived");
-                Game.mIncomingInvitationId = invitation.getInvitationId();
-                Game.category = TopekaJSonHelper.getInstance(getApplicationContext(), false).createCategoryPlayTimeReal(10, null);
-                Intent startIntent = QuizActivity.getStartIntent(CategorySelectionActivity.this, Game.category);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
-                    ActivityCompat.startActivity(CategorySelectionActivity.this, startIntent, ActivityOptions.makeSceneTransitionAnimation(CategorySelectionActivity.this).toBundle());
-                else {
-                    ActivityCompat.startActivity(CategorySelectionActivity.this, startIntent, null);
-                }
-            }
-        };
-
-        if (invitation != null && invitation.getInvitationId() != null)
-            showSnackbarMessage("Invitation Received from " + invitation.getInviter().getDisplayName(), "Accept?", true, actionInvitation);
-
-    }
-
-
-    @Override
-    public void onInvitationRemoved(String invitationId) {
-        if (Game.mIncomingInvitationId != null && Game.mIncomingInvitationId.equals(invitationId)) {
-            Game.mIncomingInvitationId = null;
-        }
-    }
 
     public interface OnClickSnackBarAction {
         void onClickAction();
@@ -315,6 +290,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
 //                    }
                     attachCategoryGridFragment();
+//                    attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
 
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
 
@@ -434,6 +410,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         // Load a freme (restore activity)
         if (TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() && getSupportFragmentManager().findFragmentById(R.id.category_container) == null && fragmentNameSaved.isEmpty()) {
             attachCategoryGridFragment();
+//            attachPlayTurnBasedFragment(ARG_TURNED_BASED_ONLINE);
         }
         showScore();
     }
@@ -451,20 +428,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
     boolean viewedMainDialog = false;
 
-    @Override protected void onStart() {
+    @Override
+    protected void onStart() {
         super.onStart();
         // JVG.S
         Log.d("TRAZA", "onStart");
         loadCategories();
         registerReceiver(receiver, filtro);
-       // JVG.E
-       // JTG.S
-       if (!viewedMainDialog) {
-          viewedMainDialog = true;
-          MainDialogFragment dialog = new MainDialogFragment();
-          dialog.show(getSupportFragmentManager(), "diálogo principal");
-       }
-       // JTG.E
+        // JVG.E
     }
 
     private void setUpToolbar() {
@@ -485,7 +456,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 //        getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
@@ -508,13 +479,13 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         return true;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
-        if (fragment != null) {
-            fragment.onActivityResult(requestCode, resultCode, data);
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
+//        if (fragment != null) {
+//            fragment.onActivityResult(requestCode, resultCode, data);
+//        }
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -635,7 +606,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             supportFragmentManager.beginTransaction()
                     .replace(R.id.category_container, fragment)
                     .commit();
-        } else if (mode.equals(QuizActivity.ARG_ONLINE)) {
+        } else if (mode.equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.category_container, fragment).addToBackStack(null)
                     .commit();
@@ -648,8 +619,30 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     public void attachPlayOnlineFragment(String mode) {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
-        if (!(fragment instanceof PlayOnlineFragment))
-            fragment = PlayOnlineFragment.newInstance();
+        if (!(fragment instanceof PlayRealTimeFragment))
+            fragment = PlayRealTimeFragment.newInstance();
+
+        /* Animate*/
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Slide slideRight = new Slide(Gravity.START);
+            slideRight.setDuration(400);
+            fragment.setEnterTransition(slideRight);
+            Fade fade = new Fade();
+            fade.setDuration(100);
+            fragment.setReturnTransition(fade);
+        }
+
+        supportFragmentManager.beginTransaction().replace(R.id.category_container, fragment).commit();
+        scoreView.setVisibility(View.GONE);
+        backButton.setVisibility(View.GONE);
+//        subcategory_title.setVisibility(View.GONE);
+    }
+
+    public void attachPlayTurnBasedFragment(String mode) {
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
+        if (!(fragment instanceof PlayTurnBasedFragment))
+            fragment = PlayTurnBasedFragment.newInstance();
 
         /* Animate*/
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -766,11 +759,20 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 //          //  Intent starter = new Intent(this, GPGActivity.class);
 //            starter.putExtra(EXTRA_PLAYER, player);
 //            return starter;
-//            attachTreeViewFragment(QuizActivity.ARG_ONLINE);
-            attachPlayOnlineFragment(QuizActivity.ARG_ONLINE);
-        } else if (id == R.id.nav_signout) {
+//            attachTreeViewFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+            attachPlayOnlineFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+
+        } else if (id == R.id.nav_tree_view_turn_base_multplayer) {
+//          //  Intent starter = new Intent(this, GPGActivity.class);
+//            starter.putExtra(EXTRA_PLAYER, player);
+//            return starter;
+//            attachTreeViewFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+            attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
+        }
+        else if (id == R.id.nav_signout) {
             signOut();
-        } else if (id == R.id.nav_settings) {
+        }
+        else if (id == R.id.nav_settings) {
             Intent startIntent = SettingsActivity.getStartIntent(this);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 ActivityCompat.startActivity(this, startIntent, null);
@@ -782,8 +784,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             AboutDialogFragment dialog = new AboutDialogFragment();
             dialog.show(getSupportFragmentManager(), "about dialog");
         } else if (id == R.id.nav_help) {
-           HelpDialogFragment dialog = new HelpDialogFragment();
-           dialog.show(getSupportFragmentManager(), "help dialog");
+            HelpDialogFragment dialog = new HelpDialogFragment();
+            dialog.show(getSupportFragmentManager(), "help dialog");
         }
 //JTG.E
         drawer.closeDrawer(GravityCompat.START);
@@ -794,10 +796,10 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     @Override
     protected void onDestroy() {
         // stop GoogleApiClient
-        if (Game.mGoogleApiClient != null && Game.mGoogleApiClient.isConnected()) {
+//        if (Game.mGoogleApiClient != null && Game.mGoogleApiClient.isConnected()) {
 //            Games.signOut(mGoogleApiClient);
-            Game.mGoogleApiClient.disconnect();
-        }
+//            Game.mGoogleApiClient.disconnect();
+//        }
         //Log.d("DESTROY CALLED","DESTROY");
         super.onDestroy();
     }

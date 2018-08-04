@@ -271,7 +271,11 @@ public class SignInFragment extends Fragment {
 
     private void assurePlayerInit() {
         if (mPlayer == null) {
+            // JVG.S
             mPlayer = PreferencesHelper.getPlayer(getActivity());
+            if (mPlayer == null)
+                mPlayer = PreferencesHelper.getDummyPlayer(getActivity());
+            // JVG.E
         }
     }
 

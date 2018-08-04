@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.persistence.TopekaJSonHelper;
 
@@ -28,7 +30,8 @@ public class Game {
     public static String mMyId;
     public static int jugadorLocal;
 
-    public static GoogleApiClient mGoogleApiClient;
+    // Se ha quedado obsoleto GoogleApiClient
+//    public static GoogleApiClient mGoogleApiClient;
     public static int numQuizzes;
 
     public static Category category;
@@ -40,7 +43,7 @@ public class Game {
     public static int maxAutoMatchPlayers;
     public static String mIncomingInvitationId;
     public static long timeStamp;
-    public static  Map<String, Long> mFinishedParticipants = new HashMap<>();
+    public static Map<String, Long> mFinishedParticipants = new HashMap<>();
     public static Map<String, Long> mParticipantScore = new HashMap<>();
 
     public static int numPlayers;
@@ -51,8 +54,10 @@ public class Game {
     public static int tmpNumPlayers = 2;
     public static int tmpTotalTime = 250;
     public static String master;
-    public static List<String> listCategories = new ArrayList<>() ;
+    public static List<String> listCategories = new ArrayList<>();
     public static long level;
+    public static Invitation pendingInvitation;
+    public static TurnBasedMatch pendingTurnBasedMatch;
 
     public static void resetGameVars() {
         Game.mRoomId = null;
@@ -71,9 +76,9 @@ public class Game {
     }
 
     public static int numParticipantsOK() {
-        int total =0;
+        int total = 0;
         for (Participant p : Game.mParticipants) {
-            if (!p.getParticipantId().equals(Game.mMyId) && p.getStatus()==Participant.STATUS_JOINED) {
+            if (!p.getParticipantId().equals(Game.mMyId) && p.getStatus() == Participant.STATUS_JOINED) {
                 total++;
             }
         }
