@@ -41,7 +41,7 @@ import com.trivial.upv.android.databinding.ItemCategoryBinding;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Category;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,7 +162,7 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
                 ICON_CATEGORY + category.getId(), DRAWABLE, mPackageName);
         //JVG.S
 //        final boolean solved = category.isSolved();
-        final boolean solved = TopekaJSonHelper.getInstance(mActivity, false).isSolvedCurrentCategory(position);
+        final boolean solved = TrivialJSonHelper.getInstance(mActivity, false).isSolvedCurrentCategory(position);
 
         //JVG.E
         if (solved) {
@@ -192,8 +192,8 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
     public void updateCategories() {
         // JVG.S
         //return TopekaDatabaseHelper.getCategories(activity, true);
-        if (TopekaJSonHelper.getInstance(mActivity, false).isLoaded()) {
-            mCategories = TopekaJSonHelper.getInstance(mActivity, false).getCategories(true);
+        if (TrivialJSonHelper.getInstance(mActivity, false).isLoaded()) {
+            mCategories = TrivialJSonHelper.getInstance(mActivity, false).getCategories(true);
             Log.d("ADAPTER", "CATEGORIAS CARGADAS");
         } else {
             if (mCategories!=null) {

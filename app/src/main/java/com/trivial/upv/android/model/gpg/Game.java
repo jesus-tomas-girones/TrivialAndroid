@@ -1,24 +1,15 @@
 package com.trivial.upv.android.model.gpg;
 
-import android.util.Log;
-
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.games.Games;
+import com.google.android.gms.games.TurnBasedMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Participant;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.trivial.upv.android.model.Category;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
 /**
  * Created by jvg63 on 22/06/2017.
@@ -58,6 +49,11 @@ public class Game {
     public static long level;
     public static Invitation pendingInvitation;
     public static TurnBasedMatch pendingTurnBasedMatch;
+    public static String mode;
+    public static int categorySelected;
+    public static Turn mTurnData;
+    public static String mPlayerId;
+    public static TurnBasedMatch mMatch;
 
     public static void resetGameVars() {
         Game.mRoomId = null;
@@ -72,6 +68,8 @@ public class Game {
         mFinishedParticipants.clear();
         mParticipantScore.clear();
         master = null;
+
+        categorySelected = -1;
 //        level = 0;
     }
 

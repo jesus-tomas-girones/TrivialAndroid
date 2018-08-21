@@ -95,8 +95,10 @@
     <string name="pref_time_online_title">Tiempo Total (seg.)</string>
     <string name="pref_warning_summary">Cualquier cambio en \'Modo Jugar en Red\' solo afecta en el dispositivo que propone la partida. Es decir, que el jugador que comienzan la partida pone las reglas, y el resto de jugadores aceptan su configuración.</string>
     <string name="pref_warning_title">Atención:</string>
-    <string name="select_partida">Selec. Partida</string>
+    <string name="select_partida">Selec. Partida…</string>
     <string name="new_match">Nueva Partida</string>
     <string name="num_quizzes">Num Preguntas</string>
+    <string name="leave_game">Dejar Juego </string>
+    <string name="score">Puntuación</string>
     <!--JTG.E-->
 </resources>

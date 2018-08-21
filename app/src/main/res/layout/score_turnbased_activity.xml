@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!-- Fake a toolbar for easier animations -->
+    <FrameLayout
+        android:id="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?colorPrimary">
+
+        <TextView
+            android:id="@+id/category_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/theme_purple_text"
+            android:background="?colorPrimary"
+            android:gravity="center_vertical"
+            android:minHeight="?actionBarSize"
+            android:paddingBottom="@dimen/spacing_micro"
+            android:paddingLeft="@dimen/spacing_huge"
+            android:paddingStart="@dimen/spacing_huge"
+            android:paddingTop="@dimen/spacing_micro"
+            android:textAppearance="@style/Topeka.TextAppearance.Title"
+            android:transitionName="@string/transition_toolbar"
+          />
+
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:background="@drawable/selector_subtle"
+            android:contentDescription="@string/back"
+            android:padding="@dimen/spacing_double"
+            android:src="@drawable/ic_arrow_back"
+            android:tint="@color/theme_purple_text" />
+    </FrameLayout>
+
+
+
+    <!-- A RecyclerView with some commonly used attributes -->
+    <android.support.v7.widget.RecyclerView
+        android:layout_marginTop="5dp"
+        android:id="@+id/my_recycler_view"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:src="@drawable/roulette_8"-->
+    <!--android:adjustViewBounds="true"-->
+    <!--android:id="@+id/rouletteImage"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--/>-->
+</LinearLayout>
+
+
+

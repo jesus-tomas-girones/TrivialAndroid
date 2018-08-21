@@ -70,6 +70,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.CategorySelectionActivity"/>
         </activity>
+        <activity android:name=".activity.RouletteActivity"
+            android:screenOrientation="portrait"
+           />
+        <activity android:name=".activity.ScoreTurbasedActivity" />
 
     </application>
 

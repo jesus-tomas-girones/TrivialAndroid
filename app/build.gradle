@@ -71,7 +71,7 @@ dependencies {
     implementation 'me.texy.treeview:treeview_lib:1.0.4'
     implementation 'com.android.volley:volley:1.1.1'
     implementation 'com.google.code.gson:gson:2.8.2'
-    implementation 'com.pixplicity.htmlcompat:library:1.0.0'
+    implementation 'com.pixplicity.htmlcompat:library:1.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation "com.android.support:mediarouter-v7:${supportLibVersion}"
     implementation "com.google.android.gms:play-services-games:${gpg}"

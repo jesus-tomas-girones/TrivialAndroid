@@ -66,11 +66,11 @@ import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
 import com.trivial.upv.android.model.Player;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
-import static com.trivial.upv.android.persistence.TopekaJSonHelper.ACTION_RESP;
+import static com.trivial.upv.android.persistence.TrivialJSonHelper.ACTION_RESP;
 
 public class CategorySelectionActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -153,7 +153,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
 
-        if (!TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
+        if (!TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
             if (checkInternetAccess()) {
 //                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
 
@@ -169,7 +169,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                 new Thread() {
                     public void run() {
                         // Aprovisiona el modelo con las categorías
-                        TopekaJSonHelper.getInstance(CategorySelectionActivity.this, true);
+                        TrivialJSonHelper.getInstance(CategorySelectionActivity.this, true);
 
                     }
                 }.start();
@@ -208,7 +208,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         snackbar = Snackbar.make(findViewById(R.id.root_view), "¿Quieres eliminar los resultados obtenidos?", Snackbar.LENGTH_INDEFINITE).setAction("Eliminar Avance", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                (TopekaJSonHelper.getInstance(getBaseContext(), false)).deleteProgressCategory(position);
+                (TrivialJSonHelper.getInstance(getBaseContext(), false)).deleteProgressCategory(position);
 
                 Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
                 if (fragment instanceof CategorySelectionFragment) {
@@ -321,7 +321,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
 
-                    TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).resetData();
+                    TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).resetData();
 
                     snackbar.show();
                 }
@@ -361,7 +361,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         } else {
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
             if (fragment instanceof CategorySelectionFragment) {
-                if (!TopekaJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
+                if (!TrivialJSonHelper.getInstance(getBaseContext(), false).thereAreMorePreviusCategories()) {
                     if (!getInitBlockAnimation())
                         super.onBackPressed();
 
@@ -377,7 +377,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     private void goToPreviusCategory() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
         if (fragment instanceof CategorySelectionFragment) {
-            TopekaJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
+            TrivialJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
             ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
             showToolbarSubcategories();
         } else {
@@ -387,14 +387,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     public void showToolbarSubcategories() {
-        if (TopekaJSonHelper.getInstance(getBaseContext(), false).isInitCategory()) {
+        if (TrivialJSonHelper.getInstance(getBaseContext(), false).isInitCategory()) {
             setToolbarTitle(getResources().getString(R.string.menu_nd_category_review));
             animateToolbarNavigateCategories(true);
 
         } else {
 //            TextView viewSubcategoryText = (TextView) findViewById(R.id.sub_category_title);
-            setToolbarTitle(TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
-            Log.d("previus", "categoria_previa" + TopekaJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
+            setToolbarTitle(TrivialJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
+            Log.d("previus", "categoria_previa" + TrivialJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
             animateToolbarNavigateToSubcategories(true);
         }
     }
@@ -408,7 +408,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         super.onResume();
 
         // Load a freme (restore activity)
-        if (TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() && getSupportFragmentManager().findFragmentById(R.id.category_container) == null && fragmentNameSaved.isEmpty()) {
+        if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() && getSupportFragmentManager().findFragmentById(R.id.category_container) == null && fragmentNameSaved.isEmpty()) {
             attachCategoryGridFragment();
 //            attachPlayTurnBasedFragment(ARG_TURNED_BASED_ONLINE);
         }
@@ -416,7 +416,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     private void showScore() {
-        final int score = TopekaJSonHelper.getInstance(getBaseContext(), false).getScore();
+        final int score = TrivialJSonHelper.getInstance(getBaseContext(), false).getScore();
         if (scoreView != null) {
             scoreView.setText(getString(R.string.x_points, score));
         }
@@ -517,7 +517,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         PreferencesHelper.signOut(this);
 //        JVG.S
 //        TopekaDatabaseHelper.reset(this);
-        TopekaJSonHelper.getInstance(this, false).signOut(getBaseContext());
+        TrivialJSonHelper.getInstance(this, false).signOut(getBaseContext());
 
         dissmissDialogs();
 
@@ -556,8 +556,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     // JVG.E
 
     public void attachCategoryGridFragment() {
-        if (TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
-            TopekaJSonHelper.getInstance(CategorySelectionActivity.this, false).moveCurrentCategoryToInit();
+        if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
+            TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).moveCurrentCategoryToInit();
             FragmentManager supportFragmentManager = getSupportFragmentManager();
             Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
             if (!(fragment instanceof CategorySelectionFragment)) {
@@ -620,7 +620,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof PlayRealTimeFragment))
-            fragment = PlayRealTimeFragment.newInstance();
+            fragment = PlayRealTimeFragment.newInstance(mode);
 
         /* Animate*/
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -642,7 +642,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof PlayTurnBasedFragment))
-            fragment = PlayTurnBasedFragment.newInstance();
+            fragment = PlayTurnBasedFragment.newInstance(mode);
 
         /* Animate*/
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

@@ -50,7 +50,7 @@ import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.gpg.ScoreOnline;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 import com.trivial.upv.android.widget.quiz.AbsQuizView;
 
@@ -59,6 +59,7 @@ import java.util.List;
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 import static com.trivial.upv.android.activity.QuizActivity.MAX_RETRY_TIMES;
 
 
@@ -108,10 +109,10 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         //mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
         if (categoryId.equals(ARG_ONE_PLAYER)) {
             mCategory = Game.category;
-        } else if (categoryId.equals(ARG_REAL_TIME_ONLINE)) {
+        } else if (((QuizActivity)getActivity()).isMatchOnline() || ((QuizActivity)getActivity()).isMatchTurnBased()) {
             mCategory = Game.category;
         } else {
-            mCategory = TopekaJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
+            mCategory = TrivialJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
         }
         //JVG.E
         super.onCreate(savedInstanceState);
@@ -169,8 +170,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         if (!isAdded()) {
             return;
         }
-        mProgressText
-                .setText(getString(R.string.quiz_of_quizzes, currentQuizPosition, mQuizSize));
+        mProgressText.setText(getString(R.string.quiz_of_quizzes, String.valueOf(currentQuizPosition), String.valueOf(mQuizSize)));
         mProgressBar.setProgress(currentQuizPosition);
     }
 
@@ -312,7 +312,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                     new Thread() {
                         @Override
                         public void run() {
-                            TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+                            TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
                         }
                     }.start();
             }
@@ -339,7 +339,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                 new Thread() {
                     @Override
                     public void run() {
-                        TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
+                        TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
                     }
                 }.start();
         }
@@ -534,7 +534,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
             }
         }
 
-        // Add the rest of the participants
+        // Add the rest of the participantsTurnBased
         for (Participant p : Game.mParticipants) {
             int cont = 0;
             for (ScoreOnline.Score score : scoreOnline.getScoreOnline()) {

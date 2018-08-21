@@ -318,7 +318,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
     /**
      * Sets the quiz to answered or unanswered.
      *
-     * @param answered <code>true</code> if an answer was selected, else <code>false</code>.
+     * @param answered <code>true</code> if an answer was roulette_selection, else <code>false</code>.
      */
     protected void allowAnswer(final boolean answered) {
         if (null != mSubmitAnswer) {
@@ -445,7 +445,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
 
     private void resizeView() {
         final float widthHeightRatio = (float) getHeight() / (float) getWidth();
-        // Animate X and Y scaling separately to allow different start delays.
+        // Animate X and Y scaling separately to allow different roulette_rotate delays.
         // object animators for x and y with different durations and then run them independently
         resizeViewProperty(View.SCALE_X, .5f, 200);
         resizeViewProperty(View.SCALE_Y, .5f / widthHeightRatio, 300);

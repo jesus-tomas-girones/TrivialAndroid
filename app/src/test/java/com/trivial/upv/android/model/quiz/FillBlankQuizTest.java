@@ -26,7 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class FillBlankQuizTest extends AbsQuizTestCase<FillBlankQuiz> {
 
     private static final String ANSWER = "answer";
-    private static final String START = "start";
+    private static final String START = "roulette_rotate";
     private static final String END = "end";
 
     @Test

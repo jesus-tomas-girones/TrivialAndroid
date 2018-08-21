@@ -37,13 +37,13 @@ public class TransitionHelper {
         //no instance
     }
     /**
-     * Create the transition participants required during a activity transition while
+     * Create the transition participantsTurnBased required during a activity transition while
      * avoiding glitches with the system UI.
      *
      * @param activity The activity used as start for the transition.
      * @param includeStatusBar If false, the status bar will not be added as the transition
      * participant.
-     * @return All transition participants.
+     * @return All transition participantsTurnBased.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static Pair<View, String>[] createSafeTransitionParticipants(@NonNull Activity activity,
@@ -58,11 +58,11 @@ public class TransitionHelper {
         }
         View navBar = decor.findViewById(android.R.id.navigationBarBackground);
 
-        // Create pair of transition participants.
+        // Create pair of transition participantsTurnBased.
         List<Pair> participants = new ArrayList<>(3);
         addNonNullViewToTransitionParticipants(statusBar, participants);
         addNonNullViewToTransitionParticipants(navBar, participants);
-        // only add transition participants if there's at least one none-null element
+        // only add transition participantsTurnBased if there's at least one none-null element
         if (otherParticipants != null && !(otherParticipants.length == 1
                 && otherParticipants[0] == null)) {
             participants.addAll(Arrays.asList(otherParticipants));

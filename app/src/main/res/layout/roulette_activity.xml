@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:windowBackground">
+    <!-- Fake a toolbar for easier animations -->
+    <FrameLayout
+        android:id="@+id/actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?colorPrimary">
+
+        <TextView
+            android:id="@+id/category_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/theme_purple_text"
+            android:background="?colorPrimary"
+            android:gravity="center_vertical"
+            android:minHeight="?actionBarSize"
+            android:paddingBottom="@dimen/spacing_micro"
+            android:paddingLeft="@dimen/spacing_huge"
+            android:paddingStart="@dimen/spacing_huge"
+            android:paddingTop="@dimen/spacing_micro"
+            android:textAppearance="@style/Topeka.TextAppearance.Title"
+            android:transitionName="@string/transition_toolbar"
+            tools:ignore="UnusedAttribute,NewApi,RtlSymmetry,PrivateResource" />
+
+        <ImageButton
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:background="@drawable/selector_subtle"
+            android:contentDescription="@string/back"
+            android:padding="@dimen/spacing_double"
+            android:src="@drawable/ic_arrow_back"
+            android:tint="@color/theme_purple_text" />
+
+        <TextView
+            android:id="@+id/txtPoints"
+            android:layout_marginRight="10dp"
+            android:textAppearance="@style/Topeka.TextAppearance.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:gravity="center_vertical"
+            android:textColor="@color/theme_purple_text"
+            android:background="?colorPrimary"
+            android:tint="@color/theme_purple_text"
+            android:layout_marginEnd="10dp" />
+
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/rouletteImage"
+        android:layout_width="15dp"
+        android:layout_height="20dp"
+        android:layout_below="@id/actionBar"
+        android:layout_centerHorizontal="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/roulette_selection" />
+
+    <com.trivial.upv.android.widget.roulette.RouletteView
+        android:id="@+id/rouletteView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/rouletteImage"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:padding="0dp" />
+
+    <!-- A RecyclerView with some commonly used attributes -->
+    <android.support.v7.widget.RecyclerView
+        android:layout_above="@id/layoutButtons"
+        android:id="@+id/my_recycler_view"
+        android:scrollbars="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <!--<ImageView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:src="@drawable/roulette_8"-->
+    <!--android:adjustViewBounds="true"-->
+    <!--android:id="@+id/rouletteImage"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--/>-->
+    <LinearLayout
+        android:id="@+id/layoutButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+
+        <Button
+            android:id="@+id/buttonAbandon"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/theme_red_primary"
+            android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
+            android:onClick="leaveMatch"
+            android:padding="0dp"
+            android:text="@string/leave_game"
+            android:textColor="@android:color/black" />
+
+        <Button
+            android:id="@+id/buttonStart"
+            android:visibility="gone"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:background="@drawable/roulette_rotate"
+            android:onClick="onClickButtonRotation"></Button>
+
+        <Button
+            android:id="@+id/buttonScore"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/theme_green_primary"
+            android:drawableLeft="@android:drawable/ic_menu_gallery"
+            android:onClick="showMatchScore"
+            android:text="@string/score" />
+
+    </LinearLayout>
+
+</RelativeLayout>
+
+
+

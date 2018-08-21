@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
@@ -41,7 +40,7 @@ import com.trivial.upv.android.adapter.CategoryAdapterJSON;
 import com.trivial.upv.android.helper.TransitionHelper;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.OffsetDecoration;
 
 public class CategorySelectionFragment extends Fragment {
@@ -93,7 +92,7 @@ public class CategorySelectionFragment extends Fragment {
                 new CategoryAdapterJSON.OnItemClickListener() {
                     @Override
                     public void onClick(View v, int position) {
-                        if (TopekaJSonHelper.getInstance(getContext(), false).getCategoriesCurrent().get(position).getSubcategories() == null) {
+                        if (TrivialJSonHelper.getInstance(getContext(), false).getCategoriesCurrent().get(position).getSubcategories() == null) {
                             // Mostrar Quizzes
                             Activity activity = getActivity();
                             startQuizActivityWithTransition(activity,
@@ -101,7 +100,7 @@ public class CategorySelectionFragment extends Fragment {
                                     mAdapter.getItem(position));
                         } else {
                             // Mostrar Subcategorias
-                            TopekaJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
+                            TrivialJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
                             animateTransitionSubcategories(v);
 
                             TextView textViewSubcategory = (TextView) getActivity().findViewById(R.id.sub_category_title);
@@ -136,7 +135,7 @@ public class CategorySelectionFragment extends Fragment {
                                 categoriesView.getViewTreeObserver().removeOnPreDrawListener(this);
                                 //        JVG.S
 //                                getActivity().supportStartPostponedEnterTransition();
-                                if (TopekaJSonHelper.getInstance(getActivity().getApplicationContext(), false).isLoaded()) {
+                                if (TrivialJSonHelper.getInstance(getActivity().getApplicationContext(), false).isLoaded()) {
                                     Log.d("TRAZA", "" + mAdapter.getItemCount());
 
                                     animateTransitionSubcategories(null);
@@ -171,7 +170,7 @@ public class CategorySelectionFragment extends Fragment {
         ActivityOptionsCompat sceneTransitionAnimation = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(activity, pairs);
 
-        // Start the activity with the participants, animating from one to the other.
+        // Start the activity with the participantsTurnBased, animating from one to the other.
         final Bundle transitionBundle = sceneTransitionAnimation.toBundle();
         Intent startIntent = QuizActivity.getStartIntent(activity, category);
         startActivityForResult(

@@ -14,7 +14,7 @@ import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.model.quiz.Quiz;
 import com.trivial.upv.android.model.txtquiz.QuestionTXT;
 import com.trivial.upv.android.model.txtquiz.QuestionsTXT;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.trivial.upv.android.persistence.TopekaJSonHelper.createArrayIntFromNumQuizzes;
+import static com.trivial.upv.android.persistence.TrivialJSonHelper.createArrayIntFromNumQuizzes;
 
 
 /**
@@ -132,11 +132,11 @@ public class QuestionsTXTHelper {
         Quiz quizz;
         for (QuestionTXT question : questionsTXT.getQuestions()) {
             if (question.getRespuestaCorrecta().size() > 1) {
-                quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.MULTI_SELECT);
+                quizz = TrivialJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.MULTI_SELECT);
             } else if (question.getRespuestas().size() == 4) {
-                quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.FOUR_QUARTER);
+                quizz = TrivialJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.FOUR_QUARTER);
             } else {
-                quizz = TopekaJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.SINGLE_SELECT);
+                quizz = TrivialJSonHelper.createQuizDueToType(question, JsonAttributes.QuizType.SINGLE_SELECT);
             }
             quizzes.add(quizz);
         }
@@ -240,10 +240,10 @@ public class QuestionsTXTHelper {
 
                 new Thread() {
                     public void run() {
-                        TopekaJSonHelper.getInstance(mContext, false).updateCategory();
-                        TopekaJSonHelper.getInstance(mContext, false).setLoaded(true);
-                        TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh(100);
-                        TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessage("OK");
+                        TrivialJSonHelper.getInstance(mContext, false).updateCategory();
+                        TrivialJSonHelper.getInstance(mContext, false).setLoaded(true);
+                        TrivialJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh(100);
+                        TrivialJSonHelper.getInstance(mContext, false).sendBroadCastMessage("OK");
                     }
                 }.start();
             }
@@ -252,7 +252,7 @@ public class QuestionsTXTHelper {
 
                 int avance = (maxPendingRequests - pendingRequests) * 100 / maxPendingRequests;
                 if (avance % 5 == 0 && avance > 0)
-                    TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
+                    TrivialJSonHelper.getInstance(mContext, false).sendBroadCastMessageRefresh((int) ((float) (maxPendingRequests - pendingRequests) / (float) maxPendingRequests * 100f));
             }
         }
 
@@ -485,7 +485,7 @@ public class QuestionsTXTHelper {
                             updateProgress();
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
-                            TopekaJSonHelper.getInstance(mContext, false).sendBroadCastMessage("ERROR");
+                            TrivialJSonHelper.getInstance(mContext, false).sendBroadCastMessage("ERROR");
                         }
 
                     }
@@ -496,9 +496,9 @@ public class QuestionsTXTHelper {
         {
             @Override
             public void onErrorResponse(VolleyError error) {
-                TopekaJSonHelper.getInstance(mContext, false).sendBroadCastError("Volley", "Loading quizzes!");
+                TrivialJSonHelper.getInstance(mContext, false).sendBroadCastError("Volley", "Loading quizzes!");
 
-                TopekaJSonHelper.cancelRequests();
+                TrivialJSonHelper.cancelRequests();
             }
         }, true);
 

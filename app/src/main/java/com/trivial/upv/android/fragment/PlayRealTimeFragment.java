@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -41,11 +42,12 @@ import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.json.CategoryJSON;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static android.media.MediaCodec.MetricsConstants.MODE;
 
 /**
  * Created by jvg63 on 22/06/2017.
@@ -76,11 +78,12 @@ public class PlayRealTimeFragment extends Fragment
     private TextView txtListCategories;
     private String mPlayerId;
     private GoogleSignInClient mGoogleSignInClient;
+    private boolean retry = false;
 
     public PlayRealTimeFragment() {
         Game.resetGameVars();
         Game.listCategories.clear();
-        List<CategoryJSON> categoriesJSON = TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON();
+        List<CategoryJSON> categoriesJSON = TrivialJSonHelper.getInstance(getContext(), false).getCategoriesJSON();
         for (CategoryJSON category : categoriesJSON) {
             Game.listCategories.add(new String(category.getCategory()));
         }
@@ -88,9 +91,18 @@ public class PlayRealTimeFragment extends Fragment
         Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Game.mode = getArguments().getString(MODE);;
+    }
 
-    public static PlayRealTimeFragment newInstance() {
-        return new PlayRealTimeFragment();
+    public static PlayRealTimeFragment newInstance(String mode) {
+        PlayRealTimeFragment fragment = new PlayRealTimeFragment();
+        Bundle args = new Bundle();
+        args.putString(MODE, mode);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -124,7 +136,7 @@ public class PlayRealTimeFragment extends Fragment
         super.onResume();
         signInSilently();
 
-        if (Game.listCategories.size() == TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
+        if (Game.listCategories.size() == TrivialJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
             txtListCategories.setText(getString(R.string.all_categories));
         } else {
 //            txtListCategories.setText("(Otras)");
@@ -180,15 +192,15 @@ public class PlayRealTimeFragment extends Fragment
         Game.resetGameVars();
 
 //        btnConectar.setVisibility(View.VISIBLE);
-        loginActions.setVisibility(View.VISIBLE);
+//        loginActions.setVisibility(View.VISIBLE);
 //        btnDesconectar.setVisibility(View.GONE);
 
-        newGameActions.setVisibility(View.GONE);
-        globalActions.setVisibility(View.GONE);
+//        newGameActions.setVisibility(View.GONE);
+//        globalActions.setVisibility(View.GONE);
 
         mGoogleSignInClient = GoogleSignIn.getClient(getActivity(),
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
-        startSignInIntent();
+//        startSignInIntent();
 
         btnNewGame = (Button) view.findViewById(R.id.btnSelectCategories);
         btnNewGame.setOnClickListener(this);
@@ -341,9 +353,9 @@ public class PlayRealTimeFragment extends Fragment
 
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
+        retry = false;
 
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
-
 
         PlayersClient playersClient = Games.getPlayersClient(getActivity(),
                 googleSignInAccount);
@@ -479,10 +491,10 @@ public class PlayRealTimeFragment extends Fragment
                         message = "Error al conectar el cliente.";
                     }
                     onDisconnected();
-                    new AlertDialog.Builder(getActivity())
-                            .setMessage(message)
-                            .setNeutralButton(android.R.string.ok, null)
-                            .show();
+//                    new AlertDialog.Builder(getActivity())
+//                            .setMessage(message)
+//                            .setNeutralButton(android.R.string.ok, null)
+//                            .show();
                 }
                 break;
 
@@ -494,7 +506,7 @@ public class PlayRealTimeFragment extends Fragment
 
             case RC_INVITATION_INBOX:
                 // we got the result from the "select invitation" UI (invitation inbox). We're
-                // ready to accept the selected invitation:
+                // ready to accept the roulette_selection invitation:
                 handleInvitationInboxResult(responseCode, intent);
                 break;
         }
@@ -502,6 +514,12 @@ public class PlayRealTimeFragment extends Fragment
     }
 
     private void onDisconnected() {
+
+        if (!retry) {
+            retry = true;
+            startSignInIntent();
+
+        }
     }
 
 
@@ -534,13 +552,13 @@ public class PlayRealTimeFragment extends Fragment
         Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
 
 
-        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10), Game.listCategories);
+        Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10), Game.listCategories, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
         startQuizzes();
     }
 
 
     // Handle the result of the invitation inbox UI, where the player can pick an invitation
-    // to accept. We react by accepting the selected invitation, if any.
+    // to accept. We react by accepting the roulette_selection invitation, if any.
     private void handleInvitationInboxResult(int response, Intent data) {
         if (response != RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
@@ -556,11 +574,12 @@ public class PlayRealTimeFragment extends Fragment
             acceptInviteToRoom(inv.getInvitationId());
         else {
             new AlertDialog.Builder(getActivity())
-                    .setMessage("La invitación no corresponde a una REALTIME invitation!")
+                    .setMessage("La invitación no corresponde a una  invitation!")
                     .setNeutralButton(android.R.string.ok, null)
                     .show();
             Game.pendingTurnBasedMatch = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
-            ((CategorySelectionActivity)getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);;
+            ((CategorySelectionActivity) getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
+            ;
         }
 
     }
@@ -573,7 +592,7 @@ public class PlayRealTimeFragment extends Fragment
 
         Game.resetGameVars();
         Game.mIncomingInvitationId = invId;
-        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(10, null);
+        Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(10, null, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
         startQuizzes();
 //        switchToScreen(R.id.screen_wait);
     }
@@ -639,9 +658,9 @@ public class PlayRealTimeFragment extends Fragment
         Game.minAutoMatchPlayers = Game.numPlayers - 1;
         Game.maxAutoMatchPlayers = Game.numPlayers - 1;
 
-        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(
+        Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(
                 SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10),
-                Game.listCategories);
+                Game.listCategories, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
 
         Intent intent = QuizActivity.getStartIntent(getContext(), Game.category);
         startActivity(intent);
@@ -710,7 +729,7 @@ public class PlayRealTimeFragment extends Fragment
             public void onClickAction() {
                 Log.d("TRAZA", "OnInvitationReceived");
                 Game.mIncomingInvitationId = invitation.getInvitationId();
-                Game.category = TopekaJSonHelper.getInstance(getActivity(), false).createCategoryPlayTimeReal(10, null);
+                Game.category = TrivialJSonHelper.getInstance(getActivity(), false).createCategoryPlayTimeReal(10, null, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
                 Intent startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
                     ActivityCompat.startActivity(getActivity(), startIntent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());

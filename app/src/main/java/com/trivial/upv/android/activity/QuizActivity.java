@@ -91,7 +91,7 @@ import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.TextSharedElementCallback;
 
 import java.io.UnsupportedEncodingException;
@@ -211,7 +211,7 @@ public class QuizActivity extends AppCompatActivity {
 
         // JVG.S
         // Partuda en tiempo real (Play OnLine)
-        if (isMathOnline()) {
+        if (isMatchOnline()) {
             mGoogleSignInClient = GoogleSignIn.getClient(this,
                     new GoogleSignInOptions.Builder(
                             GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
@@ -219,12 +219,22 @@ public class QuizActivity extends AppCompatActivity {
 
 //            startSignInIntent();
 //            iniciarPartidaEnTiempoReal();
+        } else {
+            mGoogleSignInClient = GoogleSignIn.getClient(this,
+                    new GoogleSignInOptions.Builder(
+                            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                            .build());
+
         }
         // JVG.E
     }
 
-    private boolean isMathOnline() {
-        return mCategory.getId().equals(ARG_REAL_TIME_ONLINE);
+    public boolean isMatchOnline() {
+        return Game.mode.equals(ARG_REAL_TIME_ONLINE);
+    }
+
+    public boolean isMatchTurnBased() {
+        return Game.mode.equals(ARG_TURNED_BASED_ONLINE);
     }
 
     public void startSignInIntent() {
@@ -262,7 +272,7 @@ public class QuizActivity extends AppCompatActivity {
                         public void onSuccess(Player player) {
                             mPlayerId = player.getPlayerId();
 
-                            if (isMathOnline()) {
+                            if (isMatchOnline()) {
                                 iniciarPartidaEnTiempoReal();
                             }
 
@@ -296,7 +306,7 @@ public class QuizActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        if (isMathOnline())
+        if (isMatchOnline())
             signInSilently();
         //        Handler to control the time for answer a quiz
         if (mHandlerPlayGame == null)
@@ -456,7 +466,7 @@ public class QuizActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void prepareCircularReveal(View startView, FrameLayout targetView) {
         int centerX = (startView.getLeft() + startView.getRight()) / 2;
-        // Subtract the start view's height to adjust for relative coordinates on screen.
+        // Subtract the roulette_rotate view's height to adjust for relative coordinates on screen.
         int centerY = (startView.getTop() + startView.getBottom()) / 2 - startView.getHeight();
         float endRadius = (float) Math.hypot(centerX, centerY);
         mCircularReveal = ViewAnimationUtils.createCircularReveal(
@@ -580,11 +590,11 @@ public class QuizActivity extends AppCompatActivity {
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
         if (categoryId.equals(ARG_ONE_PLAYER)) {
-            mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryPlayGameOffLine();
-        } else if (categoryId.equals(ARG_REAL_TIME_ONLINE)) {
+            mCategory = TrivialJSonHelper.getInstance(getBaseContext(), false).getCategoryPlayGameOffLine();
+        } else if (isMatchOnline() || isMatchTurnBased()) {
             mCategory = Game.category;
         } else {
-            mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
+            mCategory = TrivialJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
         }
         // JVG.E
 
@@ -702,52 +712,23 @@ public class QuizActivity extends AppCompatActivity {
 //        mIcon.setImageResource(resId);
 
         mIcon.setFitsSystemWindows(true);
-        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(
-
-                getBaseContext()).
-
-                getImageLoader());
+        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(getBaseContext()).getImageLoader());
 
         //JVG.E
-        ViewCompat.animate(mIcon)
-                .
-
-                        scaleX(1)
-                .
-
-                        scaleY(1)
-                .
-
-                        alpha(1)
-                .
-
-                        setInterpolator(mInterpolator)
-                .
-
-                        setStartDelay(300)
-                .
-
-                        start();
+        ViewCompat.animate(mIcon).scaleX(1).scaleY(1).alpha(1).setInterpolator(mInterpolator).setStartDelay(300).start();
 
         mQuizFab = (FloatingActionButton)
 
                 findViewById(R.id.fab_quiz);
         mQuizFab.setImageResource(R.drawable.ic_play);
         if (mSavedStateIsPlaying)
-
-        {
             mQuizFab.hide();
-        } else
-
-        {
+        else
             mQuizFab.show();
-        }
         mQuizFab.setOnClickListener(mOnClickListener);
-
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
-        if (categoryId.equals(ARG_REAL_TIME_ONLINE) || mCategory.getQuizzes() == null)
-
+        if (isMatchOnline() || mCategory.getQuizzes() == null)
         {
             mQuizFab.hide();
         }
@@ -987,7 +968,7 @@ public class QuizActivity extends AppCompatActivity {
                                     }.getType();
 
                                     GsonBuilder builder = new GsonBuilder();
-                                    builder.registerTypeAdapter(Quiz.class, new TopekaJSonHelper.QuizDeserializer());
+                                    builder.registerTypeAdapter(Quiz.class, new TrivialJSonHelper.QuizDeserializer());
                                     Gson gson = builder.create();
 
                                     Log.d("TRAZAGPGE", sbMessageData.toString());
@@ -1140,7 +1121,7 @@ public class QuizActivity extends AppCompatActivity {
                         Game.mRoomId = room.getRoomId();
                     }
 
-                    // print out the list of participants (for debug purposes)
+                    // print out the list of participantsTurnBased (for debug purposes)
                     Log.d(TAG, "Room ID: " + Game.mRoomId);
                     Log.d(TAG, "My ID " + Game.mMyId);
                     Log.d(TAG, "<< CONNECTED TO ROOM>>");
@@ -1302,7 +1283,7 @@ public class QuizActivity extends AppCompatActivity {
 
     void showWaitingRoom(Room room) {
         // minimum number of players required for our game
-        // For simplicity, we require everyone to join the game before we start it
+        // For simplicity, we require everyone to join the game before we roulette_rotate it
         // (this is signaled by Integer.MAX_VALUE).
         final int MIN_PLAYERS = Game.numPlayers;
 
@@ -1367,7 +1348,7 @@ public class QuizActivity extends AppCompatActivity {
             case RC_WAITING_ROOM:
                 // we got the result from the "waiting room" UI.
                 if (responseCode == AppCompatActivity.RESULT_OK) {
-                    // ready to start playing
+                    // ready to roulette_rotate playing
                     Log.d(TAG, "Starting game (waiting room returned OK).");
                     // JVG.S
 
@@ -1594,7 +1575,7 @@ public class QuizActivity extends AppCompatActivity {
 
     // Sets the flag to keep this screen on. It's recommended to do that during
     // the
-    // handshake when setting up a game, because if the screen turns off, the
+    // handshake when setting roulette_up a game, because if the screen turns off, the
     // game will be
     // cancelled.
     void keepScreenOn() {

@@ -5,16 +5,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -22,12 +18,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
-import android.webkit.JsResult;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,6 +41,8 @@ import com.google.android.gms.games.TurnBasedMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.InvitationCallback;
 import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.Participant;
+import com.google.android.gms.games.multiplayer.ParticipantResult;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
@@ -59,32 +54,34 @@ import com.google.android.gms.tasks.Task;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
-import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
+import com.trivial.upv.android.activity.RouletteActivity;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.gpg.Turn;
 import com.trivial.upv.android.model.json.CategoryJSON;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static android.media.MediaCodec.MetricsConstants.MODE;
+import static com.google.android.gms.games.multiplayer.ParticipantResult.MATCH_RESULT_LOSS;
+import static com.google.android.gms.games.multiplayer.ParticipantResult.MATCH_RESULT_TIE;
+import static com.google.android.gms.games.multiplayer.ParticipantResult.MATCH_RESULT_WIN;
+import static com.google.android.gms.games.multiplayer.ParticipantResult.PLACING_UNINITIALIZED;
 
 /**
  * Created by jvg63 on 22/06/2017.
  */
 
-public class PlayTurnBasedFragment extends Fragment
-        implements
-//        GoogleApiClient.ConnectionCallbacks,
-//        GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener {
+public class PlayTurnBasedFragment extends Fragment {
 
     private static final String QUICK_GAME = "QUICK_GAME";
     private static final String CUSTOM_GAME = "CUSTOM_GAME";
-    private static final short K_PUNTOS_POR_PREGUNTA = 1;
+    public static final short K_PUNTOS_POR_PREGUNTA = 1;
     private static final int K_MAX_PREGUNTAS = 50;
     private static final int K_MIN_PREGUNTAS = 2;
+
     private Button btnPartidasGuardadas;
 
     private Button btnNewGame;
@@ -92,28 +89,30 @@ public class PlayTurnBasedFragment extends Fragment
 
     final static int RC_INVITATION_INBOX = 10001;
     final static int RC_LOOK_AT_MATCHES = 20001;
-
+    final static int RC_CHOOOSE_CATEGORY = 30001;
+    private static final int RC_PLAY_TURN = 30002;
 
     private com.google.android.gms.common.SignInButton btnConectar;
     //    private Button btnDesconectar;
 
-    private WebView navegador;
+//    private WebView navegador;
 
     private ProgressDialog dialogo;
 
     List<CategoryJSON> categoriesJSON;
-    private Button btnGirar;
+
     private SeekBar sbNumQuizzes;
     private TextView txtNumQuizzes;
-    private String mPlayerId;
-    private Button btnPlayAnyone;
+    //    private String mPlayerId;
     private String mDisplayName;
+    private Button btnPlayAnyone;
+    private Button btnShowIntitations;
 
     // Local convenience pointers
     public TextView mDataView;
     public TextView mTurnTextView;
     private View gameLayout;
-    private View progressLayout;
+    private ProgressBar progressLayout;
     private View panelGame;
 
     // Action Buttons
@@ -130,7 +129,7 @@ public class PlayTurnBasedFragment extends Fragment
     public PlayTurnBasedFragment() {
         Game.resetGameVars();
         Game.listCategories.clear();
-        categoriesJSON = TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON();
+        categoriesJSON = TrivialJSonHelper.getInstance(getContext(), false).getCategoriesJSON();
         for (CategoryJSON category : categoriesJSON) {
             Game.listCategories.add(new String(category.getCategory()));
         }
@@ -138,9 +137,21 @@ public class PlayTurnBasedFragment extends Fragment
         Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Game.mode = getArguments().getString(MODE);
+        Game.mTurnData = null;
+        Game.mMatch = null;
+    }
 
-    public static PlayTurnBasedFragment newInstance() {
-        return new PlayTurnBasedFragment();
+
+    public static PlayTurnBasedFragment newInstance(String mode) {
+        PlayTurnBasedFragment fragment = new PlayTurnBasedFragment();
+        Bundle args = new Bundle();
+        args.putString(MODE, mode);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -203,7 +214,7 @@ public class PlayTurnBasedFragment extends Fragment
         signInSilently();
 
 
-//        if (Game.listCategories.size() == TopekaJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
+//        if (Game.listCategories.size() == TrivialJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
 //            txtListCategories.setText(getString(R.string.all_categories));
 //        } else {
 ////            txtListCategories.setText("(Otras)");
@@ -218,7 +229,7 @@ public class PlayTurnBasedFragment extends Fragment
 //            }
 //            txtListCategories.setText(sb.toString());
 //        }
-        soundPool.resume(idSonido);
+//        soundPool.resume(idSonido);
 
     }
 
@@ -230,14 +241,14 @@ public class PlayTurnBasedFragment extends Fragment
         }
 
         @JavascriptInterface
-        public void categorySelected(String categorySelected) {
+        public void categorySelected(int categorySelected) {
             startQuizzes(categorySelected);
         }
 
         @JavascriptInterface
         public void playSound() {
-            if (soundPool != null)
-                soundPool.play(idSonido, 1, 1, 1, 0, 1);
+//            if (soundPool != null)
+//                soundPool.play(idSonido, 1, 1, 1, 0, 1);
         }
     }
 
@@ -250,7 +261,7 @@ public class PlayTurnBasedFragment extends Fragment
     // Create a one-on-one automatch game.
     public void onQuickMatchClicked(View view) {
 
-        Bundle autoMatchCriteria = RoomConfig.createAutoMatchCriteria(sbNumQuizzes.getProgress(), sbNumQuizzes.getProgress(), 0);
+        Bundle autoMatchCriteria = RoomConfig.createAutoMatchCriteria(sbPlayers.getProgress() - 1, sbPlayers.getProgress() - 1, 0);
 
         TurnBasedMatchConfig turnBasedMatchConfig = TurnBasedMatchConfig.builder()
                 .setAutoMatchCriteria(autoMatchCriteria).build();
@@ -274,17 +285,16 @@ public class PlayTurnBasedFragment extends Fragment
         isDoingTurn = false;
 
         showWarning("Match", "This match (" + matchId + ") was canceled.  " +
-                "All other players will have their game ended.");
+                "All other players will have their game ended.", null);
     }
 
     // In-game controls
-
     // Cancel the game. Should possibly wait until the game is canceled before
-    // giving up on the view.
+    // giving roulette_up on the view.
     public void onCancelClicked(View view) {
         showSpinner();
 
-        mTurnBasedMultiplayerClient.cancelMatch(mMatch.getMatchId())
+        mTurnBasedMultiplayerClient.cancelMatch(Game.mMatch.getMatchId())
                 .addOnSuccessListener(new OnSuccessListener<String>() {
                     @Override
                     public void onSuccess(String matchId) {
@@ -301,7 +311,7 @@ public class PlayTurnBasedFragment extends Fragment
         dismissSpinner();
 
         isDoingTurn = false;
-        showWarning("Left", "You've left this match.");
+        showWarning("Left", "You've left this match.", null);
         setViewVisibility();
     }
 
@@ -311,7 +321,7 @@ public class PlayTurnBasedFragment extends Fragment
         showSpinner();
         String nextParticipantId = getNextParticipantId();
 
-        mTurnBasedMultiplayerClient.leaveMatchDuringTurn(mMatch.getMatchId(), nextParticipantId)
+        mTurnBasedMultiplayerClient.leaveMatchDuringTurn(Game.mMatch.getMatchId(), nextParticipantId)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -325,50 +335,105 @@ public class PlayTurnBasedFragment extends Fragment
 
     private void setupView(final View view) {
         CategorySelectionActivity.animateViewFullScaleXY(((CategorySelectionActivity) getActivity()).getSubcategory_title(), 100, 300);
-        mImgAvatar = (ImageView) view.findViewById(R.id.imgAvatar);
 
+        // Initialie header
+        mImgAvatar = (ImageView) view.findViewById(R.id.imgAvatar);
         mNameAvatar = (TextView) view.findViewById(R.id.txtNameAvatar);
 
         // Inicializa botones principales
-        btnJugar = (Button) view.findViewById(R.id.playButton);
-        btnJugar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onPlayButton(view);
-            }
-        });
         btnPlayAnyone = (Button) view.findViewById(R.id.btnPlayAnyone);
         btnPlayAnyone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onQuickMatchClicked(view);
+                if (mTurnBasedMultiplayerClient != null) {
+                    onQuickMatchClicked(view);
+//                showSpinner();
+                } else {
+                    tryLogInGPG();
+                }
+            }
+        });
+        btnNewGame = (Button) view.findViewById(R.id.btnNewGame);
+        btnNewGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mTurnBasedMultiplayerClient != null) {
+                    onStartMatchClicked(view);
+//                showSpinner();
+                } else {
+                    tryLogInGPG();
+                }
+            }
+        });
+        btnSelectMatch = (Button) view.findViewById(R.id.btnSelectMatch);
+        btnSelectMatch.setOnClickListener(new View.OnClickListener()
+
+        {
+            @Override
+            public void onClick(View view) {
+                if (mTurnBasedMultiplayerClient != null) {
+                    onCheckGamesClicked(view);
+//                showSpinner();}
+                } else {
+                    tryLogInGPG();
+                }
+            }
+        });
+        btnShowIntitations = (Button) view.findViewById(R.id.btnShowInvitations);
+        btnShowIntitations.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mTurnBasedMultiplayerClient != null) {
+                    btnVer_Invitaciones_Click(view);
+//                showSpinner();
+                } else {
+                    tryLogInGPG();
+                }
             }
         });
 
+
         // Inicializa botones control turno
+        btnJugar = (Button) view.findViewById(R.id.playButton);
+        btnJugar.setOnClickListener(new View.OnClickListener()
+
+        {
+            @Override
+            public void onClick(View view) {
+                onPlayButton(view, true);
+            }
+        });
         btnDone = (Button) view.findViewById(R.id.doneButton);
-        btnDone.setOnClickListener(new View.OnClickListener() {
+        btnDone.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View view) {
                 onDoneClicked(view);
             }
         });
         cancelButton = (Button) view.findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        cancelButton.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View view) {
                 onCancelClicked(view);
             }
         });
         leaveButton = (Button) view.findViewById(R.id.leaveButton);
-        leaveButton.setOnClickListener(new View.OnClickListener() {
+        leaveButton.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View view) {
                 onCancelClicked(view);
             }
         });
         finishButton = (Button) view.findViewById(R.id.finishButton);
-        finishButton.setOnClickListener(new View.OnClickListener() {
+        finishButton.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View view) {
                 onFinishClicked(view);
@@ -378,20 +443,20 @@ public class PlayTurnBasedFragment extends Fragment
 
         gameLayout = (View) view.findViewById(R.id.gameplay_layout);
         panelGame = (View) view.findViewById(R.id.panel_game);
-        navegador = (WebView) view.findViewById(R.id.webview);
+//        navegador = (WebView) view.findViewById(R.id.webview);
         mDataView = view.findViewById(R.id.data_view);
         mTurnTextView = view.findViewById(R.id.turn_counter_view);
-        progressLayout = view.findViewById(R.id.progressLayout);
-        navegador.getSettings().setJavaScriptEnabled(true);
-        navegador.getSettings().setBuiltInZoomControls(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
-        navegador.loadUrl("file:///android_asset/index.html");
-        navegador.addJavascriptInterface(miInterfazJava, "jsInterfazNativa");
-
-
-        navegador.setWebChromeClient(new WebChromeClient() {
+        progressLayout = view.findViewById(R.id.progress_dialog);
+//        navegador.getSettings().setJavaScriptEnabled(true);
+//        navegador.getSettings().setBuiltInZoomControls(false);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            WebView.setWebContentsDebuggingEnabled(true);
+//        }
+//        navegador.loadUrl("file:///android_asset/index.html");
+//        navegador.addJavascriptInterface(miInterfazJava, "jsInterfazNativa");
+//
+//
+//        navegador.setWebChromeClient(new WebChromeClient() {
 //            @Override
 //            public void onProgressChanged(WebView view, int progreso) {
 //                barraProgreso.setProgress(0);
@@ -404,67 +469,67 @@ public class PlayTurnBasedFragment extends Fragment
 //                }
 //            }
 
-            @Override
-            public boolean onJsAlert(WebView view, String url, String message,
-                                     final JsResult result) {
-                new AlertDialog.Builder(getActivity()).setTitle("Mensaje")
-                        .setMessage(message).setPositiveButton
-                        (android.R.string.ok, new AlertDialog.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                result.confirm();
-                            }
-                        }).setCancelable(false).create().show();
-                return true;
-            }
-
-        });
-        navegador.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                if (dialogo != null)
-                    dialogo.dismiss();
-                dialogo = new ProgressDialog(getActivity());
-                dialogo.setMessage("Cargando...");
-                dialogo.setCancelable(true);
-                dialogo.show();
-//                btnDetener.setEnabled(true);
-
-                comprobarConectividad();
-//                if (comprobarConectividad()) {
-//                    btnDetener.setEnabled(true);
-//                } else {
-//                    btnDetener.setEnabled(false);
-//                }
-
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                dialogo.dismiss();
-                addCategories();
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode,
-                                        String description, String failingUrl) {
-                AlertDialog.Builder builder =
-                        new AlertDialog.Builder(getActivity());
-                builder.setMessage(description).setPositiveButton("Aceptar",
-                        null).setTitle("onReceivedError");
-                builder.show();
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//                String url_filtro = "http://www.androidcurso.com/";
-//                if (!url.toString().equals(url_filtro)) {
-//                    view.loadUrl(url_filtro);
-//                }
-                return false;
-            }
-
-
-        });
+//            @Override
+//            public boolean onJsAlert(WebView view, String url, String message,
+//                                     final JsResult result) {
+//                new AlertDialog.Builder(getActivity()).setTitle("Mensaje")
+//                        .setMessage(message).setPositiveButton
+//                        (android.R.string.ok, new AlertDialog.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                result.confirm();
+//                            }
+//                        }).setCancelable(false).create().show();
+//                return true;
+//            }
+//
+//        });
+//        navegador.setWebViewClient(new WebViewClient() {
+//            @Override
+//            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+//                if (dialogo != null)
+//                    dialogo.dismiss();
+//                dialogo = new ProgressDialog(getActivity());
+//                dialogo.setMessage("Cargando...");
+//                dialogo.setCancelable(true);
+//                dialogo.show();
+////                btnDetener.setEnabled(true);
+//
+//                comprobarConectividad();
+////                if (comprobarConectividad()) {
+////                    btnDetener.setEnabled(true);
+////                } else {
+////                    btnDetener.setEnabled(false);
+////                }
+//
+//            }
+//
+//            @Override
+//            public void onPageFinished(WebView view, String url) {
+//                dialogo.dismiss();
+//                addCategories();
+//            }
+//
+//            @Override
+//            public void onReceivedError(WebView view, int errorCode,
+//                                        String description, String failingUrl) {
+//                AlertDialog.Builder builder =
+//                        new AlertDialog.Builder(getActivity());
+//                builder.setMessage(description).setPositiveButton("Aceptar",
+//                        null).setTitle("onReceivedError");
+//                builder.show();
+//            }
+//
+//            @Override
+//            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+////                String url_filtro = "http://www.androidcurso.com/";
+////                if (!url.toString().equals(url_filtro)) {
+////                    view.loadUrl(url_filtro);
+////                }
+//                return false;
+//            }
+//
+//
+//        });
 
         sbPlayers = (SeekBar) view.findViewById(R.id.sbPlayers);
         sbNumQuizzes = (SeekBar) view.findViewById(R.id.sbNumQuizzes);
@@ -474,7 +539,9 @@ public class PlayTurnBasedFragment extends Fragment
         sbPlayers = (SeekBar) view.findViewById(R.id.sbPlayers);
         txtPlayers = (TextView) view.findViewById(R.id.txtPlayers);
 
-        sbPlayers.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        sbPlayers.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+
+        {
             int progress = sbPlayers.getProgress();
 
             @Override
@@ -501,7 +568,9 @@ public class PlayTurnBasedFragment extends Fragment
         });
 
         sbNumQuizzes.setOnSeekBarChangeListener(
-                new SeekBar.OnSeekBarChangeListener() {
+                new SeekBar.OnSeekBarChangeListener()
+
+                {
                     int progress = sbNumQuizzes.getProgress();
 
                     @Override
@@ -531,40 +600,61 @@ public class PlayTurnBasedFragment extends Fragment
                     }
                 });
 
-        btnPartidaPorTurnos = (Button) view.findViewById(R.id.btnPartidaPorTurnos);
-        btnNewGame = (Button) view.findViewById(R.id.btnNewGame);
-        btnPartidaPorTurnos.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onCheckGamesClicked(view);
-            }
-        });
 
-        btnNewGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onStartMatchClicked(view);
-            }
-        });
+//        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+//        idSonido = soundPool.load(getContext(), R.raw.tick, 0);
 
-        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-        idSonido = soundPool.load(getContext(), R.raw.tick, 0);
+        mGoogleSignInClient = GoogleSignIn.getClient(
 
-        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(),
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
+                getActivity(),
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).
+
+                        build());
+
 //        startSignInIntent();
     }
 
-    private void onPlayButton(View view) {
+    public void tryLogInGPG() {
+        showWarning("Google Play Games", "You aren't not log in! OK to try it", new ActionOnClickButton() {
+            @Override
+            public void onClick() {
+                startSignInIntent();
+            }
+        });
+    }
+
+    private void onPlayButton(View view, boolean playable) {
         // Muestra Ruleta y elige categoria
 //        navegador.setVisibility(View.VISIBLE);
 //        panelGame.setVisibility(View.GONE);
-        navegador.loadUrl("javascript:girar()");
+//        navegador.loadUrl("javascript:girar()");
+        Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
+
+        if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas || !playable) {
+
+            Intent startIntent = new Intent(getActivity(), RouletteActivity.class);
+            startIntent.putExtra("playable", playable);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                startActivityForResult(startIntent, RC_CHOOOSE_CATEGORY, null);
+            } else {
+                startActivityForResult(startIntent, RC_CHOOOSE_CATEGORY, null);
+            }
+            getActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        } else {
+            if (Game.mTurnData.numTurnos >= 1)
+                onFinishClicked(null);
+            else {
+                String nextParticipantId = getNextParticipantId();
+                Game.mTurnData.numTurnos++;
+                nextTurn(nextParticipantId, nextParticipantId);
+            }
+        }
+
     }
 
 
     // Open the create-game UI. You will get back an onActivityResult
-    // and figure out what to do.
+// and figure out what to do.
     public void onStartMatchClicked(View view) {
         final int NUMERO_MINIMO_OPONENTES = sbPlayers.getProgress() - 1, NUMERO_MAXIMO_OPONENTES = sbPlayers.getProgress() - 1;
 
@@ -610,6 +700,15 @@ public class PlayTurnBasedFragment extends Fragment
         mInvitationsClient = null;
 
         setViewVisibility();
+
+
+        if (!retry) {
+            retry = true;
+            startSignInIntent();
+
+        } else {
+            showWarning("Google Play Games", "No ha sido posible conectar con Google Play Games", null);
+        }
     }
 
     private void setViewVisibility() {
@@ -631,18 +730,20 @@ public class PlayTurnBasedFragment extends Fragment
 //        ((TextView) findViewById(R.id.name_field)).setText(mDisplayName);
 //        findViewById(R.id.login_layout).setVisibility(View.GONE);
 
-        if (isDoingTurn) {
-//            findViewById(R.id.matchup_layout).setVisibility(View.GONE);
-            gameLayout.setVisibility(View.VISIBLE);
-        } else {
-//            findViewById(R.id.matchup_layout).setVisibility(View.VISIBLE);
-            gameLayout.setVisibility(View.GONE);
-        }
+//        if (isDoingTurn) {
+////            findViewById(R.id.matchup_layout).setVisibility(View.GONE);
+//            gameLayout.setVisibility(View.VISIBLE);
+//        } else {
+////            findViewById(R.id.matchup_layout).setVisibility(View.VISIBLE);
+//            gameLayout.setVisibility(View.GONE);
+//        }
     }
+
+    boolean retry = false;
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
         Log.d(TAG, "onConnected(): connected to Google APIs");
-
+        retry = false;
         mTurnBasedMultiplayerClient = Games.getTurnBasedMultiplayerClient(getActivity(), googleSignInAccount);
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
 
@@ -657,9 +758,10 @@ public class PlayTurnBasedFragment extends Fragment
                                 imageManager.loadImage(mImgAvatar, mImagePlayer);
 
                                 mDisplayName = player.getDisplayName();
-                                mPlayerId = player.getPlayerId();
+                                Game.mPlayerId = player.getPlayerId();
 
 
+//                                mNameAvatar.setText(Game.mPlayerId + " -  " + mDisplayName);
                                 mNameAvatar.setText(mDisplayName);
                                 setViewVisibility();
                             }
@@ -717,45 +819,45 @@ public class PlayTurnBasedFragment extends Fragment
 
 
     public void updateMatch(TurnBasedMatch match) {
-        mMatch = match;
+        Game.mMatch = match;
 
         int status = match.getStatus();
         int turnStatus = match.getTurnStatus();
 
         switch (status) {
             case TurnBasedMatch.MATCH_STATUS_CANCELED:
-                showWarning("Canceled!", "This game was canceled!");
+                showWarning("Canceled!", "This game was canceled!", null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-                showWarning("Expired!", "This game is expired.  So sad!");
+                showWarning("Expired!", "This game is expired.  So sad!", null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                 showWarning("Waiting for auto-match...",
-                        "We're still waiting for an automatch partner.");
+                        "We're still waiting for an automatch partner.", actionButton);
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
                     showWarning("Complete!",
                             "This game is over; someone finished it, and so did you!  " +
-                                    "There is nothing to be done.");
+                                    "There is nothing to be done.", actionButton);
                     break;
                 }
 
                 // Note that in this state, you must still call "Finish" yourself,
                 // so we allow this to continue.
-                showWarning("Complete!",
-                        "This game is over; someone finished it!  You can only finish it now.");
+//                showWarning("Complete!",
+//                        "This game is over; someone finished it!  You can only finish it now.", actionButton);
 
-                onFinishClicked(null);
-                break;
+                finishFinishedMatch();
+                return;
         }
 
         // OK, it's active. Check on turn status.
         switch (turnStatus) {
             case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
                 if (match.getData() != null) {
-                    // This is a game that has already started, so I'll just start
-                    mTurnData = Turn.unpersist(match.getData());
+                    // This is a game that has already started, so I'll just roulette_rotate
+                    Game.mTurnData = Turn.unpersist(match.getData());
                     setGameplayUI();
                 } else {
                     startMatch(match);
@@ -763,25 +865,42 @@ public class PlayTurnBasedFragment extends Fragment
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
                 // Should return results.
-                showWarning("Alas...", "It's not your turn.");
+                showWarning("Alas...", "It's not your turn.", actionButton);
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
                 showWarning("Good inititative!",
-                        "Still waiting for invitations.\n\nBe patient!");
+                        "Still waiting for invitations.\n\nBe patient!", actionButton);
+
         }
 
-        mTurnData = null;
+//        mTurnData = null;
         // Switch to gameplay view.
         setViewVisibility();
 
     }
 
+
+    private ActionOnClickButton actionButton = new ActionOnClickButton() {
+        @Override
+        public void onClick() {
+            onPlayButton(null, false);
+        }
+    };
+
+
+    public interface ActionOnClickButton {
+        void onClick();
+    }
+
+    ;
+
     // Switch to gameplay view.
     public void setGameplayUI() {
         isDoingTurn = true;
         setViewVisibility();
-        mDataView.setText("" + mTurnData.getNumQuizz());
-        mTurnTextView.setText(getString(R.string.turn_label, mTurnData.getNumQuizz() + 1));
+//        mDataView.setText("" + mTurnData.getNumQuizz());
+//        mTurnTextView.setText(getString(R.string.turn_label, mTurnData.getNumQuizz() + 1));
+        onPlayButton(null, true);
     }
 
 
@@ -822,8 +941,8 @@ public class PlayTurnBasedFragment extends Fragment
     };
 
     // This is a helper functio that will do all the setup to create a simple failure message.
-    // Add it to any task and in the case of an failure, it will report the string in an alert
-    // dialog.
+// Add it to any task and in the case of an failure, it will report the string in an alert
+// dialog.
     private OnFailureListener createFailureListener(final String string) {
         return new OnFailureListener() {
             @Override
@@ -869,7 +988,7 @@ public class PlayTurnBasedFragment extends Fragment
     }
 
     // Returns false if something went wrong, probably. This should handle
-    // more cases, and probably report more accurate results.
+// more cases, and probably report more accurate results.
     private boolean checkStatusCode(int statusCode) {
         switch (statusCode) {
             case GamesCallbackStatusCodes.OK:
@@ -898,7 +1017,7 @@ public class PlayTurnBasedFragment extends Fragment
                 Log.d(TAG, "Did not have warning or string to deal with: "
                         + statusCode);
         }
-
+        CustomDialogFragment.dismissDialog();
         return false;
     }
 
@@ -906,7 +1025,7 @@ public class PlayTurnBasedFragment extends Fragment
     private android.app.AlertDialog mAlertDialog;
 
     // Generic warning/info dialog
-    public void showWarning(String title, String message) {
+    public void showWarning(String title, String message, final ActionOnClickButton actionButton) {
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
 
         // set title
@@ -919,6 +1038,8 @@ public class PlayTurnBasedFragment extends Fragment
                     public void onClick(DialogInterface dialog, int id) {
                         // if this button is clicked, close
                         // current activity
+                        if (actionButton != null)
+                            actionButton.onClick();
                     }
                 });
 
@@ -930,7 +1051,7 @@ public class PlayTurnBasedFragment extends Fragment
     }
 
     public void showErrorMessage(int stringId) {
-        showWarning("Warning", getResources().getString(stringId));
+        showWarning("Warning", getResources().getString(stringId), null);
     }
 
 
@@ -949,7 +1070,7 @@ public class PlayTurnBasedFragment extends Fragment
     private static final int RC_SIGN_IN = 9001;
 
     // Displays your inbox. You will get back onActivityResult where
-    // you will need to figure out what you clicked on.
+// you will need to figure out what you clicked on.
     public void onCheckGamesClicked(View view) {
         mTurnBasedMultiplayerClient.getInboxIntent()
                 .addOnSuccessListener(new OnSuccessListener<Intent>() {
@@ -963,18 +1084,14 @@ public class PlayTurnBasedFragment extends Fragment
 
 
     private void addCategories() {
-        for (CategoryJSON category : categoriesJSON) {
-            navegador.loadUrl("javascript:addSegment(\"" + category.getCategory().substring(0,Math.min(category.getCategory().length(),20)) + "\",\"" + category.getTheme() + "\",\"" + category.getImg() + "\")");
-        }
-//        navegador.loadUrl("javascript:girar()");
-
-//        navegador.setVisibility(View.VISIBLE);
-//        navegador.setVisibility(View.GONE);
+//        for (CategoryJSON category : categoriesJSON) {
+//            navegador.loadUrl("javascript:addSegment(\"" + category.getCategory().substring(0,Math.min(category.getCategory().length(),20)) + "\",\"" + category.getTheme() + "\",\"" + category.getImg() + "\")");
+//        }
 
     }
-
-    private static SoundPool soundPool;
-    int idSonido = 0;
+//
+//    private static SoundPool soundPool;
+//    int idSonido = 0;
 
     private boolean comprobarConectividad() {
         ConnectivityManager connectivityManager =
@@ -992,23 +1109,8 @@ public class PlayTurnBasedFragment extends Fragment
 
 
     final static int RC_SELECT_PLAYERS = 10000;
-    private Button btnPartidaPorTurnos;
+    private Button btnSelectMatch;
     final static String TAG = "PLAYTURNBASED";
-
-
-    public void selectCategories(View v) {
-
-        Game.jugadorLocal = 0;
-//        Game.tmpNumQuizzes = sbQuizzes.getProgress();
-//        Game.tmpTotalTime = sbTotalTime.getProgress();
-        SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
-        Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
-        Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
-        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
-
-        // Choose category in custom Game
-        ((CategorySelectionActivity) getActivity()).attachTreeViewFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
-    }
 
 
     @Override
@@ -1027,10 +1129,10 @@ public class PlayTurnBasedFragment extends Fragment
                         message = "Error al conectar el cliente.";
                     }
                     onDisconnected();
-                    new AlertDialog.Builder(getActivity())
-                            .setMessage(message)
-                            .setNeutralButton(android.R.string.ok, null)
-                            .show();
+//                    new AlertDialog.Builder(getActivity())
+//                            .setMessage(message)
+//                            .setNeutralButton(android.R.string.ok, null)
+//                            .show();
                 }
                 break;
 
@@ -1042,7 +1144,7 @@ public class PlayTurnBasedFragment extends Fragment
 
             case RC_INVITATION_INBOX:
                 // we got the result from the "select invitation" UI (invitation inbox). We're
-                // ready to accept the selected invitation:
+                // ready to accept the roulette_selection invitation:
                 handleInvitationInboxResult(resultCode, intent);
                 break;
             case RC_LOOK_AT_MATCHES:
@@ -1058,7 +1160,37 @@ public class PlayTurnBasedFragment extends Fragment
 
                 Log.d(TAG, "Match = " + match);
                 break;
+            case RC_CHOOOSE_CATEGORY:
+
+                if (resultCode != RESULT_OK)
+                    onLeaveClicked(null);
+                else {
+                    int categoryAux = intent.getIntExtra("category", 0);
+                    // If no play do nathing
+                    if (categoryAux != -1)
+                        startQuizzes(categoryAux);
+                }
+                break;
+
+            case RC_PLAY_TURN:
+
+//                if (resultCode != RESULT_OK)
+//                    onLeaveClicked(null);
+//                else {
+                // Actualiza puntuación
+                onDoneClicked(null);
+                    /*if (Game.category.getScore()>0) {
+                        // Continua Jugando
+
+                    }else {
+                        // Pasa Turno
+                    }*/
+
+//                }
+                break;
         }
+
+
         super.onActivityResult(requestCode, resultCode, intent);
     }
 
@@ -1067,8 +1199,8 @@ public class PlayTurnBasedFragment extends Fragment
                 + message);
     }
 
-    public TurnBasedMatch mMatch;
-    private Turn mTurnData;
+//    public TurnBasedMatch Game.mMatch;
+//    private Turn mTurnData;
 
     private AlertDialog mDialogoAlerta;
 
@@ -1092,7 +1224,7 @@ public class PlayTurnBasedFragment extends Fragment
 
 
     // Handle the result of the invitation inbox UI, where the player can pick an invitation
-    // to accept. We react by accepting the selected invitation, if any.
+// to accept. We react by accepting the roulette_selection invitation, if any.
     private void handleInvitationInboxResult(int response, Intent data) {
         if (response != RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
@@ -1101,10 +1233,20 @@ public class PlayTurnBasedFragment extends Fragment
         }
 
         Log.d(TAG, "Invitation inbox UI succeeded.");
-        Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
+        Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
 
         // accept invitation
-        acceptInviteToRoom(inv.getInvitationId());
+        if (inv != null)
+            acceptInviteToRoom(inv.getInvitationId());
+        else {
+            new android.app.AlertDialog.Builder(getActivity())
+                    .setMessage("La invitación corresponde a una PARTIDA EN TIEMPO REAL")
+                    .setNeutralButton(android.R.string.ok, null)
+                    .show();
+            Game.pendingInvitation = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
+            ((CategorySelectionActivity) getActivity()).attachPlayOnlineFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+            ;
+        }
     }
 
 
@@ -1113,26 +1255,28 @@ public class PlayTurnBasedFragment extends Fragment
         // accept the invitation
         Log.d(TAG, "Accepting invitation: " + invId);
 
-        onPlayButton(null);
+        onPlayButton(null, true);
 //        switchToScreen(R.id.screen_wait);
     }
 
 
-    private void startQuizzes(String categorySelected) {
+    private void startQuizzes(int categorySelected) {
         Intent startIntent;
-        Toast.makeText(getActivity(), "CREANDO PARTIDA", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getActivity(), "CREANDO PARTIDA", Toast.LENGTH_SHORT).show();
 
         Game.numQuizzes = 1;
         Game.totalTime = 60;
 
-
-        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryTurnBased(categorySelected);
+        Game.categorySelected = categorySelected;
+        Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryTurnBased(categorySelected);
         startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
-            ActivityCompat.startActivity(getActivity(), startIntent, null);
+            startActivityForResult(startIntent, RC_PLAY_TURN, null);
         else {
-            ActivityCompat.startActivity(getActivity(), startIntent, null);
+            startActivityForResult(startIntent, RC_PLAY_TURN, null);
         }
+        getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
 
@@ -1145,51 +1289,20 @@ public class PlayTurnBasedFragment extends Fragment
 
 
     @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-
-            case R.id.sign_in_button:
-                // start the sign-in flow
-                Log.d(TAG, "Sign-in button clicked");
-//                mSignInClicked = true;
-                break;
-//            case R.id.sign_out_button:
-//                Log.d(TAG, "Sign-out button clicked");
-//                mSignInClicked = false;
-//                Games.signOut(Game.mGoogleApiClient);
-//                Game.mGoogleApiClient.disconnect();
-//
-//                loginActions.setVisibility(View.VISIBLE);
-//                globalActions.setVisibility(View.GONE);
-//                newGameActions.setVisibility(View.GONE);
-//                break;
-        }
-    }
-
-
-//    public void btnVer_Invitaciones_Click(View view) {
-//        // show list of pending invitations
-//        Intent intent = Games.Invitations.getInvitationInboxIntent(Game.mGoogleApiClient);
-////        switchToScreen(R.id.screen_wait);
-//        startActivityForResult(intent, RC_INVITATION_INBOX);
-//    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
-        if (soundPool != null) {
-            soundPool.stop(idSonido);
-            soundPool.release();
-        }
+//        if (soundPool != null) {
+//            soundPool.stop(idSonido);
+//            soundPool.release();
+//        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (soundPool != null) {
-            soundPool.pause(idSonido);
-        }
+//        if (soundPool != null) {
+//            soundPool.pause(idSonido);
+//        }
 
         // Unregister the invitation callbacks; they will be re-registered via
         // onResume->signInSilently->onConnected.
@@ -1213,9 +1326,9 @@ public class PlayTurnBasedFragment extends Fragment
      */
     public String getNextParticipantId() {
 
-        String myParticipantId = mMatch.getParticipantId(mPlayerId);
+        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
 
-        ArrayList<String> participantIds = mMatch.getParticipantIds();
+        ArrayList<String> participantIds = Game.mMatch.getParticipantIds();
 
         int desiredIndex = -1;
 
@@ -1229,8 +1342,8 @@ public class PlayTurnBasedFragment extends Fragment
             return participantIds.get(desiredIndex);
         }
 
-        if (mMatch.getAvailableAutoMatchSlots() <= 0) {
-            // You've run out of automatch slots, so we start over.
+        if (Game.mMatch.getAvailableAutoMatchSlots() <= 0) {
+            // You've run out of automatch slots, so we roulette_rotate over.
             return participantIds.get(0);
         } else {
             // You have not yet fully automatched, so null will find a new
@@ -1240,83 +1353,159 @@ public class PlayTurnBasedFragment extends Fragment
     }
 
     // Upload your new gamestate, then take a turn, and pass it on to the next
-    // player.
+// player.
     public void onDoneClicked(View view) {
-        mTurnData = Turn.unpersist(mMatch.getData());
-        if (mTurnData != null) {
+
+        Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
+        if (Game.mTurnData != null) {
             showSpinner();
+
+            String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
 
             String nextParticipantId = getNextParticipantId();
             // Create the next turn
-            if (mTurnData.turnoJugador == 1)
-                mTurnData.puntosJ1 += K_PUNTOS_POR_PREGUNTA;
-            else
-                mTurnData.puntosJ2 += K_PUNTOS_POR_PREGUNTA;
+            if (Game.mTurnData.participantsTurnBased.indexOf(myParticipantId) == -1)
+                Game.mTurnData.participantsTurnBased.add(myParticipantId);
 
 
-            int currentQuizz = mTurnData.getNumQuizz();
-            mTurnData.puntuacion[currentQuizz][0] = (short) mTurnData.turnoJugador;
-            mTurnData.puntuacion[currentQuizz][1] += K_PUNTOS_POR_PREGUNTA;
+            Game.mTurnData.puntuacion[Game.mTurnData.numPreguntasContestadas][0] = (short) Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
+            Game.mTurnData.puntuacion[Game.mTurnData.numPreguntasContestadas][1] = (Game.category.getScore() > 0) ? (short) (Game.category.getScore() * K_PUNTOS_POR_PREGUNTA) : 0;
+            Game.mTurnData.puntuacion[Game.mTurnData.numPreguntasContestadas][2] = (short) Game.categorySelected;
 
-            final boolean finalPartida = currentQuizz + 1 >= mTurnData.numPreguntas;
-            Log.d(getClass().getSimpleName(), "finalPartida=" + finalPartida + " currentQuizz=" + currentQuizz);
-            if (mTurnData.turnoJugador == 1) {
-                mTurnData.puntosJ1++;
-                mTurnData.turnoJugador = 2;
-            } else {
-                mTurnData.puntosJ2++;
-                mTurnData.turnoJugador = 1;
-            }
+            Game.mTurnData.numPreguntasContestadas++;
 
 
-            String myParticipantId = mMatch.getParticipantId(mPlayerId);
+            final boolean finalPartida = Game.mTurnData.numPreguntasContestadas >= Game.mTurnData.numPreguntas;
+            Log.d(getClass().getSimpleName(), "finalPartida=" + finalPartida + " currentQuizz=" + Game.mTurnData.numPreguntasContestadas);
 
             if (finalPartida) {
-                mTurnBasedMultiplayerClient.finishMatch(mMatch.getMatchId())
-                        .addOnSuccessListener(
-                                new OnSuccessListener<TurnBasedMatch>() {
-                                    @Override
-                                    public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                                        Toast.makeText(getActivity(),
-                                                "Fin de la partida.",
-                                                Toast.LENGTH_LONG).show();
-                                        mTurnData = null;
-                                        onUpdateMatch(turnBasedMatch);
-                                    }
-                                })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getActivity(),
-                                        "Hay un problema finalizando la partida", Toast.LENGTH_SHORT);
-                            }
-                        });
+                if (Game.mTurnData.numTurnos >= 1) {
+                    finishMatch();
+                } else {
+                    Game.mTurnData.numTurnos++;
+                    nextTurn(nextParticipantId, nextParticipantId);
+                }
             } else {
-                mTurnBasedMultiplayerClient.takeTurn(mMatch.getMatchId(),
-                        mTurnData.persist(), finalPartida ? myParticipantId : nextParticipantId)
-                        .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
+                if (Game.category.getScore() == 0)
+                    Game.mTurnData.numTurnos++;
+                nextTurn(myParticipantId, nextParticipantId);
+            }
+        }
+
+    }
+
+    public void nextTurn(String myParticipantId, String nextParticipantId) {
+        mTurnBasedMultiplayerClient.takeTurn(Game.mMatch.getMatchId(),
+                Game.mTurnData.persist(), Game.category == null || Game.category.getScore() == 0 ? nextParticipantId : myParticipantId)
+                .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
+                    @Override
+                    public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                        Game.mMatch = turnBasedMatch;
+                        onUpdateMatch(turnBasedMatch);
+                    }
+                })
+                .addOnFailureListener(createFailureListener("There was a problem taking a turn!"));
+        Game.mTurnData = null;
+    }
+
+    public void finishFinishedMatch() {
+        mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId())
+                .addOnSuccessListener(
+                        new OnSuccessListener<TurnBasedMatch>() {
                             @Override
                             public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                                mMatch = turnBasedMatch;
 
+                                showWarning("Complete!",
+                                        "This game is over; someone finished it, and so did you!  " +
+                                                "There is nothing to be done.", actionButton);
+//                                Toast.makeText(getActivity(),
+//                                        "Fin de la partida.",
+//                                        Toast.LENGTH_LONG).show();
+                                Game.mTurnData = null;
+//                                onUpdateMatch(turnBasedMatch);
+                            }
+                        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(),
+                                "Hay un problema finalizando la partida", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
+    public void finishMatch() {
+        Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
+        List<String> winners = getWinners();
+        List<ParticipantResult> list = new ArrayList<ParticipantResult>();
+        for (Participant p : Game.mMatch.getParticipants()) {
+            ParticipantResult participantResult = null;
+            if (winners.indexOf(p.getParticipantId()) >= 0) {
+
+                if (winners.size() > 1)
+                    participantResult = new ParticipantResult(p.getParticipantId(), MATCH_RESULT_TIE, PLACING_UNINITIALIZED);
+                else
+                    participantResult = new ParticipantResult(p.getParticipantId(), MATCH_RESULT_WIN, PLACING_UNINITIALIZED);
+
+            } else {
+                participantResult = new ParticipantResult(p.getParticipantId(), MATCH_RESULT_LOSS, PLACING_UNINITIALIZED);
+
+            }
+            list.add(participantResult);
+        }
+
+        mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId(), Game.mTurnData.persist(), list)
+                .addOnSuccessListener(
+                        new OnSuccessListener<TurnBasedMatch>() {
+                            @Override
+                            public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                                Toast.makeText(getActivity(),
+                                        "Fin de la partida.",
+                                        Toast.LENGTH_LONG).show();
+                                Game.mTurnData = null;
                                 onUpdateMatch(turnBasedMatch);
                             }
                         })
-                        .addOnFailureListener(createFailureListener("There was a problem taking a turn!"));
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(),
+                                "Hay un problema finalizando la partida", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
-                mTurnData = null;
+    private List<String> getWinners() {
+        int maxAnswers = 0;
+
+        List<String> players = new ArrayList<>();
+
+        for (int i = 0; i < Game.mTurnData.participantsTurnBased.size(); i++) {
+            int auxAnswers = 0;
+            for (int cont = 0; cont < Game.mTurnData.numPreguntas; cont++) {
+                if ((Game.mTurnData.puntuacion[cont][0] == i) && Game.mTurnData.puntuacion[cont][1] > 0) {
+                    auxAnswers++;
+                }
+            }
+            if (maxAnswers < auxAnswers) {
+                maxAnswers = auxAnswers;
+                players.clear();
+                players.add(Game.mTurnData.participantsTurnBased.get(i));
+            } else if (maxAnswers == auxAnswers) {
+                players.add(Game.mTurnData.participantsTurnBased.get(i));
+            } else {
+                // Less score
             }
         }
+
+        return players;
     }
 
 
     // Rematch dialog
-    public void askForRematch() {
+    public void askForRematch(final TurnBasedMatch match) {
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
-
         alertDialogBuilder.setMessage("Do you want a rematch?");
-
         alertDialogBuilder
                 .setCancelable(false)
                 .setPositiveButton("Sure, rematch!",
@@ -1330,6 +1519,7 @@ public class PlayTurnBasedFragment extends Fragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
+                                continueOnUpdateMatch(match);
                             }
                         });
 
@@ -1340,7 +1530,7 @@ public class PlayTurnBasedFragment extends Fragment
     // If you choose to rematch, then call it and wait for a response.
     public void rematch() {
         showSpinner();
-        mTurnBasedMultiplayerClient.rematch(mMatch.getMatchId())
+        mTurnBasedMultiplayerClient.rematch(Game.mMatch.getMatchId())
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
@@ -1348,7 +1538,7 @@ public class PlayTurnBasedFragment extends Fragment
                     }
                 })
                 .addOnFailureListener(createFailureListener("There was a problem starting a rematch!"));
-        mMatch = null;
+        Game.mMatch = null;
         isDoingTurn = false;
     }
 
@@ -1357,30 +1547,24 @@ public class PlayTurnBasedFragment extends Fragment
         dismissSpinner();
 
         if (match.canRematch()) {
-            askForRematch();
+            askForRematch(match);
+        } else {
+            continueOnUpdateMatch(match);
         }
+    }
 
+    public void continueOnUpdateMatch(TurnBasedMatch match) {
         isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
-
         if (isDoingTurn) {
             updateMatch(match);
             return;
         }
-
         setViewVisibility();
     }
 
     public void onFinishClicked(View view) {
         showSpinner();
-        mTurnBasedMultiplayerClient.finishMatch(mMatch.getMatchId())
-                .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
-                    @Override
-                    public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                        onUpdateMatch(turnBasedMatch);
-                    }
-                })
-                .addOnFailureListener(createFailureListener("There was a problem finishing the match!"));
-
+        finishMatch();
         isDoingTurn = false;
         setViewVisibility();
     }
@@ -1407,38 +1591,8 @@ public class PlayTurnBasedFragment extends Fragment
 
         return progresValue;
     }
-    //////////////////////////////////////////////////////////////
-    ////////////////////////////  TRASH
-    //////////////////////////////////////////////////////////////
 
 
-//    // Activity just got to the foreground. We switch to the wait screen because we will now
-//    // go through the sign-in flow (remember that, yes, every time the Activity comes back to the
-//    // foreground we go through the sign-in flow -- but if the user is already authenticated,
-//    // this flow simply succeeds and is imperceptible).
-
-    //Click actions
-
-    // QuickGame
-//    private void playAnyOne(View v) {
-//        // QuizFragment
-//        SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
-////        Game.numPlayers = Game.tmpNumPlayers = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_PLAYERS, 2);
-//        Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
-//        Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
-//        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
-//        Game.minAutoMatchPlayers = Game.numPlayers - 1;
-//        Game.maxAutoMatchPlayers = Game.numPlayers - 1;
-//
-//        Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(
-//                SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10),
-//                Game.listCategories);
-//
-//        Intent intent = QuizActivity.getStartIntent(getContext(), Game.category);
-//        startActivity(intent);
-//    }
-//
-//
     private void showSeekbarsProgress() {
         txtPlayers.setText(getString(R.string.num_players) + sbPlayers.getProgress() + "/" + (sbPlayers.getMax() - 1));
 //        txtTotalTime.setText("Total Time: " + sbTotalTime.getProgress() + "/" + sbTotalTime.getMax());
@@ -1446,14 +1600,16 @@ public class PlayTurnBasedFragment extends Fragment
     }
 
     //
-    // Handle the result of the "Select players UI" we launched when the user clicked the
-    // "Invite friends" button. We react by creating a room with those players.
+// Handle the result of the "Select players UI" we launched when the user clicked the
+// "Invite friends" button. We react by creating a room with those players.
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != RESULT_OK) {
             Log.w(TAG, "*** select players UI cancelled, " + response);
 //            switchToMainScreen();
             return;
         }
+
+        showSpinner();
 
         Log.d(TAG, "Select players UI succeeded.");
 
@@ -1489,7 +1645,7 @@ public class PlayTurnBasedFragment extends Fragment
 //        Game.tmpNumQuizzes = sbQuizzes.getProgress();
 //        Game.tmpTotalTime = sbTotalTime.getProgress();
 
-//                Game.category = TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10), Game.listCategories);
+//                Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10), Game.listCategories);
 //                startQuizzes();
                         onInitiateMatch(turnBasedMatch);
                         Log.d(TAG, "Juego por Turnos Creado");
@@ -1497,14 +1653,13 @@ public class PlayTurnBasedFragment extends Fragment
                 }).addOnFailureListener(createFailureListener("There was a problem creating a match!"));
 
 
-        showSpinner();
     }
 
     private void onInitiateMatch(TurnBasedMatch match) {
         dismissSpinner();
 
         if (match.getData() != null) {
-            // This is a game that has already started, so I'll just start
+            // This is a game that has already started, so I'll just roulette_rotate
             updateMatch(match);
             return;
         }
@@ -1513,32 +1668,40 @@ public class PlayTurnBasedFragment extends Fragment
     }
 
     // startMatch() happens in response to the createTurnBasedMatch()
-    // above. This is only called on success, so we should have a
-    // valid match object. We're taking this opportunity to setup the
-    // game, saving our initial state. Calling takeTurn() will
-    // callback to OnTurnBasedMatchUpdated(), which will show the game
-    // UI.
+// above. This is only called on success, so we should have a
+// valid match object. We're taking this opportunity to setup the
+// game, saving our initial state. Calling takeTurn() will
+// callback to OnTurnBasedMatchUpdated(), which will show the game
+// UI.
     public void startMatch(TurnBasedMatch match) {
-        mTurnData = new Turn();
-        mTurnData.numPreguntas = sbNumQuizzes.getProgress();
+        showSpinner();
+        Game.mMatch = match;
+        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
 
-        mTurnData.puntosJ1 = 0;
-        mTurnData.puntosJ2 = 0;
-        mTurnData.turnoJugador = 1;
-        mTurnData.puntuacion = new short[mTurnData.numPreguntas][2];
-        for (int pos = 0; pos < mTurnData.numPreguntas; pos++) {
-            mTurnData.puntuacion[pos][0] = 0;
-            mTurnData.puntuacion[pos][1] = 0;
+        Game.mTurnData = new Turn();
+        Game.mTurnData.numPreguntas = sbNumQuizzes.getProgress();
+
+        Game.mTurnData.numPreguntasContestadas = 0;
+        Game.mTurnData.numTurnos = 0;
+        Game.mTurnData.numJugadores = sbPlayers.getProgress();
+        if (Game.mTurnData.participantsTurnBased != null)
+            Game.mTurnData.participantsTurnBased.clear();
+        else
+            Game.mTurnData.participantsTurnBased = new ArrayList<>();
+
+        if (Game.mTurnData.participantsTurnBased.indexOf(myParticipantId) == -1)
+            Game.mTurnData.participantsTurnBased.add(myParticipantId);
+
+        Game.mTurnData.puntuacion = new short[Game.mTurnData.numPreguntas][3];
+        for (int pos = 0; pos < Game.mTurnData.numPreguntas; pos++) {
+            Game.mTurnData.puntuacion[pos][0] = 0;
+            Game.mTurnData.puntuacion[pos][1] = 0;
+            Game.mTurnData.puntuacion[pos][2] = 0;
         }
 
-        mMatch = match;
-
-        String myParticipantId = mMatch.getParticipantId(mPlayerId);
-
-        showSpinner();
 
         mTurnBasedMultiplayerClient.takeTurn(match.getMatchId(),
-                mTurnData.persist(), myParticipantId)
+                Game.mTurnData.persist(), myParticipantId)
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
@@ -1550,10 +1713,24 @@ public class PlayTurnBasedFragment extends Fragment
 
     // Helpful dialogs
     public void showSpinner() {
-        progressLayout.setVisibility(View.VISIBLE);
+        CustomDialogFragment.showDialog(getFragmentManager());
+//        progressLayout.setVisibility(View.VISIBLE);
     }
 
     public void dismissSpinner() {
-        progressLayout.setVisibility(View.GONE);
+//        progressLayout.setVisibility(View.GONE);
+        CustomDialogFragment.dismissDialog();
+
+    }
+
+    public void btnVer_Invitaciones_Click(View view) {
+        Games.getInvitationsClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
+                .getInvitationInboxIntent()
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        startActivityForResult(intent, RC_INVITATION_INBOX);
+                    }
+                });
     }
 }

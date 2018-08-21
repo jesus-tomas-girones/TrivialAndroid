@@ -30,7 +30,7 @@ import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.fab.CheckableFab;
 import com.trivial.upv.android.widget.treeview.TreeViewFactoryNode;
 
@@ -58,8 +58,8 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mode = getArguments().getString(MODE);
+        Game.mode = mode;
     }
 
     public static CategorySelectionTreeViewFragment newInstance(String mode) {
@@ -166,7 +166,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 //            Game.numPlayers = Game.tmpNumPlayers;
 //            Game.totalTime = Game.tmpTotalTime;
 //
-//            Game.category = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
+//            Game.category = TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
             animateFloatButton();
         }
     }
@@ -178,7 +178,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONE_PLAYER_TOTAL_TIME, 250);
 
         if (getRandomQuizzesFromSelectedCategories(Game.tmpNumQuizzes)) {
-            Game.category = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
+            Game.category = TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
             Game.numQuizzes = Game.tmpNumQuizzes;
             Game.numPlayers = Game.tmpNumPlayers;
             Game.totalTime = Game.tmpTotalTime;
@@ -191,9 +191,9 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     public void animateFloatButton() {
         final Intent startIntent;
         if (mode.equals(ARG_ONE_PLAYER)) {
-            startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
+            startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
         } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
-            //startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
+            //startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
 
             startIntent = null;
         } else {
@@ -273,7 +273,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         Game.listCategories.clear();
         long level = 0;
 
-        TopekaJSonHelper instanceJSON = TopekaJSonHelper.getInstance(getContext(), false);
+        TrivialJSonHelper instanceJSON = TrivialJSonHelper.getInstance(getContext(), false);
         for (int i = 0; i < selectedNodes.size(); i++) {
             CategoryJSON category = (CategoryJSON) selectedNodes.get(i).getValue();
             Game.listCategories.add(category.getCategory());
@@ -297,7 +297,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         String description = null;
         String video = null;
 
-        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
+        TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
         Game.level = level;
 //        Log.d("LEVEL", "Level:" + Game.level);
         return true;
@@ -358,7 +358,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         String description = null;
         String video = null;
 
-        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
+        TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
 
         return true;
     }
@@ -383,7 +383,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         return tmpQuizzes;
     }
 
-    // Change the fragment mode: ONE_PLAYER, TWO_PLAYER
+    // Change the fragment mode: ONE_PLAYER, REALTIME_MULTIPLAYER
     public void changeMode(String newMode) {
         if (mode == null || !mode.equals(newMode))
             switch (mode) {
@@ -452,8 +452,8 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     }
 
     private void buildTreeNodes() {
-        if (TopekaJSonHelper.getInstance(getActivity(), false).isLoaded()) {
-            List<CategoryJSON> categoriesJSON = TopekaJSonHelper.getInstance(getActivity(), false).getCategoriesJSON();
+        if (TrivialJSonHelper.getInstance(getActivity(), false).isLoaded()) {
+            List<CategoryJSON> categoriesJSON = TrivialJSonHelper.getInstance(getActivity(), false).getCategoriesJSON();
             if (categoriesJSON != null) {
                 int level = 0;
                 for (CategoryJSON category : categoriesJSON) {

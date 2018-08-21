@@ -70,7 +70,7 @@ public class AnswerHelper {
     /**
      * Checks whether a provided answer is correct.
      *
-     * @param checkedItems The items that were selected.
+     * @param checkedItems The items that were roulette_selection.
      * @param answerIds The actual correct answer ids.
      * @return <code>true</code> if correct else <code>false</code>.
      */
