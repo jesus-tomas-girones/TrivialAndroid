@@ -263,7 +263,7 @@ public class QuestionsTXTHelper {
     }
 
 
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
     public static boolean LOAD_LOCAL_FILE = false;
 
     /**
