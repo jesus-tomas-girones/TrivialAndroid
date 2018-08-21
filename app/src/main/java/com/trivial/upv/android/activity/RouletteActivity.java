@@ -37,7 +37,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     RouletteView rouletteView;
 
 
-    private Button btnRotate, btnScore, btnCancelMatch;
+    private Button btnScore, btnCancelMatch;
     private ImageButton btnBack;
     ShakeListener shakeListener;
     private TextView category_title;
@@ -56,7 +56,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
     private void setupView() {
         playable = getIntent().getBooleanExtra("playable", false);
-        btnRotate = (Button) findViewById(R.id.buttonStart);
+//        btnRotate = (Button) findViewById(R.id.buttonStart);
         btnBack = (ImageButton) findViewById(R.id.back);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override

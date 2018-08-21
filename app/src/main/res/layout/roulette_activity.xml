@@ -114,14 +114,14 @@
             android:text="@string/leave_game"
             android:textColor="@android:color/black" />
 
-        <Button
-            android:id="@+id/buttonStart"
-            android:visibility="gone"
-            android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_weight="1"
-            android:background="@drawable/roulette_rotate"
-            android:onClick="onClickButtonRotation"></Button>
+        <!--<Button-->
+            <!--android:id="@+id/buttonStart"-->
+            <!--android:visibility="gone"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="45dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:background="@drawable/roulette_rotate"-->
+            <!--android:onClick="onClickButtonRotation"></Button>-->
 
         <Button
             android:id="@+id/buttonScore"
