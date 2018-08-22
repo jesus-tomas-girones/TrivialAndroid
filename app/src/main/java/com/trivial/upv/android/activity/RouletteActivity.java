@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.RouletteScorePlayerAdapter;
+import com.trivial.upv.android.fragment.CustomDialogFragment;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.gpg.Game;
@@ -174,6 +175,9 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         rouletteView.pauseSound();
     }
 
+    public interface FinishCounterEvent {
+        void onFinishedCount();
+    }
 
     RouletteView.RotateEventLisstener rotateEventLinestener = new RouletteView.RotateEventLisstener() {
         @Override
@@ -186,7 +190,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         }
 
         @Override
-        public void rotateEnd(int category) {
+        public void rotateEnd(final int category) {
 //            btnRotate.setVisibility(View.VISIBLE);
 //            isRotationEnabled = true;
 //            validateSectors();
@@ -195,11 +199,17 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //            toast.show();
 
             // PlayQuiz
-            Intent intent = new Intent();
-            intent.putExtra("category", category);
-            setResult(Activity.RESULT_OK, intent);
-            finish();
-            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            CustomDialogFragment.showDialog(getSupportFragmentManager(), new FinishCounterEvent() {
+                @Override
+                public void onFinishedCount() {
+                    Intent intent = new Intent();
+                    intent.putExtra("category", category);
+                    setResult(Activity.RESULT_OK, intent);
+                    finish();
+                    overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+                }
+            });
+
         }
     };
 

@@ -540,7 +540,6 @@ public class PlayTurnBasedFragment extends Fragment {
         txtPlayers = (TextView) view.findViewById(R.id.txtPlayers);
 
         sbPlayers.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-
         {
             int progress = sbPlayers.getProgress();
 
@@ -603,7 +602,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
 //        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 //        idSonido = soundPool.load(getContext(), R.raw.tick, 0);
-
+        showSeekbarsProgress();
         mGoogleSignInClient = GoogleSignIn.getClient(
 
                 getActivity(),
@@ -712,7 +711,7 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
     private void setViewVisibility() {
-        dismissSpinner();
+        /*dismissSpinner();
         boolean isSignedIn = mTurnBasedMultiplayerClient != null;
 
         if (!isSignedIn) {
@@ -736,7 +735,7 @@ public class PlayTurnBasedFragment extends Fragment {
 //        } else {
 ////            findViewById(R.id.matchup_layout).setVisibility(View.VISIBLE);
 //            gameLayout.setVisibility(View.GONE);
-//        }
+//        }*/
     }
 
     boolean retry = false;
@@ -813,7 +812,6 @@ public class PlayTurnBasedFragment extends Fragment {
         // to register a MatchUpdateListener.
         mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
 
-        showSeekbarsProgress();
         ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
     }
 
@@ -1713,12 +1711,14 @@ public class PlayTurnBasedFragment extends Fragment {
 
     // Helpful dialogs
     public void showSpinner() {
-        CustomDialogFragment.showDialog(getFragmentManager());
+        CustomDialogFragment.showDialog(getFragmentManager(), null);
+        Log.d("CONTROL", "showSpinner");
 //        progressLayout.setVisibility(View.VISIBLE);
     }
 
     public void dismissSpinner() {
 //        progressLayout.setVisibility(View.GONE);
+        Log.d("CONTROL", "DISMISSPINNER");
         CustomDialogFragment.dismissDialog();
 
     }

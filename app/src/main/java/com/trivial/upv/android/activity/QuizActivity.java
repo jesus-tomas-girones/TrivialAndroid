@@ -325,7 +325,7 @@ public class QuizActivity extends AppCompatActivity {
                 mQuizFab.hide();
                 mIcon.setVisibility(View.GONE);
             }
-            if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
+            if (mCategory.getId().equals(ARG_ONE_PLAYER) || isMatchTurnBased()) {
                 postDelayHandlerPlayGame();
             }
         } else {

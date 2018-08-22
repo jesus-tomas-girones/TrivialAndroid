@@ -1,9 +1,9 @@
 package com.trivial.upv.android.fragment;
 
 import android.app.Dialog;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
@@ -13,17 +13,23 @@ import android.view.Window;
 import android.widget.ProgressBar;
 
 import com.trivial.upv.android.R;
+import com.trivial.upv.android.activity.RouletteActivity;
 
 public class CustomDialogFragment extends DialogFragment {
     /**
      * The system calls this to get the DialogFragment's layout, regardless
      * of whether it's being displayed as a dialog or an embedded fragment.
      */
+    private static RouletteActivity.FinishCounterEvent conCuentaAtras = null;
+
+    private static ProgressBar progressBar = null;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout to use as dialog or embedded fragment
         View view = inflater.inflate(R.layout.custom_dialog_fragment, container, false);
+        progressBar = (ProgressBar) view.findViewById(R.id.progress_dialog);
         ((ProgressBar) view.findViewById(R.id.progress_dialog)).getIndeterminateDrawable().setColorFilter(getContext().getResources().getColor(R.color.topeka_primary), PorterDuff.Mode.SRC_IN);
         return view;
     }
@@ -40,20 +46,30 @@ public class CustomDialogFragment extends DialogFragment {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
         return dialog;
     }
 
     public static CustomDialogFragment newFragment = null;
 
-    public static void showDialog(FragmentManager fragmentManager) {
+    public static void showDialog(FragmentManager fragmentManager, RouletteActivity.FinishCounterEvent conCuentaAtrasIn) {
 //        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         if (newFragment != null) {
             newFragment.dismiss();
             newFragment = null;
         }
+
+        conCuentaAtras = conCuentaAtrasIn;
+
         newFragment = new CustomDialogFragment();
         newFragment.show(fragmentManager, "dialog");
         newFragment.setCancelable(false);
+
+        if (conCuentaAtras != null) {
+            final MyCounter timer = new MyCounter(3000, 1000);
+            timer.start();
+        }
+
 //        if (mIsLargeLayout) {
 //            // The device is using a large layout, so show the fragment as a dialog
 //            newFragment.show(fragmentManager, "dialog");
@@ -73,6 +89,32 @@ public class CustomDialogFragment extends DialogFragment {
         if (newFragment != null) {
             newFragment.dismiss();
             newFragment = null;
+        }
+    }
+
+    private static class MyCounter extends CountDownTimer {
+
+        public MyCounter(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onFinish() {
+            //Lo que quieras hacer al finalizar
+            if (newFragment != null) {
+                newFragment.dismiss();
+                if (conCuentaAtras != null) {
+                    conCuentaAtras.onFinishedCount();
+                }
+            }
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            //texto a mostrar en cuenta regresiva en un textview
+//            if (progressBar != null) {
+//                progressBar.setProgress(progressBar.getProgress() + 1);
+//            }
         }
     }
 }

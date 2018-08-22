@@ -18,6 +18,7 @@ import java.util.Map;
 public class Game {
 
 
+    public static final int K_TIME_TO_ANSWER_TURN_BASED = 30;
     public static String mMyId;
     public static int jugadorLocal;
 

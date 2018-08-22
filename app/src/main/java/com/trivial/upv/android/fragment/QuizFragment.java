@@ -109,7 +109,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         //mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
         if (categoryId.equals(ARG_ONE_PLAYER)) {
             mCategory = Game.category;
-        } else if (((QuizActivity)getActivity()).isMatchOnline() || ((QuizActivity)getActivity()).isMatchTurnBased()) {
+        } else if (((QuizActivity) getActivity()).isMatchOnline() || ((QuizActivity) getActivity()).isMatchTurnBased()) {
             mCategory = Game.category;
         } else {
             mCategory = TrivialJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
@@ -218,6 +218,10 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                                 ((QuizActivity) getActivity()).setTimeToNextItem(Game.totalTime * 1000);
                                 setTimeLeftText(Game.totalTime * 1000);
                                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
+                            } else if (((QuizActivity) getActivity()).isMatchTurnBased()) {
+                                ((QuizActivity) getActivity()).setTimeToNextItem(Game.K_TIME_TO_ANSWER_TURN_BASED * 1000);
+                                setTimeLeftText(Game.K_TIME_TO_ANSWER_TURN_BASED * 1000);
+                                ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
                             }
                             return true;
                         }
@@ -294,11 +298,12 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 //                ((QuizActivity) getActivity()).setTimeToNextItem((TIME_TO_ANSWER_PLAY_GAME));
 //                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
-            }
-            if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
+            } else if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
 //                TIME X TOTAL QUIZZES
 //                ((QuizActivity) getActivity()).setTimeToNextItem((TIME_TO_ANSWER_PLAY_GAME));
 //                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
+                ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
+            } else if (((QuizActivity) getActivity()).isMatchTurnBased()) {
                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
             }
             /// Actualizar el estado de los test
@@ -382,7 +387,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     }
 
     private void sendMessageScore(final byte[] tmpMessage, final String participantId, final int numTimesSended) {
-        ((QuizActivity)getActivity()).mRealTimeMultiplayerClient.sendReliableMessage(tmpMessage, Game.mRoomId, participantId, new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
+        ((QuizActivity) getActivity()).mRealTimeMultiplayerClient.sendReliableMessage(tmpMessage, Game.mRoomId, participantId, new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
             @Override
             public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientParticipantId) {
                 if (statusCode == STATUS_OK) {

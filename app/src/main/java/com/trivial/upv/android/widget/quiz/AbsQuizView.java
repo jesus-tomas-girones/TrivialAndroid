@@ -67,6 +67,7 @@ import org.xml.sax.Attributes;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 
 /**
  * This is the base class for displaying a {@link Quiz}.
@@ -254,8 +255,9 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
                     //JVG.S
                     if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
                         ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
-                    }
-                    if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
+                    } else if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
+                        ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
+                    } else if (((QuizActivity)getContext()).isMatchTurnBased()) {
                         ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
                     }
                     submitAnswer(v);
