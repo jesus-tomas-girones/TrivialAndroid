@@ -74,8 +74,6 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         setupScorePlayer();
     }
 
-    private String myParticipantId = null;
-
     private void setupScorePlayer() {
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         // use this setting to improve performance if you know that changes
@@ -91,10 +89,11 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         // 1 puntuaciones por categorias
         String score[] = new String[intNumber];
 
+        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
         int index = Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
         if (index != -1) {
             for (int i = 0; i < intNumber; i++) {
-                // Cuantas preguntas hay de esa categoría
+                // Cuantas preguntas hay de esa categoríaº
                 int numPreguntas = 0;
                 int numPreguntasOK = 0;
 
@@ -104,8 +103,6 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                         if (Game.mTurnData.puntuacion[j][1] > 0)
                             numPreguntasOK++;
                     }
-
-
                 }
 //                score[i] = String.format("(%d/%d)", numPreguntasOK, numPreguntas);
                 score[i] = String.format("%d/%d", numPreguntasOK, numPreguntas);
@@ -133,8 +130,8 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             category_title.setText(String.format(Locale.getDefault(), "Quizz (%d/%d)", Game.mTurnData.numPreguntasContestadas + 1, Game.mTurnData.numPreguntas));
         else
             category_title.setText(String.format(Locale.getDefault(), "Finished Quizz"));
-        myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
-        txtPoints.setText(String.format(Locale.getDefault(), "Pts: %d", Game.mTurnData.calculateScorePlayer(myParticipantId)));
+
+        txtPoints.setText(String.format(Locale.getDefault(), "Pts: %d", Game.mTurnData.calculateScorePlayer(Game.mPlayerId)));
         rouletteView = (RouletteView) findViewById(R.id.rouletteView);
         rouletteView.setRotationEventListener(rotateEventLinestener, playable);
 
@@ -261,7 +258,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
 
     @Override
-    public void onShake(int speed) {
+    public void onShake(float speed) {
         rouletteView.rotate(speed);
     }
 

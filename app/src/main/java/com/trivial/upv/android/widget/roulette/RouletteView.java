@@ -38,7 +38,9 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     private static final int SIZE_BORDER = 10;
     private static final String TAB = "RoluetteView";
-    private String images[];
+    private static final int K_ADJUST_ROULETTE_EDGE = 2;
+    private static final int K_ADJUST_ROULETTE_DEGREES_EDGE = 5;
+    private String images[] = null;
     private RectF oval;
     private Theme[] themes;
     private boolean isRotating;
@@ -51,7 +53,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     }
 
     private float mDensity;
-
 
     public void setupView() {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -96,7 +97,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                     mBitmaps[i] = null;
                 }
             }
-
         }
         mBitmaps = new Bitmap[numSectors];
 
@@ -133,13 +133,12 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                         Log.d("error_volley", error.getMessage());
                     }
                 });
-
                 this.invalidate();
             }
         }
     }
 
-    private int numSectors = 3;
+    private int numSectors = 1;
 
 
     private float angulo;
@@ -310,9 +309,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     public void rotate(float speed) {
         if (playable) {
-            if (speed > 10.0f)
-                speed = 10.0f;
-            if (!isRotating && speed > 0.0f) {
+            if (!isRotating && speed > 0.1f) {
                 isRotating = true;
                 this.speed = speed;
                 soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
@@ -321,16 +318,25 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
 //            int ran = new Random().nextInt(360);
 //
-                float ran = 360.0f * speed;
-                if (ran % numSectors / 360 == 0) {
-                    ran = (ran + 1) % 360;
+                if (speed > 20.0f)
+                    speed = 20.33f;
+                long ran = (long) (360.0f * speed);
+
+                long ajuste = ((lngDegrees + ran) % 360) % ((360 / numSectors));
+
+                if (ajuste <= K_ADJUST_ROULETTE_EDGE) {
+                    ran = ran + K_ADJUST_ROULETTE_DEGREES_EDGE;
+//                    Log.d("RAN" , "RAN AJUSTADO");
                 }
+
+//                Log.d("RAN", "grados: " + lngDegrees + " ran=" +ran +  " SPEED=" + speed + " ajuste =" + ajuste + " grados ajustados:" +(lngDegrees + ran) % 360);
                 rotateAnimation = new RotateAnimation((float) this.lngDegrees, (float)
                         (this.lngDegrees + ((long) ran)), this.getWidth() / 2, this.getWidth() / 2);
 //                    Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
 
-                lngDegrees = (lngDegrees + ((long) ran)) % 360;
-                rotateAnimation.setDuration((long) ran);
+                lngDegrees = (lngDegrees + ran) % 360;
+
+                rotateAnimation.setDuration(ran);
                 rotateAnimation.setFillAfter(true);
                 rotateAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
                 rotateAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -361,13 +367,11 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         }
     }
 
-
     private SoundPool soundPool = null;
     private int idSonido = 0;
     boolean parar = false;
 
     public void playSound() {
-
         final ValueAnimator animacion = ValueAnimator.ofFloat(0, 10);
         animacion.setDuration((int) (360.0f * speed + lngDegrees));
         animacion.setInterpolator(new AccelerateDecelerateInterpolator());

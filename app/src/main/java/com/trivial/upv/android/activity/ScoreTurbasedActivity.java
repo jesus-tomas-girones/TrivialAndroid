@@ -18,6 +18,7 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.RouletteScorePlayerAdapter;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.gpg.Game;
+import com.trivial.upv.android.model.gpg.Turn;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 
 import java.util.ArrayList;
@@ -119,30 +120,46 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                                 if (Game.mTurnData.puntuacion[cont][1] > 0) {
                                     totalQuizzesAnsweredOK++;
                                 }
-
                             }
                         }
 
                         String auxResult = "";
                         if (Game.mTurnData.numPreguntasContestadas == Game.mTurnData.numPreguntas) {
                             if (i - 1 < Game.mMatch.getParticipants().size()) {
-                                switch (Game.mMatch.getParticipants().get(i - 1).getResult().getResult()) {
-                                    case ParticipantResult.MATCH_RESULT_WIN:
+                                if (Game.mMatch.getParticipants().get(i - 1).getResult() != null) {
+                                    switch (Game.mMatch.getParticipants().get(i - 1).getResult().getResult()) {
+                                        case ParticipantResult.MATCH_RESULT_WIN:
+                                            auxResult = "WIN";
+                                            break;
+                                        case ParticipantResult.MATCH_RESULT_LOSS:
+                                            auxResult = "LOST";
+                                            break;
+                                        case ParticipantResult.MATCH_RESULT_TIE:
+                                            auxResult = "TIE";
+                                            break;
+                                    }
+                                } else {
+                                    int scoreAux = Game.mTurnData.calculateScorePlayer(Game.mPlayerId);
+                                    if (scoreAux > 0)
                                         auxResult = "WIN";
-                                        break;
-                                    case ParticipantResult.MATCH_RESULT_LOSS:
-                                        auxResult = "LOSS";
-                                        break;
-                                    case ParticipantResult.MATCH_RESULT_TIE:
-                                        auxResult = "TIE";
-                                        break;
+                                    else
+                                        auxResult = "LOST";
                                 }
                             } else
-                                auxResult = "LOSS";
+                                auxResult = "LOST";
                             score[posAux] = String.format(Locale.getDefault(), "%d/%d\nPts: %d\n(%s)", totalQuizzesAnsweredOK, totalQuizzes, totalQuizzesAnsweredOK * K_PUNTOS_POR_PREGUNTA, auxResult);
                         } else {
                             score[posAux] = String.format(Locale.getDefault(), "%d/%d\nPts: %d", totalQuizzesAnsweredOK, totalQuizzes, totalQuizzesAnsweredOK * K_PUNTOS_POR_PREGUNTA);
                         }
+                    } else if (i == Game.mTurnData.numJugadores + 1) {
+                        // Total Score
+                        int totalQuizzes = Game.mTurnData.numPreguntasContestadas;
+                        int totalQuizzesAnsweredOK = 0;
+                        for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
+                            if (Game.mTurnData.puntuacion[cont][1] > 0)
+                                totalQuizzesAnsweredOK++;
+                        }
+                        score[posAux] = String.format(Locale.getDefault(), "%d/%d", totalQuizzesAnsweredOK, totalQuizzes);
                     } else {
                         score[posAux] = "";
                     }

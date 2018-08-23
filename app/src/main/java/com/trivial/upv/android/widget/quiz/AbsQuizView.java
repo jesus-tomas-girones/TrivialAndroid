@@ -412,7 +412,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
             }
         }
 
-        if (!mCategory.getId().equals(ARG_REAL_TIME_ONLINE) && !answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
+        if (!mCategory.getId().equals(ARG_REAL_TIME_ONLINE) && !((QuizActivity)getContext()).isMatchTurnBased() && !answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
 
             Snackbar snackbar = Snackbar
                     .make(findViewById(R.id.absQuizViewContainer), comments, Snackbar.LENGTH_INDEFINITE)

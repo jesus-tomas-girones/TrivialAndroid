@@ -61,7 +61,7 @@ public class ShakeListener implements SensorEventListener {
                     mediaSpeed = mediaSpeed / SHAKE_COUNT;
 //                    Log.d("SPEED", "SHAKE");
                     if (mShakeListener != null) {
-                        mShakeListener.onShake((int) mediaSpeed / FORCE_THRESHOLD);
+                        mShakeListener.onShake(mediaSpeed / FORCE_THRESHOLD);
                     }
                 }
                 mLastForce = now;
@@ -82,7 +82,7 @@ public class ShakeListener implements SensorEventListener {
 
 
     public interface OnShakeListener {
-        public void onShake(int speed);
+        public void onShake(float speed);
     }
 
     public ShakeListener(Context context) {

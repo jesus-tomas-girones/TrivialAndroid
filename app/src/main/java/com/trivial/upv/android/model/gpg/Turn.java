@@ -108,7 +108,8 @@ public class Turn {
     public  int calculateScorePlayer(String playerId) {
         int auxPuntuacion = 0;
         if (participantsTurnBased!=null) {
-            int indexPlayer = participantsTurnBased.indexOf(playerId);
+            String myParticipantId = Game.mMatch.getParticipantId(playerId);
+            int indexPlayer = participantsTurnBased.indexOf(myParticipantId);
 
             if (indexPlayer != -1) {
                 for (int pos = 0; pos < numPreguntasContestadas; pos++) {
