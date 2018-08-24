@@ -231,8 +231,8 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     if (mode.equals(ARG_ONE_PLAYER)) {
-                        ActivityCompat.startActivity(getActivity(), startIntent,
-                                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+//                        startActivity(startIntent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle() ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+                        startActivity(startIntent, null);
                         mSubmitAnswer.show();
                     } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
                         getActivity().onBackPressed();
@@ -244,7 +244,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             anim.start();
         } else {
             if (mode.equals(ARG_ONE_PLAYER)) {
-                ActivityCompat.startActivity(getActivity(), startIntent,
+                startActivity(startIntent,
                         null);
             } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
                 getActivity().onBackPressed();

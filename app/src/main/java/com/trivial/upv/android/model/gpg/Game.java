@@ -16,17 +16,23 @@ import java.util.Map;
  */
 
 public class Game {
-
-
+    // Turnbased
     public static final int K_TIME_TO_ANSWER_TURN_BASED = 30;
     public static String mMyId;
-    public static int jugadorLocal;
+    public static int categorySelected;
+    public static Turn mTurnData;
+    public static String mPlayerId;
+    public static TurnBasedMatch mMatch;
+    public static Invitation pendingTurnInvitation;
+    public static TurnBasedMatch pendingTurnBasedMatch;
 
-    // Se ha quedado obsoleto GoogleApiClient
-//    public static GoogleApiClient mGoogleApiClient;
-    public static int numQuizzes;
-
+    // Common
     public static Category category;
+    public static String mode;
+
+    // Real time
+    public static int jugadorLocal;
+    public static int numQuizzes;
     public static ArrayList<Participant> mParticipants = null;
     public static String mRoomId;
     public static String mRoomIdInvited;
@@ -37,11 +43,9 @@ public class Game {
     public static long timeStamp;
     public static Map<String, Long> mFinishedParticipants = new HashMap<>();
     public static Map<String, Long> mParticipantScore = new HashMap<>();
-
     public static int numPlayers;
     public static int totalTime;
     public static String myName;
-
     public static int tmpNumQuizzes = 10;
     public static int tmpNumPlayers = 2;
     public static int tmpTotalTime = 250;
@@ -49,12 +53,7 @@ public class Game {
     public static List<String> listCategories = new ArrayList<>();
     public static long level;
     public static Invitation pendingInvitation;
-    public static TurnBasedMatch pendingTurnBasedMatch;
-    public static String mode;
-    public static int categorySelected;
-    public static Turn mTurnData;
-    public static String mPlayerId;
-    public static TurnBasedMatch mMatch;
+
 
     public static void resetGameVars() {
         Game.mRoomId = null;
@@ -81,7 +80,6 @@ public class Game {
                 total++;
             }
         }
-
         return total;
     }
 }

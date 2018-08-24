@@ -101,7 +101,7 @@ public class PlayTurnBasedFragment extends Fragment {
     private SeekBar sbNumQuizzes;
     private TextView txtNumQuizzes;
     //    private String mPlayerId;
-    private String mDisplayName;
+
     private Button btnPlayAnyone;
     private Button btnShowIntitations;
 
@@ -110,10 +110,11 @@ public class PlayTurnBasedFragment extends Fragment {
     private View panelGame;
 
     // Player
+    private String mDisplayName;
     private Uri mImagePlayer;
     private ImageView mImgAvatar;
     private TextView mNameAvatar;
-    private GoogleSignInAccount mSignedInAccount = null;
+//    private GoogleSignInAccount mSignedInAccount = null;
 
     public PlayTurnBasedFragment() {
         Game.resetGameVars();
@@ -317,6 +318,21 @@ public class PlayTurnBasedFragment extends Fragment {
 //        setViewVisibility();
     }
 
+    private void modifyVisibilityButtons(boolean visible) {
+        btnShowIntitations.setEnabled(visible);
+        btnSelectMatch.setEnabled(visible);
+        btnNewGame.setEnabled(visible);
+        btnPlayAnyone.setEnabled(visible);
+    }
+
+    private void disableButtons() {
+        modifyVisibilityButtons(false);
+    }
+
+    private void enableButtons() {
+        modifyVisibilityButtons(true);
+    }
+
     private void setupView(final View view) {
         CategorySelectionActivity.animateViewFullScaleXY(((CategorySelectionActivity) getActivity()).getSubcategory_title(), 100, 300);
 
@@ -329,6 +345,7 @@ public class PlayTurnBasedFragment extends Fragment {
         btnPlayAnyone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                disableButtons();
                 if (mTurnBasedMultiplayerClient != null) {
                     onQuickMatchClicked(view);
 //                showSpinner();
@@ -341,6 +358,7 @@ public class PlayTurnBasedFragment extends Fragment {
         btnNewGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                disableButtons();
                 if (mTurnBasedMultiplayerClient != null) {
                     onStartMatchClicked(view);
 //                showSpinner();
@@ -350,11 +368,10 @@ public class PlayTurnBasedFragment extends Fragment {
             }
         });
         btnSelectMatch = (Button) view.findViewById(R.id.btnSelectMatch);
-        btnSelectMatch.setOnClickListener(new View.OnClickListener()
-
-        {
+        btnSelectMatch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                disableButtons();
                 if (mTurnBasedMultiplayerClient != null) {
                     onCheckGamesClicked(view);
 //                showSpinner();}
@@ -367,6 +384,7 @@ public class PlayTurnBasedFragment extends Fragment {
         btnShowIntitations.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                disableButtons();
                 if (mTurnBasedMultiplayerClient != null) {
                     btnVer_Invitaciones_Click(view);
 //                showSpinner();
@@ -375,6 +393,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 }
             }
         });
+
 
         panelGame = (View) view.findViewById(R.id.panel_game);
 //        navegador = (WebView) view.findViewById(R.id.webview);
@@ -534,12 +553,7 @@ public class PlayTurnBasedFragment extends Fragment {
 //        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 //        idSonido = soundPool.load(getContext(), R.raw.tick, 0);
         showSeekbarsProgress();
-        mGoogleSignInClient = GoogleSignIn.getClient(
-
-                getActivity(),
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).
-
-                        build());
+        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
 
 //        startSignInIntent();
     }
@@ -628,6 +642,7 @@ public class PlayTurnBasedFragment extends Fragment {
         Log.d(getClass().getSimpleName(), "DISCONNECTED GPG");
         Log.d(TAG, "onDisconnected()");
 
+        mGoogleSignInClient = null;
         mTurnBasedMultiplayerClient = null;
         mInvitationsClient = null;
 //        setViewVisibility();
@@ -642,82 +657,98 @@ public class PlayTurnBasedFragment extends Fragment {
     boolean retry = false;
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
-        if (mSignedInAccount != googleSignInAccount) {
-            mSignedInAccount = googleSignInAccount;
-            Log.d(TAG, "onConnected(): connected to Google APIs");
-            retry = false;
-            mTurnBasedMultiplayerClient = Games.getTurnBasedMultiplayerClient(getActivity(), googleSignInAccount);
-            mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
+//        if (mSignedInAccount != googleSignInAccount) {
+//            mSignedInAccount = googleSignInAccount;
+        Log.d(TAG, "onConnected(): connected to Google APIs");
+        retry = false;
+        mTurnBasedMultiplayerClient = Games.getTurnBasedMultiplayerClient(getActivity(), googleSignInAccount);
+        mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
+        enableButtons();
+        Games.getPlayersClient(getActivity(), googleSignInAccount)
+                .getCurrentPlayer()
+                .addOnSuccessListener(
+                        new OnSuccessListener<Player>() {
+                            @Override
+                            public void onSuccess(Player player) {
+                                mImagePlayer = player.getIconImageUri();
+                                ImageManager imageManager = ImageManager.create(getActivity());
+                                imageManager.loadImage(mImgAvatar, mImagePlayer);
 
-            Games.getPlayersClient(getActivity(), googleSignInAccount)
-                    .getCurrentPlayer()
-                    .addOnSuccessListener(
-                            new OnSuccessListener<Player>() {
-                                @Override
-                                public void onSuccess(Player player) {
-                                    mImagePlayer = player.getIconImageUri();
-                                    ImageManager imageManager = ImageManager.create(getActivity());
-                                    imageManager.loadImage(mImgAvatar, mImagePlayer);
-
-                                    mDisplayName = player.getDisplayName();
-                                    Game.mPlayerId = player.getPlayerId();
-
-
+                                mDisplayName = player.getDisplayName();
+                                Game.mPlayerId = player.getPlayerId();
 //                                mNameAvatar.setText(Game.mPlayerId + " -  " + mDisplayName);
-                                    mNameAvatar.setText(mDisplayName);
+                                mNameAvatar.setText(mDisplayName);
 //                                setViewVisibility();
-                                }
-                            })
-                    .addOnFailureListener(createFailureListener("There was a problem getting the player!"));
+                            }
+                        })
+                .addOnFailureListener(createFailureListener("There was a problem getting the player!"));
 
-            Log.d(TAG, "onConnected(): Connection successful");
+        Log.d(TAG, "onConnected(): Connection successful");
 
-            // Retrieve the TurnBasedMatch from the connectionHint
-            GamesClient gamesClient = Games.getGamesClient(getActivity(), googleSignInAccount);
-            gamesClient.getActivationHint()
-                    .addOnSuccessListener(new OnSuccessListener<Bundle>() {
-                        @Override
-                        public void onSuccess(Bundle hint) {
-                            if (hint != null) {
-                                TurnBasedMatch match = hint.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
-                                Invitation invitationAux = hint.getParcelable(Multiplayer.EXTRA_INVITATION);
-                                if (invitationAux != null)
-                                    Game.pendingInvitation = invitationAux;
-                                if (match != null) {
+        // Retrieve the TurnBasedMatch from the connectionHint
+        GamesClient gamesClient = Games.getGamesClient(getActivity(), googleSignInAccount);
+        gamesClient.getActivationHint()
+                .addOnSuccessListener(new OnSuccessListener<Bundle>() {
+                    @Override
+                    public void onSuccess(Bundle hint) {
+                        if (hint != null) {
+                            TurnBasedMatch match = hint.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
+                            final Invitation invitationAux = hint.getParcelable(Multiplayer.EXTRA_INVITATION);
+                            if (invitationAux != null) {
+                                new android.app.AlertDialog.Builder(getActivity())
+                                        .setMessage("La invitación corresponde a una PARTIDA de TIEMPO REAL " + invitationAux.getInviter().getDisplayName())
+                                        .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                Game.pendingInvitation = invitationAux;
+                                                ((CategorySelectionActivity) getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
+                                                ((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
+                                            }
+                                        })
+                                        .show();
+                                return;
+                            }
+                            if (match != null) {
 //                                updateMatch(match);
-                                    askForAcceptInvitation(match, null);
-                                } else if (Game.pendingTurnBasedMatch != null) {
-                                    askForAcceptInvitation(Game.pendingTurnBasedMatch, null);
-                                    Game.pendingTurnBasedMatch = null;
-                                }
-                            } else {
-                                if (Game.pendingTurnBasedMatch != null) {
-                                    askForAcceptInvitation(Game.pendingTurnBasedMatch, null);
-                                    Game.pendingTurnBasedMatch = null;
-                                }
+                                askForAcceptInvitation(match, null);
+                            } else if (Game.pendingTurnBasedMatch != null) {
+                                askForAcceptInvitation(Game.pendingTurnBasedMatch, null);
+                                Game.pendingTurnBasedMatch = null;
+                            } else if (Game.pendingTurnInvitation != null) {
+                                treatInvitation(Game.pendingInvitation);
+                                Game.pendingInvitation = null;
+                            }
+                        } else {
+                            if (Game.pendingTurnBasedMatch != null) {
+                                askForAcceptInvitation(Game.pendingTurnBasedMatch, null);
+                                Game.pendingTurnBasedMatch = null;
+                            } else if (Game.pendingTurnInvitation != null) {
+                                treatInvitation(Game.pendingTurnInvitation);
+                                Game.pendingTurnInvitation = null;
                             }
                         }
-                    })
-                    .addOnFailureListener(createFailureListener(
-                            "There was a problem getting the activation hint!"));
+                    }
+                })
+                .addOnFailureListener(createFailureListener(
+                        "There was a problem getting the activation hint!"));
 
 //        setViewVisibility();
 
-            // As a demonstration, we are registering this activity as a handler for
-            // invitation and match events.
+        // As a demonstration, we are registering this activity as a handler for
+        // invitation and match events.
 
-            // This is *NOT* required; if you do not register a handler for
-            // invitation events, you will get standard notifications instead.
-            // Standard notifications may be preferable behavior in many cases.
-            mInvitationsClient.registerInvitationCallback(mInvitationCallback);
+        // This is *NOT* required; if you do not register a handler for
+        // invitation events, you will get standard notifications instead.
+        // Standard notifications may be preferable behavior in many cases.
+        mInvitationsClient.registerInvitationCallback(mInvitationCallback);
 
-            // Likewise, we are registering the optional MatchUpdateListener, which
-            // will replace notifications you would get otherwise. You do *NOT* have
-            // to register a MatchUpdateListener.
-            mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
+        // Likewise, we are registering the optional MatchUpdateListener, which
+        // will replace notifications you would get otherwise. You do *NOT* have
+        // to register a MatchUpdateListener.
+        mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
 
-            ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
-        }
+        ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
+//        }
     }
 
 
@@ -816,18 +847,16 @@ public class PlayTurnBasedFragment extends Fragment {
 //                    "An invitation has arrived from "
 //                            + invitation.getInviter().getDisplayName(), Toast.LENGTH_SHORT)
 //                    .show();
-
             treatInvitation(invitation);
         }
 
         @Override
         public void onInvitationRemoved(@NonNull String invitationId) {
-            Toast.makeText(getActivity(), "An invitation was removed.", Toast.LENGTH_SHORT)
-                    .show();
+            Log.w("TRAZA", "An invitation " + invitationId + " was removed.");
         }
     };
 
-    public void treatInvitation(@NonNull Invitation invitation) {
+    public void treatInvitation(@NonNull final Invitation invitation) {
         final String fromInvitation = invitation.getInviter().getDisplayName();
 
         if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_TURN_BASED) {
@@ -841,6 +870,18 @@ public class PlayTurnBasedFragment extends Fragment {
                     }
                 }
             }).addOnFailureListener(createFailureListener("Error getting de invitation."));
+        } else if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_REAL_TIME) {
+            new android.app.AlertDialog.Builder(getActivity())
+                    .setMessage("La invitación corresponde a una PARTIDA de TIEMPO REAL " + invitation.getInviter().getDisplayName())
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Game.pendingInvitation = invitation;
+                            ((CategorySelectionActivity) getActivity()).attachPlayOnlineFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+                            ((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
+                        }
+                    })
+                    .show();
         }
     }
 
@@ -1136,7 +1177,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
     // Handle the result of the invitation inbox UI, where the player can pick an invitation
 // to accept. We react by accepting the roulette_selection invitation, if any.
-    private void handleInvitationInboxResult(int response, Intent data) {
+    private void handleInvitationInboxResult(int response, final Intent data) {
         if (response != RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
 //            switchToMainScreen();
@@ -1149,13 +1190,18 @@ public class PlayTurnBasedFragment extends Fragment {
         if (inv != null)
             acceptInviteToRoom(inv.getInvitationId());
         else {
+            final Invitation invitationAux = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
             new android.app.AlertDialog.Builder(getActivity())
-                    .setMessage("La invitación corresponde a una PARTIDA EN TIEMPO REAL")
-                    .setNeutralButton(android.R.string.ok, null)
+                    .setMessage("La invitación corresponde a una PARTIDA de TIEMPO REAL " + invitationAux.getInviter().getDisplayName())
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Game.pendingInvitation = invitationAux;
+                            ((CategorySelectionActivity) getActivity()).attachPlayOnlineFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+                            ((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(2).setChecked(true);
+                        }
+                    })
                     .show();
-            Game.pendingInvitation = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
-            ((CategorySelectionActivity) getActivity()).attachPlayOnlineFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
-            ;
         }
     }
 
@@ -1186,7 +1232,7 @@ public class PlayTurnBasedFragment extends Fragment {
         else {
             startActivityForResult(startIntent, RC_PLAY_TURN, null);
         }
-        getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+//        getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
 
@@ -1712,7 +1758,6 @@ public class PlayTurnBasedFragment extends Fragment {
 //        progressLayout.setVisibility(View.GONE);
         Log.d("CONTROL", "DISMISSPINNER");
         CustomDialogFragment.dismissDialog();
-
     }
 
     public void btnVer_Invitaciones_Click(View view) {

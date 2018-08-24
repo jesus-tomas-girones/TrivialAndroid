@@ -53,6 +53,19 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesClient;
+import com.google.android.gms.games.multiplayer.Invitation;
+import com.google.android.gms.games.multiplayer.Multiplayer;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.databinding.ActivityCategorySelectionBinding;
 import com.trivial.upv.android.databinding.NavHeaderCategorySelectionBinding;
@@ -66,6 +79,7 @@ import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
 import com.trivial.upv.android.model.Player;
+import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 
@@ -75,10 +89,12 @@ import static com.trivial.upv.android.persistence.TrivialJSonHelper.ACTION_RESP;
 public class CategorySelectionActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String EXTRA_PLAYER = "player";
+    private static final String TAG = CategorySelectionActivity.class.getSimpleName();
     private TextView scoreView;
     private ImageButton backButton;
     private AvatarView avatar;
     private TextView title;
+    private GoogleSignInClient mGoogleSignInClient = null;
 
     public TextView getSubcategory_title() {
         return subcategory_title;
@@ -132,13 +148,10 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
         initActivity(savedInstanceState);
 
-//         JTG.S
-        if (!viewedMainDialog) {
-            viewedMainDialog = true;
-            MainDialogFragment dialog = new MainDialogFragment();
-            dialog.show(getSupportFragmentManager(), "diálogo principal");
-        }
-//         JTG.E
+        // JVG.S
+        mGoogleSignInClient = GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
+        oneTimeGooglePlayGame = true;
+        // JVG.E
     }
 
     // JVG.S
@@ -152,11 +165,9 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             receiver = new ReceptorOperacion();
 
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-
-        if (!TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
-            if (checkInternetAccess()) {
+        if (checkInternetAccess()) {
+            if (!TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
 //                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-
                 pDialog = new ProgressDialog(this);
                 pDialog.setMessage("Cargando...");
                 pDialog.setIndeterminate(false);
@@ -174,22 +185,23 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                     }
                 }.start();
 
-            } else {
-                snackbar = Snackbar
-                        .make(findViewById(R.id.category_container), "No hay conexión de Internet.", Snackbar.LENGTH_INDEFINITE)
-                        .setAction("REINTENTAR", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                dismissSnackbar();
-
-                                loadCategories();
-                            }
-                        });
-
-                snackbar.show();
             }
+        } else {
+            snackbar = Snackbar
+                    .make(findViewById(R.id.category_container), "No hay conexión de Internet.", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("REINTENTAR", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            dismissSnackbar();
+
+                            loadCategories();
+                        }
+                    });
+
+            snackbar.show();
         }
     }
+
 
     private boolean checkInternetAccess() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -267,33 +279,91 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
 
-    public class ReceptorOperacion extends BroadcastReceiver {
+    //JVG.S
+    private void onConnected(GoogleSignInAccount googleSignInAccount, final boolean loadDefaultFragmentCategories) {
+        Log.d(TAG, "onConnected(): Connection successful");
 
+        // Retrieve the TurnBasedMatch from the connectionHint
+        GamesClient gamesClient = Games.getGamesClient(this, googleSignInAccount);
+        gamesClient.getActivationHint()
+                .addOnSuccessListener(new OnSuccessListener<Bundle>() {
+                    @Override
+                    public void onSuccess(Bundle hint) {
+                        if (hint != null) {
+                            TurnBasedMatch match = hint.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
+                            final Invitation invitationAux = hint.getParcelable(Multiplayer.EXTRA_INVITATION);
+                            if (invitationAux != null) {
+                                Game.pendingInvitation = invitationAux;
+                                attachPlayOnlineFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
+                                navigationView.getMenu().getItem(2).setChecked(true);
+                            } else if (match != null) {
+                                Game.pendingTurnBasedMatch = match;
+                                attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
+                                navigationView.getMenu().getItem(3).setChecked(true);
+                            } else {
+                                if (loadDefaultFragmentCategories)
+                                    attachCategoryGridFragment();
+                            }
+                        } else {
+                            if (loadDefaultFragmentCategories)
+                                attachCategoryGridFragment();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "No hay invitaciones");
+            }
+        });
+    }
+
+    private boolean oneTimeGooglePlayGame = false;
+
+    public void signInSilently(final boolean loadDefaultFragmentCategories) {
+        if (oneTimeGooglePlayGame) {
+            Log.d(TAG, "signInSilently()");
+            mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
+                    new OnCompleteListener<GoogleSignInAccount>() {
+                        @Override
+                        public void onComplete(
+                                @NonNull Task<GoogleSignInAccount> task) {
+                            oneTimeGooglePlayGame = false;
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "signInSilently(): success");
+                                onConnected(task.getResult(), loadDefaultFragmentCategories);
+                            } else {
+                                Log.d(TAG, "signInSilently(): failure", task.getException());
+                                if (loadDefaultFragmentCategories)
+                                    attachCategoryGridFragment();
+                            }
+                        }
+                    });
+        } else {
+            if (loadDefaultFragmentCategories)
+                attachCategoryGridFragment();
+        }
+    }
+
+    //JVG.E
+    public class ReceptorOperacion extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             synchronized (this) {
                 String result = intent.getExtras().getString("RESULT");
-
-
                 if ("OK".equals(result)) {
                     if (pDialog != null) {
                         pDialog.dismiss();
                         pDialog = null;
+                        signInSilently(true);
 //                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
-
                     // Carga categorias
 //                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
 //                    if (fragment instanceof CategorySelectionFragment) {
 //                        ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
-
 //                    }
-                    attachCategoryGridFragment();
 //                    attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
-
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
-
                 } else if ("REFRESH".equals(result)) {
                     if (pDialog != null) {
                         int value = intent.getExtras().getInt("REFRESH", 0);
@@ -311,18 +381,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                                     finish();
                                 }
                             });
-
                     if (pDialog != null) {
                         pDialog.dismiss();
                         pDialog = null;
 //                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-
                     }
 
                     Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
-
                     TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).resetData();
-
                     snackbar.show();
                 }
             }
@@ -408,11 +474,24 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         super.onResume();
 
         // Load a freme (restore activity)
-        if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded() && getSupportFragmentManager().findFragmentById(R.id.category_container) == null && fragmentNameSaved.isEmpty()) {
-            attachCategoryGridFragment();
+        if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
+//         getSupportFragmentManager().findFragmentById(R.id.category_container) == null && c) {
+            if (fragmentNameSaved == null || getSupportFragmentManager().findFragmentById(R.id.category_container) == null)
+                signInSilently(true);
+            else
+                signInSilently(false);
 //            attachPlayTurnBasedFragment(ARG_TURNED_BASED_ONLINE);
         }
+//        else {
+//            signInSilently(false);
+//        }
         showScore();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        oneTimeGooglePlayGame = true;
     }
 
     private void showScore() {
@@ -437,6 +516,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         registerReceiver(receiver, filtro);
         // JVG.E
     }
+
+    public NavigationView navigationView = null;
 
     private void setUpToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_player);
@@ -464,7 +545,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         toggle.setDrawerIndicatorEnabled(false);
 //        toggle.setHomeAsUpIndicator(R.drawable.avatar_1);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setBackgroundColor(ContextCompat.getColor(getBaseContext(), R.color.theme_blue_text));
 //        avatar = (AvatarView) (navigationView.getHeaderView(0).findViewById(R.id.avatar));
@@ -557,6 +638,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
     public void attachCategoryGridFragment() {
         if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
+            Log.w(TAG, "attachCategoryGridFragment");
             TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).moveCurrentCategoryToInit();
             FragmentManager supportFragmentManager = getSupportFragmentManager();
             Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
@@ -570,12 +652,15 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             backButton.setVisibility(View.GONE);
             scoreView.setVisibility(View.VISIBLE);
             showScore();
+
+
         }
     }
 
     public void attachTreeViewFragment(String mode) {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
+        Log.w(TAG, "attachTreeViewFragment");
         if (!(fragment instanceof CategorySelectionTreeViewFragment) ||
                 !((CategorySelectionTreeViewFragment) fragment).getMode().equals(mode)) {
             fragment = CategorySelectionTreeViewFragment.newInstance(mode);
@@ -617,6 +702,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     public void attachPlayOnlineFragment(String mode) {
+        Log.w(TAG, "attachPlayOnlineFragment");
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof PlayRealTimeFragment))
@@ -639,6 +725,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     public void attachPlayTurnBasedFragment(String mode) {
+        Log.w(TAG, "attachPlayTurnBasedFragment");
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof PlayTurnBasedFragment))
@@ -768,11 +855,9 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 //            return starter;
 //            attachTreeViewFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
             attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
-        }
-        else if (id == R.id.nav_signout) {
+        } else if (id == R.id.nav_signout) {
             signOut();
-        }
-        else if (id == R.id.nav_settings) {
+        } else if (id == R.id.nav_settings) {
             Intent startIntent = SettingsActivity.getStartIntent(this);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 ActivityCompat.startActivity(this, startIntent, null);

@@ -309,7 +309,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     public void rotate(float speed) {
         if (playable) {
-            if (!isRotating && speed > 0.1f) {
+            if (!isRotating && speed > 0.5f) {
                 isRotating = true;
                 this.speed = speed;
                 soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);

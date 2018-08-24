@@ -1,5 +1,23 @@
 ﻿TodoList
 
+Pendiente
+        Cuando se encripta la aplicación
+        Al leer las categorías si da error al cargar el JSON que tome la versión de backup.
+        Traducciones de Inglés y Español.
+
+24/08/2018
+    Invitaciones:
+        Ahora las invitaciones inician la partida online automáticamente (an ambos modos)
+23/08/2018
+    MODO MULTIJUGADOR POR TURNOS:
+        Se añade el total de preguntas acertadas y falladas en el score total de la partida. (Finalizada)
+        Ya es posible acceder a partidas finalizadas para ver la puntuación (Finalizado)
+        Mensaje de alerta de unirse a partida ya Finalizada (no hay más preguntas pendientes en Jugadores al hazar (Finalizada)
+        Aviso al dejar una partida multijugador con categoría seleccionada (se pierde turno) (Finalizada)
+		Sólo se puede pulsar un botón a la vez
+    MODO JUGADOR EN RED (TIEMPO REAL)
+        Se añade cabecera del jugador
+        Sólo se puede pulsar un botón a la vez
 22/08/2018
     Se añade temporizador de 30 segundos en el modo multijugador.
     Se añade frame de espera antes de la rouleta y antes de empezar a jugar (este último con contador)

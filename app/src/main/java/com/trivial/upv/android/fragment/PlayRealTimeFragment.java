@@ -2,17 +2,19 @@ package com.trivial.upv.android.fragment;
 
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,6 +25,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.images.ImageManager;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.InvitationsClient;
@@ -63,22 +66,25 @@ public class PlayRealTimeFragment extends Fragment
     private Button btnNewGame;
 
     private static final int RC_SIGN_IN = 9001;
-
     final static int RC_INVITATION_INBOX = 10001;
-
-    private com.google.android.gms.common.SignInButton btnConectar;
-
+    //    private com.google.android.gms.common.SignInButton btnConectar;
     private Button btnShowIntitations;
     private Button btnQuickGame;
 
     private LinearLayout globalActions;
     private LinearLayout newGameActions;
-    private LinearLayout loginActions;
-
+    //    private LinearLayout loginActions;
     private TextView txtListCategories;
-    private String mPlayerId;
+
+    // Header Player
+    private String mDisplayName;
+    private Uri mImagePlayer;
+    private ImageView mImgAvatar;
+    private TextView mNameAvatar;
+
     private GoogleSignInClient mGoogleSignInClient;
     private boolean retry = false;
+//    private GoogleSignInAccount mSignedInAccount = null;
 
     public PlayRealTimeFragment() {
         Game.resetGameVars();
@@ -94,7 +100,7 @@ public class PlayRealTimeFragment extends Fragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Game.mode = getArguments().getString(MODE);;
+        Game.mode = getArguments().getString(MODE);
     }
 
     public static PlayRealTimeFragment newInstance(String mode) {
@@ -117,7 +123,7 @@ public class PlayRealTimeFragment extends Fragment
         changeTitleActionBar();
 
         super.onViewCreated(view, savedInstanceState);
-        setUpView(view);
+        setupView(view);
     }
 
     private void changeTitleActionBar() {
@@ -171,19 +177,19 @@ public class PlayRealTimeFragment extends Fragment
                 });
     }
 
-    private void setUpView(final View view) {
+    private void setupView(final View view) {
 
         CategorySelectionActivity.animateViewFullScaleXY(((CategorySelectionActivity) getActivity()).getSubcategory_title(), 100, 300);
 
         globalActions = (LinearLayout) view.findViewById(R.id.global_actions);
         newGameActions = (LinearLayout) view.findViewById(R.id.new_game_actions);
-        loginActions = (LinearLayout) view.findViewById(R.id.login_actions);
+//        loginActions = (LinearLayout) view.findViewById(R.id.login_actions);
         txtListCategories = (TextView) view.findViewById(R.id.txtListCategories);
         btnInvitar = (Button) view.findViewById(R.id.btnInvite);
         btnInvitar.setOnClickListener(this);
 
-        btnConectar = (com.google.android.gms.common.SignInButton) view.findViewById(R.id.sign_in_button);
-        btnConectar.setOnClickListener(this);
+//        btnConectar = (com.google.android.gms.common.SignInButton) view.findViewById(R.id.sign_in_button);
+//        btnConectar.setOnClickListener(this);
 
 //        btnDesconectar = (Button) view.findViewById(R.id.sign_out_button);
 //        btnDesconectar.setOnClickListener(this);
@@ -197,9 +203,6 @@ public class PlayRealTimeFragment extends Fragment
 
 //        newGameActions.setVisibility(View.GONE);
 //        globalActions.setVisibility(View.GONE);
-
-        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(),
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
 //        startSignInIntent();
 
         btnNewGame = (Button) view.findViewById(R.id.btnSelectCategories);
@@ -240,6 +243,11 @@ public class PlayRealTimeFragment extends Fragment
                 txtPlayers.setText(getString(R.string.num_players) + progress + "/" + (seekBar.getMax() - 1));
             }
         });
+        showSeekbarsProgress();
+
+        // Initialie header
+        mImgAvatar = (ImageView) view.findViewById(R.id.imgAvatar);
+        mNameAvatar = (TextView) view.findViewById(R.id.txtNameAvatar);
 
 //        sbTotalTime = (SeekBar) view.findViewById(R.id.sbTotalTime);
 //        txtTotalTime = (TextView) view.findViewById(R.id.txtTotalTime);
@@ -299,12 +307,15 @@ public class PlayRealTimeFragment extends Fragment
 //                    }
 //                });
 //
-
+        mGoogleSignInClient = GoogleSignIn.getClient(getActivity(),
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
     }
 
     public void startSignInIntent() {
-        startActivityForResult(mGoogleSignInClient.getSignInIntent(),
-                RC_SIGN_IN);
+        if (mGoogleSignInClient != null)
+            startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
+        else
+            showWarningConnection(actionOnClickButton);
     }
 
 
@@ -333,12 +344,11 @@ public class PlayRealTimeFragment extends Fragment
 
     final static int RC_SELECT_PLAYERS = 10000;
     private Button btnInvitar;
-    private Button btnPartidaPorTurnos;
+
     final static String TAG = "PLAYONLINEFRAGMENT";
 
 
     public void selectCategories(View v) {
-
         Game.jugadorLocal = 0;
 //        Game.tmpNumQuizzes = sbQuizzes.getProgress();
 //        Game.tmpTotalTime = sbTotalTime.getProgress();
@@ -351,10 +361,28 @@ public class PlayRealTimeFragment extends Fragment
         ((CategorySelectionActivity) getActivity()).attachTreeViewFragment(QuizActivity.ARG_REAL_TIME_ONLINE);
     }
 
+    private void modifyVisibilityButtons(boolean visible) {
+        btnShowIntitations.setEnabled(visible);
+        btnQuickGame.setEnabled(visible);
+        btnNewGame.setEnabled(visible);
+        btnInvitar.setEnabled(visible);
+    }
+
+    private void disableButtons() {
+        modifyVisibilityButtons(false);
+    }
+
+    private void enableButtons() {
+        modifyVisibilityButtons(true);
+    }
+
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
+//        if (mSignedInAccount != googleSignInAccount) {
+//        mSignedInAccount = googleSignInAccount;
+        Log.d(TAG, "onConnected(): connected to Google APIs");
         retry = false;
-
+        enableButtons();
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
 
         PlayersClient playersClient = Games.getPlayersClient(getActivity(),
@@ -363,11 +391,7 @@ public class PlayRealTimeFragment extends Fragment
                 .addOnSuccessListener(new OnSuccessListener<Player>() {
                     @Override
                     public void onSuccess(Player player) {
-                        mPlayerId = player.getPlayerId();
-
-                        inicializarRealTimeGameOnConnected();
-
-
+                        inicializarRealTimeGameOnConnected(player);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -385,9 +409,21 @@ public class PlayRealTimeFragment extends Fragment
                     @Override
                     public void onSuccess(Bundle bundle) {
                         if (bundle != null) {
-                            TurnBasedMatch match = bundle.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
-                            if (match != null)
-                                Game.pendingTurnBasedMatch = match;
+                            final TurnBasedMatch match = bundle.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
+                            if (match != null) {
+                                new AlertDialog.Builder(getActivity())
+                                        .setMessage("La invitación corresponde a una PARTIDA POR TURNOS de " + Game.pendingTurnBasedMatch.getParticipants().get(0).getDisplayName())
+                                        .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                Game.pendingTurnBasedMatch = match;
+                                                ((CategorySelectionActivity) getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
+                                                ((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(3).setChecked(true);
+                                            }
+                                        })
+                                        .show();
+                                return;
+                            }
                             Invitation invitation = bundle.getParcelable(Multiplayer.EXTRA_INVITATION);
                             if (invitation != null) {
                                 manageInvitation(invitation);
@@ -422,16 +458,26 @@ public class PlayRealTimeFragment extends Fragment
         // Standard notifications may be preferable behavior in many cases.
         mInvitationsClient.registerInvitationCallback(mInvitationCallback);
 
-        showSeekbarsProgress();
         ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
-
     }
+//    }
 
 
-    public void inicializarRealTimeGameOnConnected() {
+    public void inicializarRealTimeGameOnConnected(Player player) {
+        mImagePlayer = player.getIconImageUri();
+        ImageManager imageManager = ImageManager.create(getActivity());
+        imageManager.loadImage(mImgAvatar, mImagePlayer);
+
+        mDisplayName = player.getDisplayName();
+        mNameAvatar.setText(mDisplayName);
+        Game.mPlayerId = player.getPlayerId();
+
+//                                mNameAvatar.setText(Game.mPlayerId + " -  " + mDisplayName);
+        mNameAvatar.setText(mDisplayName);
+
 //        Toast.makeText(this, "CONECTADO", Toast.LENGTH_SHORT).show();
 //        btnConectar.setVisibility(View.GONE);
-        loginActions.setVisibility(View.GONE);
+//        loginActions.setVisibility(View.GONE);
 //        btnDesconectar.setVisibility(View.VISIBLE);
 //        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
 //        findViewById(R.id.sign_out_button).setVisibility(View.VISIBLE);
@@ -514,12 +560,14 @@ public class PlayRealTimeFragment extends Fragment
     }
 
     private void onDisconnected() {
+        mGoogleSignInClient = null;
 
         if (!retry) {
             retry = true;
             startSignInIntent();
 
         }
+
     }
 
 
@@ -559,7 +607,7 @@ public class PlayRealTimeFragment extends Fragment
 
     // Handle the result of the invitation inbox UI, where the player can pick an invitation
     // to accept. We react by accepting the roulette_selection invitation, if any.
-    private void handleInvitationInboxResult(int response, Intent data) {
+    private void handleInvitationInboxResult(int response, final Intent data) {
         if (response != RESULT_OK) {
             Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
 //            switchToMainScreen();
@@ -570,16 +618,22 @@ public class PlayRealTimeFragment extends Fragment
         Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
 
         // accept invitation
-        if (inv != null)
+        if (inv != null) {
             acceptInviteToRoom(inv.getInvitationId());
-        else {
+        } else {
+            final TurnBasedMatch match = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
             new AlertDialog.Builder(getActivity())
-                    .setMessage("La invitación no corresponde a una  invitation!")
-                    .setNeutralButton(android.R.string.ok, null)
+                    .setMessage("La invitación corresponde a una PARTIDA POR TURNOS de " + match.getParticipants().get(0).getDisplayName())
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Game.pendingTurnBasedMatch = match;
+                            ((CategorySelectionActivity) getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
+                            ((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(3).setChecked(true);
+                        }
+                    })
                     .show();
-            Game.pendingTurnBasedMatch = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
-            ((CategorySelectionActivity) getActivity()).attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
-            ;
+
         }
 
     }
@@ -603,9 +657,9 @@ public class PlayRealTimeFragment extends Fragment
 
         startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
-            ActivityCompat.startActivity(getActivity(), startIntent, null);
+            startActivity(startIntent, null);
         else {
-            ActivityCompat.startActivity(getActivity(), startIntent, null);
+            startActivity(startIntent, null);
         }
     }
 
@@ -615,23 +669,27 @@ public class PlayRealTimeFragment extends Fragment
         switch (v.getId()) {
 
             case R.id.btnSelectCategories:
+                disableButtons();
                 selectCategories(v);
                 break;
             case R.id.btnPlayAnyone:
+                disableButtons();
                 playAnyOne(v);
                 break;
             case R.id.btnShowInvitations:
+                disableButtons();
                 btnVer_Invitaciones_Click(v);
                 break;
             case R.id.btnInvite:
+                disableButtons();
                 btnInvitar_Click();
                 break;
-            case R.id.sign_in_button:
-                // start the sign-in flow
-                Log.d(TAG, "Sign-in button clicked");
-//                mSignInClicked = true;
-                startSignInIntent();
-                break;
+//            case R.id.sign_in_button:
+//                // start the sign-in flow
+//                Log.d(TAG, "Sign-in button clicked");
+////                mSignInClicked = true;
+//                startSignInIntent();
+//                break;
 //            case R.id.sign_out_button:
 //                Log.d(TAG, "Sign-out button clicked");
 //                mSignInClicked = false;
@@ -649,21 +707,24 @@ public class PlayRealTimeFragment extends Fragment
 
     // QuickGame
     private void playAnyOne(View v) {
-        // QuizFragment
-        SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
+        if (mGoogleSignInClient != null) {
+            // QuizFragment
+            SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
 //        Game.numPlayers = Game.tmpNumPlayers = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_PLAYERS, 2);
-        Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
-        Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
-        Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
-        Game.minAutoMatchPlayers = Game.numPlayers - 1;
-        Game.maxAutoMatchPlayers = Game.numPlayers - 1;
+            Game.numPlayers = Game.tmpNumPlayers = sbPlayers.getProgress();
+            Game.numQuizzes = Game.tmpNumQuizzes = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10);
+            Game.totalTime = Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_TOTAL_TIME, 250);
+            Game.minAutoMatchPlayers = Game.numPlayers - 1;
+            Game.maxAutoMatchPlayers = Game.numPlayers - 1;
 
-        Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(
-                SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10),
-                Game.listCategories, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
+            Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(
+                    SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10),
+                    Game.listCategories, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
 
-        Intent intent = QuizActivity.getStartIntent(getContext(), Game.category);
-        startActivity(intent);
+            Intent intent = QuizActivity.getStartIntent(getContext(), Game.category);
+            startActivity(intent);
+        } else
+            showWarningConnection(actionOnClickButton);
     }
 
 
@@ -675,24 +736,27 @@ public class PlayRealTimeFragment extends Fragment
 
 
     public void btnInvitar_Click() {
-        final int NUMERO_MINIMO_OPONENTES = sbPlayers.getProgress() - 1, NUMERO_MAXIMO_OPONENTES = sbPlayers.getProgress() - 1;
-        // show list of invitable players
+        if (mGoogleSignInClient != null) {
+            final int NUMERO_MINIMO_OPONENTES = sbPlayers.getProgress() - 1, NUMERO_MAXIMO_OPONENTES = sbPlayers.getProgress() - 1;
+            // show list of invitable players
 //        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(Game.mGoogleApiClient, NUMERO_MINIMO_OPONENTES, NUMERO_MAXIMO_OPONENTES);
 //        switchToScreen(R.id.screen_wait);
 //        startActivityForResult(intent, RC_SELECT_PLAYERS);
 //        Games.Achievements.unlock(Game.mGoogleApiClient, getString(R.string.logro_invitar));
 
-        boolean allowAutoMatch = false;
-        Games.getTurnBasedMultiplayerClient(getActivity(),
-                GoogleSignIn.getLastSignedInAccount(getActivity()))
-                .getSelectOpponentsIntent(NUMERO_MINIMO_OPONENTES,
-                        NUMERO_MAXIMO_OPONENTES, allowAutoMatch)
-                .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                    @Override
-                    public void onSuccess(Intent intent) {
-                        startActivityForResult(intent, RC_SELECT_PLAYERS);
-                    }
-                });
+            boolean allowAutoMatch = false;
+            Games.getTurnBasedMultiplayerClient(getActivity(),
+                    GoogleSignIn.getLastSignedInAccount(getActivity()))
+                    .getSelectOpponentsIntent(NUMERO_MINIMO_OPONENTES,
+                            NUMERO_MAXIMO_OPONENTES, allowAutoMatch)
+                    .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                        @Override
+                        public void onSuccess(Intent intent) {
+                            startActivityForResult(intent, RC_SELECT_PLAYERS);
+                        }
+                    });
+        } else
+            showWarningConnection(actionOnClickButton);
     }
 
 
@@ -700,48 +764,72 @@ public class PlayRealTimeFragment extends Fragment
     private InvitationCallback mInvitationCallback = new InvitationCallback() {
         // Handle notification events.
         @Override
-        public void onInvitationReceived(@NonNull Invitation invitation) {
-            Toast.makeText(
-                    getActivity(),
-                    "An invitation has arrived from "
-                            + invitation.getInviter().getDisplayName(), Toast.LENGTH_SHORT)
-                    .show();
-
+        public void onInvitationReceived(@NonNull final Invitation invitation) {
+//            Toast.makeText(
+//                    getActivity(),
+//                    "An invitation has arrived from "
+//                            + invitation.getInviter().getDisplayName(), Toast.LENGTH_SHORT)
+//                    .show();
             if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_REAL_TIME) {
                 manageInvitation(invitation);
+            } else if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_TURN_BASED) {
+
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("La invitación corresponde a una PARTIDA POR TURNOS de " + invitation.getInviter().getDisplayName())
+                        .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Game.pendingTurnInvitation = invitation;
+                                ((CategorySelectionActivity) getActivity()).onNavigationItemSelected(((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(3));
+                                ((CategorySelectionActivity) getActivity()).navigationView.getMenu().getItem(3).setChecked(true);
+                            }
+                        })
+                        .show();
             }
         }
 
         @Override
         public void onInvitationRemoved(@NonNull String invitationId) {
-            Toast.makeText(getActivity(), "An invitation was removed.", Toast.LENGTH_SHORT)
-                    .show();
-            if (Game.mIncomingInvitationId != null && Game.mIncomingInvitationId.equals(invitationId)) {
-                Game.mIncomingInvitationId = null;
-            }
+//            Toast.makeText(getActivity(), "An invitation was removed.", Toast.LENGTH_SHORT).show();
+            Log.w("TRAZA", "An invitation " + invitationId + " was removed.");
+//            if (Game.mIncomingInvitationId != null && Game.mIncomingInvitationId.equals(invitationId)) {
+//                Game.mIncomingInvitationId = null;
+//            }
         }
     };
 
 
     public void manageInvitation(final Invitation invitation) {
-        CategorySelectionActivity.OnClickSnackBarAction actionInvitation = new CategorySelectionActivity.OnClickSnackBarAction() {
-            @Override
-            public void onClickAction() {
-                Log.d("TRAZA", "OnInvitationReceived");
-                Game.mIncomingInvitationId = invitation.getInvitationId();
-                Game.category = TrivialJSonHelper.getInstance(getActivity(), false).createCategoryPlayTimeReal(10, null, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
-                Intent startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
-                    ActivityCompat.startActivity(getActivity(), startIntent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
-                else {
-                    ActivityCompat.startActivity(getActivity(), startIntent, null);
-                }
-            }
-        };
-
-        if (invitation != null && invitation.getInvitationId() != null)
-            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("Invitation Received from " + invitation.getInviter().getDisplayName(), "Accept?", true, actionInvitation);
-
+        if (invitation != null && invitation.getInvitationId() != null) {
+            String invitationFrom = invitation.getInviter().getDisplayName();
+            android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+            alertDialogBuilder.setMessage("Do you want tu accept the invitation from " + invitationFrom + "?");
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("Sure, accept!",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Log.d("TRAZA", "OnInvitationReceived");
+                                    Game.mIncomingInvitationId = invitation.getInvitationId();
+                                    Game.category = TrivialJSonHelper.getInstance(getActivity(), false).createCategoryPlayTimeReal(10, null, QuizActivity.ARG_REAL_TIME_ONLINE, -1);
+                                    Intent startIntent = QuizActivity.getStartIntent(getActivity(), Game.category);
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP)
+                                        startActivity(startIntent, null);
+                                    else {
+                                        startActivity(startIntent, null);
+                                    }
+                                }
+                            })
+                    .setNegativeButton("No.",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+//                                continueOnUpdateMatch(match);
+                                }
+                            });
+            alertDialogBuilder.show();
+        }
     }
 
 
@@ -750,16 +838,47 @@ public class PlayRealTimeFragment extends Fragment
 
 
     public void btnVer_Invitaciones_Click(View view) {
-        Games.getInvitationsClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
-                .getInvitationInboxIntent()
-                .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                    @Override
-                    public void onSuccess(Intent intent) {
-                        startActivityForResult(intent, RC_INVITATION_INBOX);
-                    }
-                });
+        if (mGoogleSignInClient != null) {
+            Games.getInvitationsClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
+                    .getInvitationInboxIntent()
+                    .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                        @Override
+                        public void onSuccess(Intent intent) {
+                            startActivityForResult(intent, RC_INVITATION_INBOX);
+                        }
+                    });
+        } else
+            showWarningConnection(actionOnClickButton);
     }
 
+    private android.app.AlertDialog mAlertDialog = null;
+
+    // Generic warning/info dialog
+    public void showWarningConnection(final ActionOnClickButton actionOnClickButton) {
+        String title = "Google Play Games";
+        String message = "You aren't not log in! OK to try it";
+
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+        // set title
+        alertDialogBuilder.setTitle(title).setMessage(message);
+        // set dialog message
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, close
+                        // current activity
+                        if (actionOnClickButton != null)
+                            actionOnClickButton.onClick();
+                    }
+                });
+
+        // create alert dialog
+        mAlertDialog = alertDialogBuilder.create();
+
+        // show it
+        mAlertDialog.show();
+    }
 
     @Override
     public void onPause() {
@@ -770,4 +889,15 @@ public class PlayRealTimeFragment extends Fragment
             mInvitationsClient.unregisterInvitationCallback(mInvitationCallback);
         }
     }
+
+    private interface ActionOnClickButton {
+        void onClick();
+    }
+
+    private ActionOnClickButton actionOnClickButton = new ActionOnClickButton() {
+        @Override
+        public void onClick() {
+            startSignInIntent();
+        }
+    };
 }

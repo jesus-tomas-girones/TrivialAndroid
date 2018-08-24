@@ -68,6 +68,7 @@ import com.google.android.gms.games.GamesActivityResultCodes;
 import com.google.android.gms.games.Player;
 import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.games.RealTimeMultiplayerClient;
+import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.realtime.OnRealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
@@ -175,43 +176,17 @@ public class QuizActivity extends AppCompatActivity {
             mSavedStateIsPlaying = savedInstanceState.getBoolean(STATE_IS_PLAYING);
         }
         super.onCreate(savedInstanceState);
+
+
         populate(categoryId);
         int categoryNameTextSize = getResources()
                 .getDimensionPixelSize(R.dimen.category_item_text_size);
         int paddingStart = getResources().getDimensionPixelSize(R.dimen.spacing_double);
         final int startDelay = getResources().getInteger(R.integer.toolbar_transition_duration);
-        ActivityCompat.setEnterSharedElementCallback(this,
-                new TextSharedElementCallback(categoryNameTextSize, paddingStart) {
-                    @Override
-                    public void onSharedElementStart(List<String> sharedElementNames,
-                                                     List<View> sharedElements,
-                                                     List<View> sharedElementSnapshots) {
-                        super.onSharedElementStart(sharedElementNames,
-                                sharedElements,
-                                sharedElementSnapshots);
-                        mToolbarBack.setScaleX(0f);
-                        mToolbarBack.setScaleY(0f);
-                    }
-
-                    @Override
-                    public void onSharedElementEnd(List<String> sharedElementNames,
-                                                   List<View> sharedElements,
-                                                   List<View> sharedElementSnapshots) {
-                        super.onSharedElementEnd(sharedElementNames,
-                                sharedElements,
-                                sharedElementSnapshots);
-                        // Make sure to perform this animation after the transition has ended.
-                        ViewCompat.animate(mToolbarBack)
-                                .setStartDelay(startDelay)
-                                .scaleX(1f)
-                                .scaleY(1f)
-                                .alpha(1f);
-                    }
-                });
 
         // JVG.S
-        // Partuda en tiempo real (Play OnLine)
-        if (isMatchOnline()) {
+        // Partida en tiempo real (Play OnLine)
+        if (isMatchOnline() || isMatchTurnBased()) {
             mGoogleSignInClient = GoogleSignIn.getClient(this,
                     new GoogleSignInOptions.Builder(
                             GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
@@ -219,22 +194,54 @@ public class QuizActivity extends AppCompatActivity {
 
 //            startSignInIntent();
 //            iniciarPartidaEnTiempoReal();
+        } else if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
+
         } else {
-            mGoogleSignInClient = GoogleSignIn.getClient(this,
-                    new GoogleSignInOptions.Builder(
-                            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                            .build());
+            // Load animation from action bar
+            ActivityCompat.setEnterSharedElementCallback(this,
+                    new TextSharedElementCallback(categoryNameTextSize, paddingStart) {
+                        @Override
+                        public void onSharedElementStart(List<String> sharedElementNames,
+                                                         List<View> sharedElements,
+                                                         List<View> sharedElementSnapshots) {
+                            super.onSharedElementStart(sharedElementNames,
+                                    sharedElements,
+                                    sharedElementSnapshots);
+                            mToolbarBack.setScaleX(0f);
+                            mToolbarBack.setScaleY(0f);
+                        }
+
+                        @Override
+                        public void onSharedElementEnd(List<String> sharedElementNames,
+                                                       List<View> sharedElements,
+                                                       List<View> sharedElementSnapshots) {
+                            super.onSharedElementEnd(sharedElementNames,
+                                    sharedElements,
+                                    sharedElementSnapshots);
+                            // Make sure to perform this animation after the transition has ended.
+                            ViewCompat.animate(mToolbarBack)
+                                    .setStartDelay(startDelay)
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .alpha(1f);
+                        }
+                    });
 
         }
         // JVG.E
     }
 
     public boolean isMatchOnline() {
-        return Game.mode.equals(ARG_REAL_TIME_ONLINE);
+        if (Game.mode != null)
+            return Game.mode.equals(ARG_REAL_TIME_ONLINE);
+        return false;
     }
 
     public boolean isMatchTurnBased() {
-        return Game.mode.equals(ARG_TURNED_BASED_ONLINE);
+        if (Game.mode != null)
+            return Game.mode.equals(ARG_TURNED_BASED_ONLINE);
+        return false;
+
     }
 
     public void startSignInIntent() {
@@ -258,7 +265,7 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     public void onDisconnected() {
-     showGameError("No ha sido posible desconectar", true);
+        showGameError("No ha sido posible desconectar", true);
     }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
@@ -365,6 +372,13 @@ public class QuizActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         leaveRoom();
+
+        if (isMatchTurnBased()) {
+            if (!mCategory.isSolved()) {
+                showMessageAcceptCancelTurn();
+                return;
+            }
+        }
         if (mIcon == null || mQuizFab == null) {
             // Skip the animation if icon or fab are not initialized.
             super.onBackPressed();
@@ -728,8 +742,7 @@ public class QuizActivity extends AppCompatActivity {
         mQuizFab.setOnClickListener(mOnClickListener);
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
-        if (isMatchOnline() || mCategory.getQuizzes() == null)
-        {
+        if (isMatchOnline() || mCategory.getQuizzes() == null) {
             mQuizFab.hide();
         }
         // JVG.E
@@ -1115,7 +1128,7 @@ public class QuizActivity extends AppCompatActivity {
                     Game.mParticipants = room.getParticipants();
                     Game.mMyId = room.getParticipantId(mPlayerId);
 
-                    Game.myName =  room.getParticipant(Game.mMyId).getDisplayName();
+                    Game.myName = room.getParticipant(Game.mMyId).getDisplayName();
 
                     if (Game.mRoomId == null) {
                         Game.mRoomId = room.getRoomId();
@@ -1405,8 +1418,31 @@ public class QuizActivity extends AppCompatActivity {
                 mRealTimeMultiplayerClient.leave(mRoomConfig, Game.mRoomId);
                 Game.mRoomId = null;
             }
-
         }
+    }
+
+    private void showMessageAcceptCancelTurn() {
+
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'>" +  "Do you want tu pass your Turn?"));
+
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("Yes!",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                QuizActivity.super.onBackPressed();
+                            }
+                        })
+                .setNegativeButton("No.",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+//                                continueOnUpdateMatch(match);
+                            }
+                        });
+        alertDialogBuilder.show();
     }
 
     private void numeroJugadorLocal() {
