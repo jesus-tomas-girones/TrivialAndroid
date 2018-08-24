@@ -187,7 +187,7 @@ public class PlayTurnBasedFragment extends Fragment {
                     public void onComplete(
                             @NonNull Task<GoogleSignInAccount> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "signInSilently(): success");
+//                            Log.d(TAG, "signInSilently(): success");
                             onConnected(task.getResult());
                         } else {
                             Log.d(TAG, "signInSilently(): failure", task.getException());
@@ -617,8 +617,35 @@ public class PlayTurnBasedFragment extends Fragment {
 
 
     public void startSignInIntent() {
-        startActivityForResult(mGoogleSignInClient.getSignInIntent(),
-                RC_SIGN_IN);
+        if (mGoogleSignInClient != null)
+            startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
+        else
+            showWarningConnection();
+    }
+
+    public void showWarningConnection() {
+        String title = "Google Play Games";
+        String message = "You aren't not log in! OK to try it";
+
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+        // set title
+        alertDialogBuilder.setTitle(title).setMessage(message);
+        // set dialog message
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, close
+                        // current activity
+                        startSignInIntent();
+                    }
+                });
+
+        // create alert dialog
+        mAlertDialog = alertDialogBuilder.create();
+
+        // show it
+        mAlertDialog.show();
     }
 
     public void signOut() {
@@ -642,7 +669,7 @@ public class PlayTurnBasedFragment extends Fragment {
         Log.d(getClass().getSimpleName(), "DISCONNECTED GPG");
         Log.d(TAG, "onDisconnected()");
 
-        mGoogleSignInClient = null;
+//        mGoogleSignInClient = null;
         mTurnBasedMultiplayerClient = null;
         mInvitationsClient = null;
 //        setViewVisibility();
@@ -659,7 +686,7 @@ public class PlayTurnBasedFragment extends Fragment {
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
 //        if (mSignedInAccount != googleSignInAccount) {
 //            mSignedInAccount = googleSignInAccount;
-        Log.d(TAG, "onConnected(): connected to Google APIs");
+//        Log.d(TAG, "onConnected(): connected to Google APIs");
         retry = false;
         mTurnBasedMultiplayerClient = Games.getTurnBasedMultiplayerClient(getActivity(), googleSignInAccount);
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
@@ -683,7 +710,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         })
                 .addOnFailureListener(createFailureListener("There was a problem getting the player!"));
 
-        Log.d(TAG, "onConnected(): Connection successful");
+//        Log.d(TAG, "onConnected(): Connection successful");
 
         // Retrieve the TurnBasedMatch from the connectionHint
         GamesClient gamesClient = Games.getGamesClient(getActivity(), googleSignInAccount);
@@ -852,7 +879,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
         @Override
         public void onInvitationRemoved(@NonNull String invitationId) {
-            Log.w("TRAZA", "An invitation " + invitationId + " was removed.");
+//            Log.w("TRAZA", "An invitation " + invitationId + " was removed.");
         }
     };
 
@@ -1179,7 +1206,7 @@ public class PlayTurnBasedFragment extends Fragment {
 // to accept. We react by accepting the roulette_selection invitation, if any.
     private void handleInvitationInboxResult(int response, final Intent data) {
         if (response != RESULT_OK) {
-            Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
+//            Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
 //            switchToMainScreen();
             return;
         }
@@ -1640,7 +1667,7 @@ public class PlayTurnBasedFragment extends Fragment {
 // "Invite friends" button. We react by creating a room with those players.
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != RESULT_OK) {
-            Log.w(TAG, "*** select players UI cancelled, " + response);
+//            Log.w(TAG, "*** select players UI cancelled, " + response);
 //            switchToMainScreen();
             return;
         }

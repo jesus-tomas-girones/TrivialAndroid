@@ -198,7 +198,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             startIntent = null;
         } else {
             startIntent = null;
-            Log.d(TAG, "AnimateFloatButton option incorrect");
+//            Log.d(TAG, "AnimateFloatButton option incorrect");
             return;
         }
 

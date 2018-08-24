@@ -281,7 +281,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
     //JVG.S
     private void onConnected(GoogleSignInAccount googleSignInAccount, final boolean loadDefaultFragmentCategories) {
-        Log.d(TAG, "onConnected(): Connection successful");
+//        Log.d(TAG, "onConnected(): Connection successful");
 
         // Retrieve the TurnBasedMatch from the connectionHint
         GamesClient gamesClient = Games.getGamesClient(this, googleSignInAccount);
@@ -313,6 +313,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.w(TAG, "No hay invitaciones");
+                if (loadDefaultFragmentCategories)
+                    attachCategoryGridFragment();
             }
         });
     }
@@ -321,7 +323,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
     public void signInSilently(final boolean loadDefaultFragmentCategories) {
         if (oneTimeGooglePlayGame) {
-            Log.d(TAG, "signInSilently()");
+//            Log.d(TAG, "signInSilently()");
             mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
                     new OnCompleteListener<GoogleSignInAccount>() {
                         @Override
@@ -329,7 +331,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                                 @NonNull Task<GoogleSignInAccount> task) {
                             oneTimeGooglePlayGame = false;
                             if (task.isSuccessful()) {
-                                Log.d(TAG, "signInSilently(): success");
+//                                Log.d(TAG, "signInSilently(): success");
                                 onConnected(task.getResult(), loadDefaultFragmentCategories);
                             } else {
                                 Log.d(TAG, "signInSilently(): failure", task.getException());
@@ -363,7 +365,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 //                        ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
 //                    }
 //                    attachPlayTurnBasedFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
-                    Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
+//                    Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
                 } else if ("REFRESH".equals(result)) {
                     if (pDialog != null) {
                         int value = intent.getExtras().getInt("REFRESH", 0);
@@ -387,7 +389,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 //                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
 
-                    Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
+//                    Log.d("ONRECEIVE", intent.getExtras().getString("RESULT"));
                     TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).resetData();
                     snackbar.show();
                 }
@@ -460,7 +462,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         } else {
 //            TextView viewSubcategoryText = (TextView) findViewById(R.id.sub_category_title);
             setToolbarTitle(TrivialJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
-            Log.d("previus", "categoria_previa" + TrivialJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
+//            Log.d("previus", "categoria_previa" + TrivialJSonHelper.getInstance(getBaseContext(), false).getPreviousTitleCategory());
             animateToolbarNavigateToSubcategories(true);
         }
     }
@@ -511,7 +513,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     protected void onStart() {
         super.onStart();
         // JVG.S
-        Log.d("TRAZA", "onStart");
+//        Log.d("TRAZA", "onStart");
         loadCategories();
         registerReceiver(receiver, filtro);
         // JVG.E
@@ -638,7 +640,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
     public void attachCategoryGridFragment() {
         if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
-            Log.w(TAG, "attachCategoryGridFragment");
+//            Log.w(TAG, "attachCategoryGridFragment");
             TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).moveCurrentCategoryToInit();
             FragmentManager supportFragmentManager = getSupportFragmentManager();
             Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
@@ -660,7 +662,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     public void attachTreeViewFragment(String mode) {
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
-        Log.w(TAG, "attachTreeViewFragment");
+//        Log.w(TAG, "attachTreeViewFragment");
         if (!(fragment instanceof CategorySelectionTreeViewFragment) ||
                 !((CategorySelectionTreeViewFragment) fragment).getMode().equals(mode)) {
             fragment = CategorySelectionTreeViewFragment.newInstance(mode);
@@ -702,7 +704,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     public void attachPlayOnlineFragment(String mode) {
-        Log.w(TAG, "attachPlayOnlineFragment");
+//        Log.w(TAG, "attachPlayOnlineFragment");
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof PlayRealTimeFragment))
@@ -725,7 +727,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     }
 
     public void attachPlayTurnBasedFragment(String mode) {
-        Log.w(TAG, "attachPlayTurnBasedFragment");
+//        Log.w(TAG, "attachPlayTurnBasedFragment");
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         Fragment fragment = supportFragmentManager.findFragmentById(R.id.category_container);
         if (!(fragment instanceof PlayTurnBasedFragment))
@@ -758,14 +760,14 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         super.onRestoreInstanceState(savedInstanceState);
 
         fragmentNameSaved = savedInstanceState.getString("fragment", "");
-        Log.d("TRAZA", "onRestore");
+//        Log.d("TRAZA", "onRestore");
 
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d("TRAZA", "onSave");
+//        Log.d("TRAZA", "onSave");
         Fragment tmpFragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
         if (tmpFragment != null)
             outState.putString("fragment", tmpFragment.getClass().getName().toString());

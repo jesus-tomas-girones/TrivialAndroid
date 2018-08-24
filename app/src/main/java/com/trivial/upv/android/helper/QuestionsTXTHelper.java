@@ -236,7 +236,7 @@ public class QuestionsTXTHelper {
             removeRequest();
 
             if (pendingRequests == 0) {
-                Log.d("CARGA", "CARGA_FINALIZADA");
+//                Log.d("CARGA", "CARGA_FINALIZADA");
 
                 new Thread() {
                     public void run() {

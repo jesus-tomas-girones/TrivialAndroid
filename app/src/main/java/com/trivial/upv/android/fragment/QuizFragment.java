@@ -472,7 +472,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 
     public void generateScoreOnline(String participant, int points, int timeLeft) {
 
-        Log.d("TRAZASCORE", ((participant == null) ? Game.mMyId : participant) + " " + " " + points + " " + timeLeft);
+//        Log.d("TRAZASCORE", ((participant == null) ? Game.mMyId : participant) + " " + " " + points + " " + timeLeft);
 //        scoreOnline.getmScoreOnline().clear();
 //        for (Participant p : Game.mParticipants) {
 //            if (p.getParticipantId().equals(Game.mMyId)) {
@@ -562,7 +562,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     }
 
     public void checkScoreNumParticipants() {
-        Log.d("TRAZA", "Closing Dialog!" + "" + scoreOnline.areAnyPendingScore());
+//        Log.d("TRAZA", "Closing Dialog!" + "" + scoreOnline.areAnyPendingScore());
         if (!scoreOnline.areAnyPendingScore()) {
             if (pWaitingProgress != null) {
                 pWaitingProgress.dismiss();

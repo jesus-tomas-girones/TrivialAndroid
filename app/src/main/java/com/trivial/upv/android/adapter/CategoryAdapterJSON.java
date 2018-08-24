@@ -194,14 +194,14 @@ public class CategoryAdapterJSON extends RecyclerView.Adapter<CategoryAdapterJSO
         //return TopekaDatabaseHelper.getCategories(activity, true);
         if (TrivialJSonHelper.getInstance(mActivity, false).isLoaded()) {
             mCategories = TrivialJSonHelper.getInstance(mActivity, false).getCategories(true);
-            Log.d("ADAPTER", "CATEGORIAS CARGADAS");
+//            Log.d("ADAPTER", "CATEGORIAS CARGADAS");
         } else {
             if (mCategories!=null) {
                 mCategories.clear();
             }
             else
                 mCategories = new ArrayList<>();
-            Log.d("ADAPTER", "NO HA TERMINADO LA CARGA DE LAS CATEGORIAS");
+//            Log.d("ADAPTER", "NO HA TERMINADO LA CARGA DE LAS CATEGORIAS");
         }
 
         // JVG.E

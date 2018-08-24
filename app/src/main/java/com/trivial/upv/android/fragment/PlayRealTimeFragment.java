@@ -160,14 +160,14 @@ public class PlayRealTimeFragment extends Fragment
     }
 
     public void signInSilently() {
-        Log.d(TAG, "signInSilently()");
+//        Log.d(TAG, "signInSilently()");
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(getActivity(),
                 new OnCompleteListener<GoogleSignInAccount>() {
                     @Override
                     public void onComplete(
                             @NonNull Task<GoogleSignInAccount> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "signInSilently(): success");
+//                            Log.d(TAG, "signInSilently(): success");
                             onConnected(task.getResult());
                         } else {
                             Log.d(TAG, "signInSilently(): failure", task.getException());
@@ -380,7 +380,7 @@ public class PlayRealTimeFragment extends Fragment
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
 //        if (mSignedInAccount != googleSignInAccount) {
 //        mSignedInAccount = googleSignInAccount;
-        Log.d(TAG, "onConnected(): connected to Google APIs");
+//        Log.d(TAG, "onConnected(): connected to Google APIs");
         retry = false;
         enableButtons();
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
@@ -485,13 +485,9 @@ public class PlayRealTimeFragment extends Fragment
         newGameActions.setVisibility(View.VISIBLE);
 // Para que funcione el regalo en lugar de la notificación
 //        Games.Requests.registerRequestListener(Game.mGoogleApiClient, mRequestListener);
-
 //        estadisticasJugador();
-
-        Log.d(TAG, "onConnected() called. Sign in successful!");
-
-        Log.d(TAG, "Sign-in succeeded.");
-
+//        Log.d(TAG, "onConnected() called. Sign in successful!");
+//        Log.d(TAG, "Sign-in succeeded.");
         // register listener so we are notified if we receive an invitation to play
         // while we are in the game
 //        Games.Invitations.registerInvitationListener(Game.mGoogleApiClient, (CategorySelectionActivity) getActivity());
@@ -560,7 +556,7 @@ public class PlayRealTimeFragment extends Fragment
     }
 
     private void onDisconnected() {
-        mGoogleSignInClient = null;
+//        mGoogleSignInClient = null;
 
         if (!retry) {
             retry = true;
@@ -575,7 +571,7 @@ public class PlayRealTimeFragment extends Fragment
     // "Invite friends" button. We react by creating a room with those players.
     private void handleSelectPlayersResult(int response, Intent data) {
         if (response != RESULT_OK) {
-            Log.w(TAG, "*** select players UI cancelled, " + response);
+//            Log.w(TAG, "*** select players UI cancelled, " + response);
 //            switchToMainScreen();
             return;
         }
@@ -609,7 +605,7 @@ public class PlayRealTimeFragment extends Fragment
     // to accept. We react by accepting the roulette_selection invitation, if any.
     private void handleInvitationInboxResult(int response, final Intent data) {
         if (response != RESULT_OK) {
-            Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
+//            Log.w(TAG, "*** invitation inbox UI cancelled, " + response);
 //            switchToMainScreen();
             return;
         }
@@ -791,7 +787,7 @@ public class PlayRealTimeFragment extends Fragment
         @Override
         public void onInvitationRemoved(@NonNull String invitationId) {
 //            Toast.makeText(getActivity(), "An invitation was removed.", Toast.LENGTH_SHORT).show();
-            Log.w("TRAZA", "An invitation " + invitationId + " was removed.");
+//            Log.w("TRAZA", "An invitation " + invitationId + " was removed.");
 //            if (Game.mIncomingInvitationId != null && Game.mIncomingInvitationId.equals(invitationId)) {
 //                Game.mIncomingInvitationId = null;
 //            }

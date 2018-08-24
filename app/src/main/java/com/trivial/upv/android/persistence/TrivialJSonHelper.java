@@ -121,8 +121,7 @@ public class TrivialJSonHelper {
 
         String url = sPref.getString(PREF_URL_CATEGORIES, "http://mmoviles.upv.es/trivial/trivialandroid.json");
 
-        Log.d("CATEGORIES", url);
-
+//        Log.d("CATEGORIES", url);
         request = new StringRequestHeaders(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(final String response) {
@@ -154,7 +153,7 @@ public class TrivialJSonHelper {
 
                                 if (contador > 0 && iguales && contador == preguntas.length && line == null) {
                                     /* The same file  Take information from cache*/
-                                    Log.d("TRAZA", "fichero no se ha modificado");
+//                                    Log.d("TRAZA", "fichero no se ha modificado");
                                     new Thread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -171,7 +170,7 @@ public class TrivialJSonHelper {
 
                             } catch (FileNotFoundException e1) {
                                 e1.printStackTrace();
-                                Log.d("TRAZA", "nuevo fichero");
+//                                Log.d("TRAZA", "nuevo fichero");
                                 try {
                                     readNewFileJson(response, preguntas, true);
                                     return;
@@ -192,7 +191,7 @@ public class TrivialJSonHelper {
                         }
                     }.start();
                 } else {
-                    Log.d("TRAZA", "fecha <= ultima fecha");
+//                    Log.d("TRAZA", "fecha <= ultima fecha");
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -252,7 +251,7 @@ public class TrivialJSonHelper {
             pw.println(line);
         }
         pw.close();
-        Log.d("TRAZA", "nuevo fichero creado");
+//        Log.d("TRAZA", "nuevo fichero creado");
 
     }
 
@@ -890,13 +889,13 @@ public class TrivialJSonHelper {
             sendBroadCastMessageRefresh(100);
             sendBroadCastMessage("OK");
 
-            Log.d("CACHE", "CARGA OK");
+//            Log.d("CACHE", "CARGA OK");
 
         } catch (FileNotFoundException e) {
-            Log.d("CACHE", "Error loading NOT FOUND");
+//            Log.d("CACHE", "Error loading NOT FOUND");
             try {
                 readNewFileJson(response, preguntas, false);
-                Log.d("CACHE", "CACHE NOT FOUND");
+//                Log.d("CACHE", "CACHE NOT FOUND");
             } catch (FileNotFoundException e1) {
                 e1.printStackTrace();
                 sendBroadCastError("CACHE", "Error loading");
@@ -1324,8 +1323,8 @@ public class TrivialJSonHelper {
                 throws JsonParseException {
             JsonObject quiz = json.getAsJsonObject();
 
-            if (!quiz.has("mQuizType"))
-                Log.d("ACTIVO", "ERROR");
+//            if (!quiz.has("mQuizType"))
+//                Log.d("ACTIVO", "ERROR");
             String type = quiz.get("mQuizType").getAsString();
 
             Quiz tmpQuiz = null;

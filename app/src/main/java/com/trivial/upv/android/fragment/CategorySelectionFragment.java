@@ -136,7 +136,7 @@ public class CategorySelectionFragment extends Fragment {
                                 //        JVG.S
 //                                getActivity().supportStartPostponedEnterTransition();
                                 if (TrivialJSonHelper.getInstance(getActivity().getApplicationContext(), false).isLoaded()) {
-                                    Log.d("TRAZA", "" + mAdapter.getItemCount());
+//                                    Log.d("TRAZA", "" + mAdapter.getItemCount());
 
                                     animateTransitionSubcategories(null);
                                     ((CategorySelectionActivity) getActivity()).showToolbarSubcategories();

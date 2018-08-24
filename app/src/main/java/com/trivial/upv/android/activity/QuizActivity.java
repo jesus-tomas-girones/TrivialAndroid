@@ -781,7 +781,7 @@ public class QuizActivity extends AppCompatActivity {
 
 
     public boolean hasInitialicedAllPlayers() {
-        Log.d("TRAZAGPG", "nº participantes" + Game.numParticipantsOK() + " finishedParticipants:" + Game.mFinishedParticipants.size());
+//        Log.d("TRAZAGPG", "nº participantes" + Game.numParticipantsOK() + " finishedParticipants:" + Game.mFinishedParticipants.size());
         return (Game.numParticipantsOK() == Game.mFinishedParticipants.size());
     }
 
@@ -833,7 +833,7 @@ public class QuizActivity extends AppCompatActivity {
             mHandlerPlayGame = null;
         }
 
-        Log.d(TAG, "**** got onStop");
+//        Log.d(TAG, "**** got onStop");
 
         // if we're in a room, leave it.
         leaveRoom();
@@ -876,7 +876,7 @@ public class QuizActivity extends AppCompatActivity {
         // Join to an invitation
         if (Game.mIncomingInvitationId != null) {
             // Accept the given invitation.
-            Log.d(TAG, "Accepting invitation: " + Game.mIncomingInvitationId);
+//            Log.d(TAG, "Accepting invitation: " + Game.mIncomingInvitationId);
             mRoomConfig = RoomConfig.builder(mRoomUpdateCallback)
                     .setInvitationIdToAccept(Game.mIncomingInvitationId)
                     .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
@@ -901,7 +901,7 @@ public class QuizActivity extends AppCompatActivity {
             if (Game.minAutoMatchPlayers > 0 || Game.maxAutoMatchPlayers > 0) {
                 autoMatchCriteria = RoomConfig.createAutoMatchCriteria(
                         Game.minAutoMatchPlayers, Game.maxAutoMatchPlayers, 0);
-                Log.d(TAG, "Automatch criteria: " + autoMatchCriteria);
+//                Log.d(TAG, "Automatch criteria: " + autoMatchCriteria);
             }
         } else {
             // Create room for a quick match (automatchcriteria)
@@ -909,7 +909,7 @@ public class QuizActivity extends AppCompatActivity {
         }
 
         // create the room
-        Log.d(TAG, "Creating room...");
+//        Log.d(TAG, "Creating room...");
         RoomConfig.Builder rtmConfigBuilder = RoomConfig.builder(mRoomUpdateCallback);
         if (Game.invitees != null && Game.invitees.size() > 0)
             rtmConfigBuilder.addPlayersToInvite(Game.invitees);
@@ -924,7 +924,7 @@ public class QuizActivity extends AppCompatActivity {
         Game.timeStamp = System.currentTimeMillis();
         mRoomConfig = rtmConfigBuilder.build();
         mRealTimeMultiplayerClient.create(mRoomConfig);
-        Log.d(TAG, "Room created, waiting for it to be ready...");
+//        Log.d(TAG, "Room created, waiting for it to be ready...");
     }
 
     final static int RC_WAITING_ROOM = 10002;
@@ -937,11 +937,11 @@ public class QuizActivity extends AppCompatActivity {
                 @Override
                 public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
                     synchronized (this) {
-                        Log.d("TRAZAGPG", "RECEIVE: " + realTimeMessage.getMessageData().toString());
+//                        Log.d("TRAZAGPG", "RECEIVE: " + realTimeMessage.getMessageData().toString());
                         byte[] messageData = realTimeMessage.getMessageData();
                         try {
                             String tmpDataMsg = new String(messageData, "UTF-8");
-                            Log.d("TRAZAGPG", "RECEIVE: " + tmpDataMsg);
+//                            Log.d("TRAZAGPG", "RECEIVE: " + tmpDataMsg);
                             switch (tmpDataMsg.charAt(0)) {
                                 case 'P':
 //                        Toast.makeText(this, "Your oppenent do " + (int) messageData[1] + " PTS", Toast.LENGTH_LONG).show();
@@ -984,7 +984,7 @@ public class QuizActivity extends AppCompatActivity {
                                     builder.registerTypeAdapter(Quiz.class, new TrivialJSonHelper.QuizDeserializer());
                                     Gson gson = builder.create();
 
-                                    Log.d("TRAZAGPGE", sbMessageData.toString());
+//                                    Log.d("TRAZAGPGE", sbMessageData.toString());
                                     Game.category = gson.fromJson(sbMessageData.toString(), type);
                                     mCategory = Game.category;
 
@@ -1039,11 +1039,11 @@ public class QuizActivity extends AppCompatActivity {
                                     }
                                     Game.mFinishedParticipants.put(realTimeMessage.getSenderParticipantId(), new Long(new String(tmpTimeStamp)));
 
-                                    Log.d("TRAZAGPG", Game.numParticipantsOK() + " " + Game.mFinishedParticipants.size());
-                                    for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
-                                        Log.d("TRAZAGPG", key.getKey() + " " + key.getValue());
-
-                                    }
+//                                    Log.d("TRAZAGPG", Game.numParticipantsOK() + " " + Game.mFinishedParticipants.size());
+//                                    for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
+//                                        Log.d("TRAZAGPG", key.getKey() + " " + key.getValue());
+//
+//                                    }
                                     if (Game.numParticipantsOK() == Game.mFinishedParticipants.size()) {
 
                                         long minValue = Long.MAX_VALUE;
@@ -1073,7 +1073,7 @@ public class QuizActivity extends AppCompatActivity {
                                             if (sameTimestamp.size() == 1) {
                                                 Game.jugadorLocal = 1;
                                                 enviarQuizzesToOpponent();
-                                                Log.d("CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+//                                                Log.d("CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
                                             } else {
                                                 // Obtiene menor id
                                                 String tmpIdParticipant = null;
@@ -1094,15 +1094,15 @@ public class QuizActivity extends AppCompatActivity {
                                                 if (tmpIdParticipant.equals(Game.mMyId)) {
                                                     Game.jugadorLocal = 1;
                                                     enviarQuizzesToOpponent();
-                                                    Log.d("CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+//                                                    Log.d("CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
                                                 } else {
                                                     Game.jugadorLocal = 2;
 //                                        enviarQuizzesToOpponent();
-                                                    Log.d("NO_CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+//                                                    Log.d("NO_CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
                                                 }
                                             }
                                         } else {
-                                            Log.d("NO_CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+//                                            Log.d("NO_CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
                                             Game.jugadorLocal = 2;
                                         }
                                     }
@@ -1124,7 +1124,7 @@ public class QuizActivity extends AppCompatActivity {
 
                 @Override
                 public void onConnectedToRoom(Room room) {
-                    Log.d(TAG, "onConnectedToRoom.");
+//                    Log.d(TAG, "onConnectedToRoom.");
                     Game.mParticipants = room.getParticipants();
                     Game.mMyId = room.getParticipantId(mPlayerId);
 
@@ -1135,9 +1135,9 @@ public class QuizActivity extends AppCompatActivity {
                     }
 
                     // print out the list of participantsTurnBased (for debug purposes)
-                    Log.d(TAG, "Room ID: " + Game.mRoomId);
-                    Log.d(TAG, "My ID " + Game.mMyId);
-                    Log.d(TAG, "<< CONNECTED TO ROOM>>");
+//                    Log.d(TAG, "Room ID: " + Game.mRoomId);
+//                    Log.d(TAG, "My ID " + Game.mMyId);
+//                    Log.d(TAG, "<< CONNECTED TO ROOM>>");
                 }
 
                 @Override
@@ -1207,7 +1207,7 @@ public class QuizActivity extends AppCompatActivity {
             new RoomUpdateCallback() {
                 @Override
                 public void onRoomCreated(int statusCode, Room room) {
-                    Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
+//                    Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
 
                     if (statusCode != STATUS_OK) {
                         Log.e(TAG, "*** Error: onRoomCreated, status " + statusCode);
@@ -1243,7 +1243,7 @@ public class QuizActivity extends AppCompatActivity {
                 @Override
                 public void onLeftRoom(int statusCode, String roomId) {
                     // we have left the room; return to main screen.
-                    Log.d(TAG, "onLeftRoom, code " + statusCode);
+//                    Log.d(TAG, "onLeftRoom, code " + statusCode);
                     switchToMainScreen();
                 }
 
@@ -1362,7 +1362,7 @@ public class QuizActivity extends AppCompatActivity {
                 // we got the result from the "waiting room" UI.
                 if (responseCode == AppCompatActivity.RESULT_OK) {
                     // ready to roulette_rotate playing
-                    Log.d(TAG, "Starting game (waiting room returned OK).");
+//                    Log.d(TAG, "Starting game (waiting room returned OK).");
                     // JVG.S
 
                     showWaitingProgress();
@@ -1410,7 +1410,7 @@ public class QuizActivity extends AppCompatActivity {
     // Leave the room.
     void leaveRoom() {
         if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
-            Log.d(TAG, "Leaving room.");
+//            Log.d(TAG, "Leaving room.");
 //        mSecondsLeft = 0;
             stopKeepingScreenOn();
             if (Game.mRoomId != null) {
@@ -1461,7 +1461,7 @@ public class QuizActivity extends AppCompatActivity {
         }
 
         timeStamp[0] = (byte) 'D';
-        Log.d("IDENTIFICACION", Game.timeStamp + " " + timeStamp);
+//        Log.d("IDENTIFICACION", Game.timeStamp + " " + timeStamp);
 
         for (Participant p : Game.mParticipants) {
             if (!p.getParticipantId().equals(Game.mMyId)) {
@@ -1476,7 +1476,7 @@ public class QuizActivity extends AppCompatActivity {
 
     private void enviarQuizzesToOpponent() {
 //        if (Game.jugadorLocal == 1) {
-        Log.d("TRAZAGPG", "Envindo quizzes");
+//        Log.d("TRAZAGPG", "Envindo quizzes");
         Type type = new TypeToken<Category>() {
         }.getType();
 
@@ -1484,7 +1484,7 @@ public class QuizActivity extends AppCompatActivity {
         Gson gson = builder.create();
 
         String json = gson.toJson(Game.category, type);
-        Log.d("TRAZAGPG", "Conversión original:" + json);
+//        Log.d("TRAZAGPG", "Conversión original:" + json);
 
         byte[] categoryByte = json.getBytes(Charset.forName("UTF-8"));
 
@@ -1509,16 +1509,16 @@ public class QuizActivity extends AppCompatActivity {
             else
                 tmpMsg[0] = 'C';
 
-            Log.d("TRAZAGPG", "bloque: " + numBlock + "; " + "bytesTransfered:" + bytesTransfered + " ; TotalBytes: " + lengthMsg + " bloque length: " + tmpMsg.length);
+//            Log.d("TRAZAGPG", "bloque: " + numBlock + "; " + "bytesTransfered:" + bytesTransfered + " ; TotalBytes: " + lengthMsg + " bloque length: " + tmpMsg.length);
             for (int i = 1; i < tmpMsg.length; i++) {
                 tmpMsg[i] = categoryByte[bytesTransfered];
                 bytesTransfered++;
             }
-            try {
-                Log.d("TRAZAGPG", "bloque: " + new String(tmpMsg, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Log.d("TRAZAGPG", "bloque: " + new String(tmpMsg, "UTF-8"));
+//            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+//            }
 
             numBlock++;
 
@@ -1544,7 +1544,7 @@ public class QuizActivity extends AppCompatActivity {
 //            }
 
 //            if (sb.toString().equals(json)) {
-        Log.d("TRAZAGPG", "Iniciando transferencia");
+//        Log.d("TRAZAGPG", "Iniciando transferencia");
 
         // END MESSAGE
         byte[] time = String.valueOf(Game.totalTime + "|" + Game.mMyId).getBytes();
@@ -1576,12 +1576,12 @@ public class QuizActivity extends AppCompatActivity {
                 @Override
                 public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientParticipantId) {
                     if (statusCode == STATUS_OK) {
-                        Log.d("GPG", "Mensaje Enviado" + (char) tmpMessage[0]);
+//                        Log.d("GPG", "Mensaje Enviado" + (char) tmpMessage[0]);
                         if (callback != null) {
                             callback.sendActions();
                         }
                     } else {
-                        Log.d("GPG", "Error enviando mensaje: " + numTimesSended + " " + (char) tmpMessage[0]);
+//                        Log.d("GPG", "Error enviando mensaje: " + numTimesSended + " " + (char) tmpMessage[0]);
                         if (numTimesSended <= MAX_RETRY_TIMES) {
                             retryMessage(tmpMessage, participantId, numTimesSended + 1, msgError, callback);
                         } else {
