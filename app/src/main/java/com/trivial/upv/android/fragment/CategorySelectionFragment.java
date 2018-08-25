@@ -40,6 +40,7 @@ import com.trivial.upv.android.adapter.CategoryAdapterJSON;
 import com.trivial.upv.android.helper.TransitionHelper;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
+import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.OffsetDecoration;
 
@@ -94,6 +95,7 @@ public class CategorySelectionFragment extends Fragment {
                     public void onClick(View v, int position) {
                         if (TrivialJSonHelper.getInstance(getContext(), false).getCategoriesCurrent().get(position).getSubcategories() == null) {
                             // Mostrar Quizzes
+                            Game.mode = null;
                             Activity activity = getActivity();
                             startQuizActivityWithTransition(activity,
                                     v.findViewById(R.id.category_title),
