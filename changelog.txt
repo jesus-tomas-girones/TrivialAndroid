@@ -5,9 +5,16 @@ Pendiente
         Al leer las categorías si da error al cargar el JSON que tome la versión de backup.
         Traducciones de Inglés y Español.
 
+25/08/2018
+		La ruleta tiene un fallo si se intente hacer SWIPE varias veces (se ralenteza). Tiene relación con el SONIDO de la ruleta (FIX)
 24/08/2018
     Invitaciones:
         Ahora las invitaciones inician la partida online automáticamente (an ambos modos)
+	Correcciones:
+		Bloque de botones en partura  MODO MULTIJUGADOR POR TURNOS y  MODO JUGADOR EN RED (TIEMPO REAL) al no aceptar invitación. (FIXED)
+		Ruleta:
+			Imágenes de la ruleta no son las iniciales si estamos en modo Review y recibimos una notificación de unirnos a una partida. (FIXED)
+			on shake NO se desactiva una vez seleccionada una categoría (Fixed) 
 23/08/2018
     MODO MULTIJUGADOR POR TURNOS:
         Se añade el total de preguntas acertadas y falladas en el score total de la partida. (Finalizada)

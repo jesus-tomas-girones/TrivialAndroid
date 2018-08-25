@@ -267,7 +267,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 //        Log.d(TAB, "onFling: " + e1.toString() + e2.toString());
-
+        if (isRotating) return false;
         float max = Math.abs(Math.max(velocityX * mDensity / 2.0f, velocityY * mDensity / 2.0f));
         if (Math.abs(e1.getY() - e2.getY()) * mDensity / 2.0f > SWIPE_MAX_OFF_PATH) {
             if (Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY)
@@ -310,6 +310,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     public void rotate(float speed) {
         if (playable) {
             if (!isRotating && speed > 0.5f) {
+
+                Log.d("ROTATE", "ROTACION");
                 isRotating = true;
                 this.speed = speed;
                 soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
@@ -348,7 +350,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        isRotating = false;
+//                        isRotating = false;
                         rotationEventListener.rotateEnd((int) (((double) numSectors)
                                 - Math.floor(((double) lngDegrees) / (360.0d / ((double) numSectors)))) - 1);
                         parar = true;
@@ -369,28 +371,36 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     private SoundPool soundPool = null;
     private int idSonido = 0;
+    long lastTime = 0;
     boolean parar = false;
 
     public void playSound() {
         final ValueAnimator animacion = ValueAnimator.ofFloat(0, 10);
-        animacion.setDuration((int) (360.0f * speed + lngDegrees));
+        animacion.setDuration((long) (360 * speed + lngDegrees));
         animacion.setInterpolator(new AccelerateDecelerateInterpolator());
         animacion.setRepeatCount(0);
+        lastTime = System.currentTimeMillis();
+        parar = true;
         animacion.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(final ValueAnimator valueAnimator) {
-                soundPool.play(idSonido, 1, 1, 1, 0, 1);
-                try {
-                    sleep(5 + 10 * (long) (Float.parseFloat(valueAnimator.getAnimatedValue().toString())));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+//                Log.d("SONIDO", Float.parseFloat(valueAnimator.getAnimatedValue().toString()) + " " + (System.currentTimeMillis() - start -auxTime));
+//                auxTime = (System.currentTimeMillis() - start);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (parar) {
+                            parar = false;
+                            soundPool.play(idSonido, 0.5f, 0.5f, 1, 0, 1f);
+                        } else if (System.currentTimeMillis() - lastTime >= (long) (15.0f + 10f * (Float.parseFloat(valueAnimator.getAnimatedValue().toString())))) {
+                            lastTime = System.currentTimeMillis();
+                            soundPool.play(idSonido, 0.5f, 0.5f, 1, 0, 1f);
+                        }
+                    }
+                }).start();
             }
         });
         animacion.start();
-
-
     }
 
     public void resumeSound() {
@@ -414,8 +424,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         if (playable) {
+            if (isRotating) return false;
             boolean salida = mDetector.onTouchEvent(event);
             if (salida)
                 return salida;

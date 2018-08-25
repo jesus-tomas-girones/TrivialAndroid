@@ -19,6 +19,7 @@ import com.trivial.upv.android.fragment.CustomDialogFragment;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.gpg.Game;
+import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.roulette.RouletteView;
 import com.trivial.upv.android.widget.roulette.ShakeListener;
@@ -135,7 +136,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         rouletteView = (RouletteView) findViewById(R.id.rouletteView);
         rouletteView.setRotationEventListener(rotateEventLinestener, playable);
 
-        List<Category> categories = TrivialJSonHelper.getInstance(this, false).getCategories(false);
+        List<CategoryJSON> categories = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
         this.intNumber = categories.size();
 //        this.intNumber = 3;
 
@@ -143,8 +144,8 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         imagenes = new String[this.intNumber];
 
         for (int i = 0; i < this.intNumber; i++) {
-            Category category = categories.get(i % 7);
-            mThemes[i] = category.getTheme();
+            CategoryJSON category = categories.get(i);
+            mThemes[i] = Theme.valueOf(category.getTheme());
             imagenes[i] = category.getImg();
 
         }
@@ -259,7 +260,8 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
     @Override
     public void onShake(float speed) {
-        rouletteView.rotate(speed);
+        if (isRotationEnabled)
+            rouletteView.rotate(speed);
     }
 
     public void showMatchScore(View view) {

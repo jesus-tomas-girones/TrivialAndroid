@@ -821,7 +821,7 @@ public class PlayRealTimeFragment extends Fragment
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
-//                                continueOnUpdateMatch(match);
+                                    enableButtons();
                                 }
                             });
             alertDialogBuilder.show();

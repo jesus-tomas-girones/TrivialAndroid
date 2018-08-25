@@ -737,9 +737,9 @@ public class PlayTurnBasedFragment extends Fragment {
                             }
                             if (match != null) {
 //                                updateMatch(match);
-                                askForAcceptInvitation(match, null);
+                                askForAcceptInvitation(match, null, true);
                             } else if (Game.pendingTurnBasedMatch != null) {
-                                askForAcceptInvitation(Game.pendingTurnBasedMatch, null);
+                                askForAcceptInvitation(Game.pendingTurnBasedMatch, null, true);
                                 Game.pendingTurnBasedMatch = null;
                             } else if (Game.pendingTurnInvitation != null) {
                                 treatInvitation(Game.pendingInvitation);
@@ -747,7 +747,7 @@ public class PlayTurnBasedFragment extends Fragment {
                             }
                         } else {
                             if (Game.pendingTurnBasedMatch != null) {
-                                askForAcceptInvitation(Game.pendingTurnBasedMatch, null);
+                                askForAcceptInvitation(Game.pendingTurnBasedMatch, null, true);
                                 Game.pendingTurnBasedMatch = null;
                             } else if (Game.pendingTurnInvitation != null) {
                                 treatInvitation(Game.pendingTurnInvitation);
@@ -892,7 +892,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 @Override
                 public void onSuccess(TurnBasedMatch match) {
                     if (match != null) {
-                        askForAcceptInvitation(match, fromInvitation);
+                        askForAcceptInvitation(match, fromInvitation, true);
 //                            updateMatch(match);
                     }
                 }
@@ -1211,11 +1211,11 @@ public class PlayTurnBasedFragment extends Fragment {
             return;
         }
         Log.d(TAG, "Invitation inbox UI succeeded.");
-        Invitation inv = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
+        TurnBasedMatch match = data.getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH);
 
         // accept invitation
-        if (inv != null)
-            acceptInviteToRoom(inv.getInvitationId());
+        if (match != null)
+            askForAcceptInvitation(match, null, false);
         else {
             final Invitation invitationAux = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
             new android.app.AlertDialog.Builder(getActivity())
@@ -1230,16 +1230,6 @@ public class PlayTurnBasedFragment extends Fragment {
                     })
                     .show();
         }
-    }
-
-
-    // Accept the given invitation.
-    void acceptInviteToRoom(String invId) {
-        // accept the invitation
-        Log.d(TAG, "Accepting invitation: " + invId);
-
-        onPlayButton(null, true);
-//        switchToScreen(R.id.screen_wait);
     }
 
 
@@ -1555,30 +1545,37 @@ public class PlayTurnBasedFragment extends Fragment {
 
 
     // Rematch dialog
-    public void askForAcceptInvitation(final TurnBasedMatch match, String userInvitation) {
+    public void askForAcceptInvitation(final TurnBasedMatch match, String userInvitation, boolean showConfirmation) {
         String invitationFrom = userInvitation;
         if (invitationFrom == null)
             invitationFrom = getFirstPlayerGame(match);
-        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setMessage("Do you want tu accept the invitation from " + invitationFrom + "?");
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton("Sure, accept!",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-                                updateMatch(match);
-                            }
-                        })
-                .setNegativeButton("No.",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id) {
-//                                continueOnUpdateMatch(match);
-                            }
-                        });
 
-        alertDialogBuilder.show();
+        if (showConfirmation) {
+            android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+            alertDialogBuilder.setMessage("Do you want tu accept the invitation from " + invitationFrom + "?");
+            alertDialogBuilder
+                    .setCancelable(false)
+                    .setPositiveButton("Sure, accept!",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+                                    updateMatch(match);
+                                }
+                            })
+                    .setNegativeButton("No.",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id) {
+//                                continueOnUpdateMatch(match);
+                                    enableButtons();
+                                }
+                            });
+
+            alertDialogBuilder.show();
+        } else {
+            // Start match
+            updateMatch(match);
+        }
     }
 
     private String getFirstPlayerGame(TurnBasedMatch match) {
@@ -1621,6 +1618,7 @@ public class PlayTurnBasedFragment extends Fragment {
             return;
         } else {
             dismissSpinner();
+            enableButtons();
         }
 //        setViewVisibility();
     }
