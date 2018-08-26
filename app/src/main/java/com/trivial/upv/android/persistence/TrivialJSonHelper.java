@@ -889,7 +889,7 @@ public class TrivialJSonHelper {
             sendBroadCastMessageRefresh(100);
             sendBroadCastMessage("OK");
 
-//            Log.d("CACHE", "CARGA OK");
+            Log.d("CACHE", "CARGA OK");
 
         } catch (FileNotFoundException e) {
 //            Log.d("CACHE", "Error loading NOT FOUND");

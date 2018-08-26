@@ -677,7 +677,7 @@ public class PlayTurnBasedFragment extends Fragment {
             retry = true;
             startSignInIntent();
         } else {
-            showWarning("Google Play Games", "No ha sido posible conectar con Google Play Games", null);
+            enableButtons();
         }
     }
 
@@ -1100,14 +1100,15 @@ public class PlayTurnBasedFragment extends Fragment {
                     onConnected(account);
                 } catch (ApiException apiException) {
                     String message = apiException.getMessage();
-                    if (message == null || message.isEmpty()) {
-                        message = "Error al conectar el cliente.";
-                    }
-                    onDisconnected();
+//                    if (message == null || message.isEmpty()) {
+//                        message = "Error al conectar el cliente.";
+//                    }
+//                    onDisconnected();
 //                    new AlertDialog.Builder(getActivity())
 //                            .setMessage(message)
 //                            .setNeutralButton(android.R.string.ok, null)
 //                            .show();
+                    showWarning("Google Play Games", "No ha sido posible conectar con Google Play Games", null);
                 }
                 break;
 
@@ -1547,12 +1548,13 @@ public class PlayTurnBasedFragment extends Fragment {
     // Rematch dialog
     public void askForAcceptInvitation(final TurnBasedMatch match, String userInvitation, boolean showConfirmation) {
         String invitationFrom = userInvitation;
-        if (invitationFrom == null)
+        if (invitationFrom == null) {
             invitationFrom = getFirstPlayerGame(match);
+        }
 
         if (showConfirmation) {
             android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
-            alertDialogBuilder.setMessage("Do you want tu accept the invitation from " + invitationFrom + "?");
+            alertDialogBuilder.setMessage("Do you want tu play the Game with " + invitationFrom + "?");
             alertDialogBuilder
                     .setCancelable(false)
                     .setPositiveButton("Sure, accept!",
@@ -1579,8 +1581,12 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
     private String getFirstPlayerGame(TurnBasedMatch match) {
-        if (match.getParticipants() != null)
-            return match.getParticipants().get(0).getDisplayName();
+        if (match.getParticipants() != null) {
+            for (Participant p : match.getParticipants()) {
+                if (!p.getDisplayName().equals(mDisplayName))
+                    return match.getParticipants().get(0).getDisplayName();
+            }
+        }
         return "";
     }
 

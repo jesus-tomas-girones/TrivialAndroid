@@ -31,6 +31,7 @@ import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.InvitationsClient;
 import com.google.android.gms.games.Player;
 import com.google.android.gms.games.PlayersClient;
+import com.google.android.gms.games.RealTimeMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.InvitationCallback;
 import com.google.android.gms.games.multiplayer.Multiplayer;
@@ -84,6 +85,7 @@ public class PlayRealTimeFragment extends Fragment
 
     private GoogleSignInClient mGoogleSignInClient;
     private boolean retry = false;
+    private RealTimeMultiplayerClient mRealTimeMultiplayerClient;
 //    private GoogleSignInAccount mSignedInAccount = null;
 
     public PlayRealTimeFragment() {
@@ -315,7 +317,7 @@ public class PlayRealTimeFragment extends Fragment
         if (mGoogleSignInClient != null)
             startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
         else
-            showWarningConnection(actionOnClickButton);
+            showWarningConnection(null);
     }
 
 
@@ -384,6 +386,7 @@ public class PlayRealTimeFragment extends Fragment
         retry = false;
         enableButtons();
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
+        mRealTimeMultiplayerClient = Games.getRealTimeMultiplayerClient(getActivity(), googleSignInAccount);
 
         PlayersClient playersClient = Games.getPlayersClient(getActivity(),
                 googleSignInAccount);
@@ -528,15 +531,17 @@ public class PlayRealTimeFragment extends Fragment
                             task.getResult(ApiException.class);
                     onConnected(account);
                 } catch (ApiException apiException) {
-                    String message = apiException.getMessage();
-                    if (message == null || message.isEmpty()) {
-                        message = "Error al conectar el cliente.";
-                    }
+//                    String message = apiException.getMessage();
+//                    if (message == null || message.isEmpty()) {
+//                        message = "Error al conectar el cliente.";
+//                    }
                     onDisconnected();
 //                    new AlertDialog.Builder(getActivity())
 //                            .setMessage(message)
 //                            .setNeutralButton(android.R.string.ok, null)
 //                            .show();
+                    showWarningConnection(null);
+
                 }
                 break;
 
@@ -562,7 +567,11 @@ public class PlayRealTimeFragment extends Fragment
             retry = true;
             startSignInIntent();
 
+        } else {
+            enableButtons();
+            ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
         }
+        mRealTimeMultiplayerClient = null;
 
     }
 
@@ -703,7 +712,7 @@ public class PlayRealTimeFragment extends Fragment
 
     // QuickGame
     private void playAnyOne(View v) {
-        if (mGoogleSignInClient != null) {
+        if (mRealTimeMultiplayerClient != null) {
             // QuizFragment
             SharedPreferencesStorage sps = SharedPreferencesStorage.getInstance(getContext());
 //        Game.numPlayers = Game.tmpNumPlayers = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_PLAYERS, 2);
@@ -732,7 +741,7 @@ public class PlayRealTimeFragment extends Fragment
 
 
     public void btnInvitar_Click() {
-        if (mGoogleSignInClient != null) {
+        if (mRealTimeMultiplayerClient != null) {
             final int NUMERO_MINIMO_OPONENTES = sbPlayers.getProgress() - 1, NUMERO_MAXIMO_OPONENTES = sbPlayers.getProgress() - 1;
             // show list of invitable players
 //        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(Game.mGoogleApiClient, NUMERO_MINIMO_OPONENTES, NUMERO_MAXIMO_OPONENTES);
@@ -834,7 +843,7 @@ public class PlayRealTimeFragment extends Fragment
 
 
     public void btnVer_Invitaciones_Click(View view) {
-        if (mGoogleSignInClient != null) {
+        if (mRealTimeMultiplayerClient != null) {
             Games.getInvitationsClient(getActivity(), GoogleSignIn.getLastSignedInAccount(getActivity()))
                     .getInvitationInboxIntent()
                     .addOnSuccessListener(new OnSuccessListener<Intent>() {
@@ -852,7 +861,9 @@ public class PlayRealTimeFragment extends Fragment
     // Generic warning/info dialog
     public void showWarningConnection(final ActionOnClickButton actionOnClickButton) {
         String title = "Google Play Games";
-        String message = "You aren't not log in! OK to try it";
+        String message = "You aren't not log in! ";
+        if (actionOnClickButton!=null)
+            message+="OK to try it";
 
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
         // set title
