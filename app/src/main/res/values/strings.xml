@@ -81,7 +81,7 @@
     <string name="select_categories">Select Categories</string>
     <string name="all_categories">(All Categories)</string>
     <string name="total_players">Total PLayers</string>
-    <string name="show_invitations">Show Invitations …</string>
+    <string name="show_invitations">Invitations …</string>
     <string name="play_online">Play Online</string>
     <string name="num_players">Num. Players: </string>
     <string name="oops">"Oops! Something wrong happened!"</string>
@@ -89,6 +89,7 @@
     <string name="connected_error">Why: Connected Error</string>
     <string name="join_error">Why: Join Error</string>
     <!-- Turn based-->
+    <string name="choose_category_turnbased">Choose Category/ies to Play TurnBased</string>
     <string name="welcome_to_our_skeleton_app_">Welcome to our skeleton app!</string>
     <string name="check_games">Check games</string>
     <string name="start_match">Start Match</string>

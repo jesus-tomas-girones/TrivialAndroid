@@ -84,6 +84,8 @@ import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 import static com.trivial.upv.android.persistence.TrivialJSonHelper.ACTION_RESP;
 
 public class CategorySelectionActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -679,9 +681,16 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                 Fade fade = new Fade();
                 fade.setDuration(100);
                 fragment.setReturnTransition(fade);
-            } else {
+            } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
                 Slide slideRight = new Slide(Gravity.START);
                 slideRight.setDuration(400);
+                fragment.setEnterTransition(slideRight);
+                Fade fade = new Fade();
+                fade.setDuration(100);
+                fragment.setReturnTransition(fade);
+            } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
+                Fade slideRight = new Fade(Fade.IN);
+                slideRight.setDuration(600);
                 fragment.setEnterTransition(slideRight);
                 Fade fade = new Fade();
                 fade.setDuration(100);
@@ -694,6 +703,10 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                     .replace(R.id.category_container, fragment)
                     .commit();
         } else if (mode.equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
+            supportFragmentManager.beginTransaction()
+                    .replace(R.id.category_container, fragment).addToBackStack(null)
+                    .commit();
+        } else if (mode.equals(QuizActivity.ARG_TURNED_BASED_ONLINE)) {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.category_container, fragment).addToBackStack(null)
                     .commit();

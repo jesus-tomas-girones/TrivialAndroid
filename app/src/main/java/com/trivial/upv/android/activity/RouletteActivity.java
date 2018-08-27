@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.RouletteScorePlayerAdapter;
 import com.trivial.upv.android.fragment.CustomDialogFragment;
-import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.json.CategoryJSON;
@@ -99,7 +98,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 int numPreguntasOK = 0;
 
                 for (int j = 0; j < Game.mTurnData.numPreguntasContestadas; j++) {
-                    if (Game.mTurnData.puntuacion[j][2] == (short) i && Game.mTurnData.puntuacion[j][0] == index) {
+                    if (Game.mTurnData.puntuacion[j][2] == Short.parseShort(Game.mTurnData.categories.get(i)) && Game.mTurnData.puntuacion[j][0] == index) {
                         numPreguntas++;
                         if (Game.mTurnData.puntuacion[j][1] > 0)
                             numPreguntasOK++;
@@ -136,18 +135,25 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         rouletteView = (RouletteView) findViewById(R.id.rouletteView);
         rouletteView.setRotationEventListener(rotateEventLinestener, playable);
 
+        // Obtiene las categorías
         List<CategoryJSON> categories = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
-        this.intNumber = categories.size();
+        this.intNumber = Game.mTurnData.categories.size();
 //        this.intNumber = 3;
 
         mThemes = new Theme[this.intNumber];
         imagenes = new String[this.intNumber];
 
         for (int i = 0; i < this.intNumber; i++) {
-            CategoryJSON category = categories.get(i);
-            mThemes[i] = Theme.valueOf(category.getTheme());
-            imagenes[i] = category.getImg();
-
+//            CategoryJSON category = categories.get(i);
+            int indice = Integer.parseInt(Game.mTurnData.categories.get(i));
+            CategoryJSON category = null;
+            if (indice < categories.size()) {
+                category = categories.get(indice);
+                mThemes[i] = Theme.valueOf(category.getTheme());
+                imagenes[i] = category.getImg();
+            } else {
+                // The game is corrupt
+            }
         }
         rouletteView.setNumSectors(intNumber, imagenes, mThemes);
 
@@ -201,7 +207,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 @Override
                 public void onFinishedCount() {
                     Intent intent = new Intent();
-                    intent.putExtra("category", category);
+                    intent.putExtra("category", Integer.parseInt(Game.mTurnData.categories.get(category)));
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);

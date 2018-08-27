@@ -314,12 +314,13 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                     break;
                 default:
                     // Update score
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
-                        }
-                    }.start();
+                    if (!((QuizActivity) getActivity()).isMatchTurnBased())
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
+                            }
+                        }.start();
             }
 
             //JVG.E
@@ -329,7 +330,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         return false;
     }
 
-    private void markCategorySolved() {
+    public void markCategorySolved() {
         mCategory.setSolved(true);
 
         //JVG.S
@@ -340,13 +341,14 @@ public class QuizFragment extends android.support.v4.app.Fragment {
             case ARG_REAL_TIME_ONLINE:
                 break;
             default:
-                // Update score
-                new Thread() {
-                    @Override
-                    public void run() {
-                        TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
-                    }
-                }.start();
+                if (!((QuizActivity) getActivity()).isMatchTurnBased())
+                    // Update score
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
+                        }
+                    }.start();
         }
         //JVG.E
     }

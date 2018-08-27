@@ -3,13 +3,13 @@ package com.trivial.upv.android.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.ActivityOptions;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
@@ -43,6 +43,7 @@ import me.texy.treeview.TreeView;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 
 public class CategorySelectionTreeViewFragment extends Fragment {
     private static final String MODE = "mode";
@@ -54,6 +55,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     private TreeView treeView;
     private CheckableFab mSubmitAnswer;
     private String mode = null;
+    private AlertDialog mAlertDialog = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -155,8 +157,53 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             Game.minAutoMatchPlayers = Game.tmpNumPlayers - 1;
             Game.maxAutoMatchPlayers = Game.tmpNumPlayers - 1;
             playGameOnline();
+        } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
+            Game.resetGameVars();
+            playGameTurnBased();
         }
 
+    }
+
+    private void playGameTurnBased() {
+        if (treeView.getSelectedNodes().size() >= 2) {
+            getSelectedCategories();
+            animateFloatButton();
+        } else {
+            showWarning("Warning", "You mast select at least 2 categories");
+        }
+    }
+
+    // Generic warning/info dialog
+    public void showWarning(String title, String message) {
+
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+
+        // set title
+        alertDialogBuilder.setTitle(title).setMessage(message);
+
+        // set dialog message
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+        // create alert dialog
+        mAlertDialog = alertDialogBuilder.create();
+
+        // show it
+        mAlertDialog.show();
+    }
+
+    private void getSelectedCategories() {
+        List<TreeNode> selectedNodes = treeView.getSelectedNodes();
+        Game.listCategories.clear();
+        TrivialJSonHelper instanceJSON = TrivialJSonHelper.getInstance(getContext(), false);
+        for (int i = 0; i < selectedNodes.size(); i++) {
+            CategoryJSON category = (CategoryJSON) selectedNodes.get(i).getValue();
+            Game.listCategories.add(category.getCategory());
+        }
     }
 
     private void playGameOnline() {
@@ -194,10 +241,12 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
         } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
             //startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
-
+            startIntent = null;
+        } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
+            //startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
             startIntent = null;
         } else {
-            startIntent = null;
+//            startIntent = null;
 //            Log.d(TAG, "AnimateFloatButton option incorrect");
             return;
         }
@@ -236,6 +285,8 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                         mSubmitAnswer.show();
                     } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
                         getActivity().onBackPressed();
+                    } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
+                        getActivity().onBackPressed();
                     }
 
 //                    removeFragmentIfMultiplayerGame();
@@ -247,6 +298,8 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 startActivity(startIntent,
                         null);
             } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
+                getActivity().onBackPressed();
+            } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
                 getActivity().onBackPressed();
             }
 //            removeFragmentIfMultiplayerGame();
@@ -390,6 +443,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 case QuizActivity.ARG_ONE_PLAYER:
 
                 case QuizActivity.ARG_REAL_TIME_ONLINE:
+                case QuizActivity.ARG_TURNED_BASED_ONLINE:
                     changeTitleActionBar(newMode);
                     mode = newMode;
                     break;
@@ -407,6 +461,10 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 break;
             case ARG_REAL_TIME_ONLINE:
                 ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category_online));
+                ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(false);
+                break;
+            case ARG_TURNED_BASED_ONLINE:
+                ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category_turnbased));
                 ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(false);
                 break;
             default:
@@ -470,7 +528,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     private void buildTreeSubcategory(TreeNode parentNode, List<CategoryJSON> categoriesJSON, int level) {
         TreeNode treeNode = null;
 
-        if (mode.equals(ARG_REAL_TIME_ONLINE) && level >= MAX_LEVEL) {
+        if ((mode.equals(ARG_REAL_TIME_ONLINE) || (mode.equals(ARG_TURNED_BASED_ONLINE))) && level >= MAX_LEVEL) {
             return;
         }
         if (categoriesJSON != null) {

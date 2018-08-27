@@ -71,7 +71,7 @@
     <string name="select_categories">Seleccionar Categorías</string>
     <string name="all_categories">(Todas las Categorías)</string>
     <string name="total_players">Total PLayers</string>
-    <string name="show_invitations">Mostrar Invitaciones…</string>
+    <string name="show_invitations">Invitaciones…</string>
     <string name="play_online">Jugar en red</string>
     <string name="num_players">Num. Jugadores: </string>
     <string name="oops">¡Oops! ¡Ha ocurrido un error! </string>
@@ -79,6 +79,8 @@
     <string name="connected_error">Motivo: Error de connexión</string>
     <string name="join_error">Motivo: Error al emparejar</string>
     <string name="room_created_error">Motivo: Room Creada con errores</string>
+    <!-- Turn based-->
+    <string name="choose_category_turnbased">Elige Categorias para Jugar por Turnos</string>
     <!--Preferencias-->
     <string name="pref_review_mode">Modo Repaso</string>
     <string name="pref_url_summary">Introduce una URL válida para cargar las Categorías</string>

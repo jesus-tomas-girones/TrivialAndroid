@@ -796,6 +796,7 @@ public class QuizActivity extends AppCompatActivity {
 //                }
 //                else {
                 // Finish;
+                getQuizFragment().markCategorySolved();
                 getQuizFragment().showSummary();
 //                }
             } else {

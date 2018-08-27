@@ -22,6 +22,7 @@ public class Turn {
     public int numJugadores = 0;
     public short puntuacion[][] = null;
     public List<String> participantsTurnBased = null;
+    public List<String> categories;
 
     public Turn() {
     }
@@ -44,6 +45,7 @@ public class Turn {
                     }
             }
             retVal.put("puntuacion", points);
+            retVal.put("categories", categories);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -99,15 +101,22 @@ public class Turn {
                     k = k + 2;
                 }
             }
+            if (obj.has("categories")) {
+                JSONArray categoriesJson = new JSONArray(obj.getString("categories"));
+                retVal.categories = new ArrayList<>();
+                for (int i = 0; i < categoriesJson.length(); i++) {
+                    retVal.categories.add(categoriesJson.get(i).toString());
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return retVal;
     }
 
-    public  int calculateScorePlayer(String playerId) {
+    public int calculateScorePlayer(String playerId) {
         int auxPuntuacion = 0;
-        if (participantsTurnBased!=null) {
+        if (participantsTurnBased != null) {
             String myParticipantId = Game.mMatch.getParticipantId(playerId);
             int indexPlayer = participantsTurnBased.indexOf(myParticipantId);
 

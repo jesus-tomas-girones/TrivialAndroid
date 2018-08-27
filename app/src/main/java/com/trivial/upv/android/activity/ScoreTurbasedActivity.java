@@ -40,8 +40,6 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private TextView category_title;
 
-    private boolean playable = false;
-    private TextView txtResultMatch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +51,6 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
     }
 
     private void setupView() {
-        playable = getIntent().getBooleanExtra("playable", false);
         category_title = (TextView) findViewById(R.id.category_title);
         if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
             category_title.setText(String.format(Locale.getDefault(), "Quizz (%d/%d)", (Game.mTurnData.numPreguntasContestadas + 1), Game.mTurnData.numPreguntas));
@@ -67,7 +64,14 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
             }
         });
 
-        List<Category> categories = TrivialJSonHelper.getInstance(this, false).getCategories(false);
+        List<Category> allCategories = TrivialJSonHelper.getInstance(this, false).getCategories(false);
+        List<Category> categories = new ArrayList<>();
+        for (String categoryAux : Game.mTurnData.categories) {
+            int indice = Integer.parseInt(categoryAux);
+            categories.add(allCategories.get(indice));
+        }
+
+
         this.intNumber = (Game.mTurnData.numJugadores + 2) * (categories.size() + 2);
 
 
@@ -98,7 +102,7 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                     int totalQuizzes = 0;
                     int totalQuizzesAnsweredOK = 0;
                     for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
-                        if ((Game.mTurnData.puntuacion[cont][2] == j - 1)) {
+                        if ((Game.mTurnData.puntuacion[cont][2] == Short.parseShort(Game.mTurnData.categories.get(j - 1)))) {
                             totalQuizzes++;
                             if (Game.mTurnData.puntuacion[cont][1] > 0) {
                                 totalQuizzesAnsweredOK++;
@@ -176,7 +180,7 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                         int totalQuizzes = 0;
                         int totalQuizzesAnsweredOK = 0;
                         for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
-                            if ((Game.mTurnData.puntuacion[cont][2] == j - 1) && (Game.mTurnData.puntuacion[cont][0] == i - 1)) {
+                            if ((Game.mTurnData.puntuacion[cont][2] == Short.parseShort(Game.mTurnData.categories.get(j - 1))) && (Game.mTurnData.puntuacion[cont][0] == i - 1)) {
                                 totalQuizzes++;
                                 if (Game.mTurnData.puntuacion[cont][1] > 0) {
                                     totalQuizzesAnsweredOK++;

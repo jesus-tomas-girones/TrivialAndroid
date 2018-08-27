@@ -54,6 +54,7 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.activity.RouletteActivity;
+import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.gpg.Turn;
 import com.trivial.upv.android.model.json.CategoryJSON;
@@ -81,39 +82,33 @@ public class PlayTurnBasedFragment extends Fragment {
     private static final int K_MAX_PREGUNTAS = 50;
     private static final int K_MIN_PREGUNTAS = 2;
 
-    private Button btnPartidasGuardadas;
-
-    private Button btnNewGame;
-
-
     final static int RC_INVITATION_INBOX = 10001;
     final static int RC_LOOK_AT_MATCHES = 20001;
     final static int RC_CHOOOSE_CATEGORY = 30001;
     private static final int RC_PLAY_TURN = 30002;
 
     private com.google.android.gms.common.SignInButton btnConectar;
-    //    private Button btnDesconectar;
-
-//    private WebView navegador;
 
     List<CategoryJSON> categoriesJSON;
 
     private SeekBar sbNumQuizzes;
     private TextView txtNumQuizzes;
     //    private String mPlayerId;
-
+    // Action Buttons
+    private Button btnNewGame;
     private Button btnPlayAnyone;
     private Button btnShowIntitations;
-
+    private Button btnSelectCategories;
+    private TextView txtListCategories;
     // Local convenience pointers
-    private ProgressBar progressLayout;
-    private View panelGame;
-
+//    private ProgressBar progressLayout;
     // Player
     private String mDisplayName;
     private Uri mImagePlayer;
     private ImageView mImgAvatar;
     private TextView mNameAvatar;
+
+
 //    private GoogleSignInAccount mSignedInAccount = null;
 
     public PlayTurnBasedFragment() {
@@ -123,7 +118,7 @@ public class PlayTurnBasedFragment extends Fragment {
         for (CategoryJSON category : categoriesJSON) {
             Game.listCategories.add(new String(category.getCategory()));
         }
-        Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
+//        Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
     }
 
     @Override
@@ -203,21 +198,21 @@ public class PlayTurnBasedFragment extends Fragment {
         signInSilently();
 
 
-//        if (Game.listCategories.size() == TrivialJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
-//            txtListCategories.setText(getString(R.string.all_categories));
-//        } else {
-////            txtListCategories.setText("(Otras)");
-//
-//            StringBuilder sb = new StringBuilder();
-//
-//            for (int pos = 0; pos < Game.listCategories.size(); pos++) {
-//                sb.append(Game.listCategories.get(pos));
-//                if (pos != Game.listCategories.size() - 1) {
-//                    sb.append(",\n");
-//                }
-//            }
-//            txtListCategories.setText(sb.toString());
-//        }
+        if (Game.listCategories.size() == TrivialJSonHelper.getInstance(getContext(), false).getCategoriesJSON().size()) {
+            txtListCategories.setText(getString(R.string.all_categories));
+        } else {
+//            txtListCategories.setText("(Otras)");
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int pos = 0; pos < Game.listCategories.size(); pos++) {
+                sb.append(Game.listCategories.get(pos));
+                if (pos != Game.listCategories.size() - 1) {
+                    sb.append(",\n");
+                }
+            }
+            txtListCategories.setText(sb.toString());
+        }
 //        soundPool.resume(idSonido);
 
     }
@@ -323,6 +318,7 @@ public class PlayTurnBasedFragment extends Fragment {
         btnSelectMatch.setEnabled(visible);
         btnNewGame.setEnabled(visible);
         btnPlayAnyone.setEnabled(visible);
+        btnSelectCategories.setEnabled(visible);
     }
 
     private void disableButtons() {
@@ -393,11 +389,19 @@ public class PlayTurnBasedFragment extends Fragment {
                 }
             }
         });
-
-
-        panelGame = (View) view.findViewById(R.id.panel_game);
+        // Select categories
+        btnSelectCategories = (Button) view.findViewById(R.id.btnSelectCategories);
+        btnSelectCategories.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                disableButtons();
+                selectCategories(view);
+            }
+        });
+        txtListCategories = (TextView) view.findViewById(R.id.txtListCategories);
+//        panelGame = (View) view.findViewById(R.id.panel_game);
 //        navegador = (WebView) view.findViewById(R.id.webview);
-        progressLayout = view.findViewById(R.id.progress_dialog);
+//        progressLayout = view.findViewById(R.id.progress_dialog);
 //        navegador.getSettings().setJavaScriptEnabled(true);
 //        navegador.getSettings().setBuiltInZoomControls(false);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -556,6 +560,11 @@ public class PlayTurnBasedFragment extends Fragment {
         mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
 
 //        startSignInIntent();
+    }
+
+    public void selectCategories(View v) {
+        // Choose category in custom Game
+        ((CategorySelectionActivity) getActivity()).attachTreeViewFragment(QuizActivity.ARG_TURNED_BASED_ONLINE);
     }
 
     public void tryLogInGPG() {
@@ -1776,7 +1785,17 @@ public class PlayTurnBasedFragment extends Fragment {
             Game.mTurnData.puntuacion[pos][1] = 0;
             Game.mTurnData.puntuacion[pos][2] = 0;
         }
-
+        Game.mTurnData.categories = new ArrayList<>();
+        for (String idCategory : Game.listCategories) {
+            int cont = 0;
+            for (CategoryJSON category : categoriesJSON) {
+                if (idCategory.equals(category.getCategory())) {
+                    Game.mTurnData.categories.add(Integer.toString(cont));
+                    break;
+                }
+                cont++;
+            }
+        }
 
         mTurnBasedMultiplayerClient.takeTurn(match.getMatchId(),
                 Game.mTurnData.persist(), myParticipantId)
