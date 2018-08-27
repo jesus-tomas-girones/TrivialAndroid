@@ -826,7 +826,16 @@ public class PlayTurnBasedFragment extends Fragment {
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
                 // Should return results.
-                showWarning("Alas...", "It's not your turn.", actionButtonDone);
+                if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas) {
+                    String textNextPlayer = "";
+                    try {
+                        textNextPlayer = "Next player: " + match.getParticipant(getNextParticipantId()).getDisplayName();
+                    } catch (Exception ex) {
+                    }
+                    showWarning("It's not your turn...", textNextPlayer, actionButtonDone);
+                } else showWarning("Complete!",
+                        "This game is over; someone finished it, and so did you!  " +
+                                "There is nothing to be done.", actionButtonDone);
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
                 showWarning("Good inititative!",
@@ -1374,10 +1383,12 @@ public class PlayTurnBasedFragment extends Fragment {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
                         Game.mMatch = turnBasedMatch;
-                        onUpdateMatch(turnBasedMatch);
+
                         Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
                         if (Game.mTurnData.numPreguntasContestadas == Game.mTurnData.numPreguntas) {
                             showMessageFinishMatch(turnBasedMatch, false);
+                        } else {
+                            onUpdateMatch(turnBasedMatch);
                         }
                     }
                 })
@@ -1619,13 +1630,13 @@ public class PlayTurnBasedFragment extends Fragment {
 
     public void continueOnUpdateMatch(TurnBasedMatch match) {
         isDoingTurn = (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN);
-        if (isDoingTurn) {
-            updateMatch(match);
-            return;
-        } else {
-            dismissSpinner();
-            enableButtons();
-        }
+//        if (isDoingTurn) {
+        updateMatch(match);
+//            return;
+//        } else {
+        dismissSpinner();
+        enableButtons();
+//        }
 //        setViewVisibility();
     }
 

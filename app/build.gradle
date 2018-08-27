@@ -71,6 +71,7 @@ dependencies {
     implementation "com.android.support.test.espresso:espresso-idling-resource:${espressoVersion}"
     testImplementation "junit:junit:${junitVersion}"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation "org.hamcrest:hamcrest-core:${hamcrestVersion}"
     implementation 'me.texy.treeview:treeview_lib:1.0.4'

@@ -66,8 +66,13 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         SWIPE_MIN_DISTANCE = (int) (75.0f * mDensity / 2.0f);
         SWIPE_MAX_OFF_PATH = (int) (75.0f * mDensity / 2.0f);
         SWIPE_THRESHOLD_VELOCITY = (int) (75.0f * mDensity / 2.0f);
+
+        paint = new Paint();
+        path = new Path();
     }
 
+    Paint paint;
+    Path path;
     private GestureDetectorCompat mDetector = null;
 
 
@@ -75,7 +80,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     public RouletteView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-
         setupView();
     }
 
@@ -172,17 +176,22 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     @Override
     protected void onDraw(Canvas canvas) {
         angulo = 360.0f / (float) numSectors;
-        Paint p = new Paint();
+
+        int x, y;
         for (int i = 0; i < numSectors; i++) {
             if (i < themes.length)
-                p.setColor(ContextCompat.getColor(getContext(), themes[i].getWindowBackgroundColor()));
-            p.setStyle(Paint.Style.FILL);
-            canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, p);
+                paint.setColor(ContextCompat.getColor(getContext(), themes[i].getWindowBackgroundColor()));
+            paint.setStyle(Paint.Style.FILL);
+            canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, paint);
 
-            Path path = new Path();
-            path.arcTo(oval, (((float) i) * angulo - 90.0f), angulo);
-            path.lineTo(getWidth() / 2, getWidth() / 2);
-            path.close();
+            path.reset();
+            if (numSectors > 1) {
+                path.arcTo(oval, (((float) i) * angulo - 90.0f), angulo);
+                path.lineTo(getWidth() / 2, getWidth() / 2);
+                path.close();
+            } else {
+                path.addCircle((float) (getWidth() / 2), (float) (getWidth() / 2), (float) r, Path.Direction.CW);
+            }
 
             synchronized (this) {
                 Bitmap mBitmap = mBitmaps[i];
@@ -191,19 +200,22 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                     canvas.clipPath(path, Region.Op.INTERSECT);
 
                     double trad = ((((float) i) * angulo - 90.0f) + angulo / 2) * (Math.PI / 180d); // = 5.1051
-                    int x = (int) (r * Math.cos(trad));
+                    x = (int) (r * Math.cos(trad));
                     x += r;
                     x += (r - x) / 3;
-                    int y = (int) (r * Math.sin(trad));
-                    y += r;
-                    y += (r - y) / 3;
 
+                    if (numSectors > 1) {
+                        y = (int) (r * Math.sin(trad));
+                        y += r;
+                        y += (r - y) / 3;
+                    } else y = r;
 
                     x -= mBitmap.getWidth() / 2;
                     y -= mBitmap.getHeight() / 2;
 
 //                    Log.d("LOG", ((((float) i) * angulo - 90.0f) + angulo / 2) + "");
-                    canvas.rotate((((float) i) * angulo - 90.0f) + angulo / 2 + 90.0f, x + mBitmap.getWidth() / 2, y + mBitmap.getHeight() / 2);
+                    if (numSectors > 1)
+                        canvas.rotate((((float) i) * angulo - 90.0f) + angulo / 2 + 90.0f, x + mBitmap.getWidth() / 2, y + mBitmap.getHeight() / 2);
                     canvas.drawBitmap(mBitmap, x, y, null);
 
                     try {
@@ -213,10 +225,10 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                     }
                 }
             }
-            p.setStyle(Paint.Style.STROKE);
-            p.setColor(Color.BLACK);
-            p.setStrokeWidth(SIZE_BORDER);
-            canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, p);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.BLACK);
+            paint.setStrokeWidth(SIZE_BORDER);
+            canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, paint);
 
             // Draw
 //            Paint paintIndicador = new Paint();
@@ -320,8 +332,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
 //            int ran = new Random().nextInt(360);
 //
-                if (speed > 20.0f)
-                    speed = 20.33f;
+//                if (speed > 20.0f)
+//                    speed = 20.33f;
                 long ran = (long) (360.0f * speed);
 
                 long ajuste = ((lngDegrees + ran) % 360) % ((360 / numSectors));
