@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Turn {
 
@@ -20,9 +21,9 @@ public class Turn {
     public int numTurnos = 0;
     public int numPreguntasContestadas = 0;
     public int numJugadores = 0;
-    public short puntuacion[][] = null;
+    public short puntuacion[][][] = null;
     public List<String> participantsTurnBased = null;
-    public List<String> categories;
+    public List<Short> categories;
 
     public Turn() {
     }
@@ -35,16 +36,14 @@ public class Turn {
             retVal.put("numPreguntasContestadas", numPreguntasContestadas);
             retVal.put("numJugadores", numJugadores);
             retVal.put("participantsTurnBased", participantsTurnBased);
-            String points = "";
-            for (int i = 0; i < puntuacion.length; i++) {
-                for (int j = 0; j < puntuacion[i].length; j++)
-                    if (puntuacion[i][j] < 10) {
-                        points += "0" + puntuacion[i][j];
-                    } else {
-                        points += puntuacion[i][j];
-                    }
+            StringBuilder points = new StringBuilder();
+            for (int i = 0; i < numJugadores; i++) {
+                for (int j = 0; j < categories.size(); j++) {
+                    points.append(String.format(Locale.getDefault(), "%03d", puntuacion[i][j][0]));
+                    points.append(String.format(Locale.getDefault(), "%03d", puntuacion[i][j][1]));
+                }
             }
-            retVal.put("puntuacion", points);
+            retVal.put("puntuacion", points.toString());
             retVal.put("categories", categories);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -88,24 +87,25 @@ public class Turn {
                 }
             }
 
-            if (obj.has("puntuacion")) {
-                String auxPuntuacion = obj.getString("puntuacion");
-                retVal.puntuacion = new short[retVal.numPreguntas][3];
-                int k = 0;
-                for (int i = 0; i < retVal.numPreguntas; i++) {
-                    retVal.puntuacion[i][0] = Short.parseShort(auxPuntuacion.substring(k, k + 2));
-                    k = k + 2;
-                    retVal.puntuacion[i][1] = Short.parseShort(auxPuntuacion.substring(k, k + 2));
-                    k = k + 2;
-                    retVal.puntuacion[i][2] = Short.parseShort(auxPuntuacion.substring(k, k + 2));
-                    k = k + 2;
-                }
-            }
             if (obj.has("categories")) {
                 JSONArray categoriesJson = new JSONArray(obj.getString("categories"));
                 retVal.categories = new ArrayList<>();
                 for (int i = 0; i < categoriesJson.length(); i++) {
-                    retVal.categories.add(categoriesJson.get(i).toString());
+                    retVal.categories.add(Short.parseShort(categoriesJson.get(i).toString()));
+                }
+            }
+
+            if (obj.has("puntuacion")) {
+                String auxPuntuacion = obj.getString("puntuacion");
+                retVal.puntuacion = new short[retVal.numJugadores][retVal.categories.size()][2];
+                int k = 0;
+                for (int i = 0; i < retVal.numJugadores; i++) {
+                    for (int j = 0; j < retVal.categories.size(); j++) {
+                        retVal.puntuacion[i][j][0] = Short.parseShort(auxPuntuacion.substring(k, k + 3));
+                        k = k + 3;
+                        retVal.puntuacion[i][j][1] = Short.parseShort(auxPuntuacion.substring(k, k + 3));
+                        k = k + 3;
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -121,10 +121,8 @@ public class Turn {
             int indexPlayer = participantsTurnBased.indexOf(myParticipantId);
 
             if (indexPlayer != -1) {
-                for (int pos = 0; pos < numPreguntasContestadas; pos++) {
-                    if (puntuacion[pos][0] == indexPlayer && puntuacion[pos][1] > 0) {
-                        auxPuntuacion++;
-                    }
+                for (int pos = 0; pos < categories.size(); pos++) {
+                    auxPuntuacion+=puntuacion[indexPlayer][pos][0];
                 }
                 auxPuntuacion *= PlayTurnBasedFragment.K_PUNTOS_POR_PREGUNTA;
             }

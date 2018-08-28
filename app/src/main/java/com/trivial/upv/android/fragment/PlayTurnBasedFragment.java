@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +53,6 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.activity.RouletteActivity;
-import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.gpg.Turn;
 import com.trivial.upv.android.model.json.CategoryJSON;
@@ -803,8 +801,14 @@ public class PlayTurnBasedFragment extends Fragment {
                 showWarning("Expired!", "This game is expired.  So sad!", null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
-                showWarning("Waiting for auto-match...",
-                        "We're still waiting for an automatch partner.", actionButtonDone);
+                if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas) {
+                    showWarning("Waiting for auto-match...",
+                            "We're still waiting for an automatch partner.", actionButtonDone);
+
+                } else showWarning("Complete!",
+                        "This game is over; someone finished it, and so did you!  " +
+                                "There is nothing to be done.", actionButtonDone);
+
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
@@ -1161,7 +1165,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 if (resultCode != RESULT_OK)
                     onLeaveClicked(null);
                 else {
-                    int categoryAux = intent.getIntExtra("category", 0);
+                    int categoryAux = intent.getIntExtra("category", -1);
                     // If no play do nathing
                     if (categoryAux != -1)
                         startQuizzes(categoryAux);
@@ -1271,15 +1275,6 @@ public class PlayTurnBasedFragment extends Fragment {
 //        getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
-
-    final static int REQUEST_LEADERBOARD = 100;
-    final static int REQUEST_ACHIEVEMENTS = 101;
-    final static int REQUEST_QUESTS = 102;
-    private Button btnMarcadores;
-    private Button btnLogros;
-    private Button btnMisiones;
-
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -1357,9 +1352,20 @@ public class PlayTurnBasedFragment extends Fragment {
             if (Game.mTurnData.participantsTurnBased.indexOf(myParticipantId) == -1)
                 Game.mTurnData.participantsTurnBased.add(myParticipantId);
 
-            Game.mTurnData.puntuacion[Game.mTurnData.numPreguntasContestadas][0] = (short) Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
-            Game.mTurnData.puntuacion[Game.mTurnData.numPreguntasContestadas][1] = (Game.category.getScore() > 0) ? (short) (Game.category.getScore() * K_PUNTOS_POR_PREGUNTA) : 0;
-            Game.mTurnData.puntuacion[Game.mTurnData.numPreguntasContestadas][2] = (short) Game.categorySelected;
+
+            int indice = -1;
+            int pos = 0;
+            for (short category : Game.mTurnData.categories) {
+                if (category == Game.categorySelected) {
+                    indice = pos;
+                    break;
+                }
+                pos++;
+            }
+            if (Game.category.getScore() > 0)
+                Game.mTurnData.puntuacion[(short) Game.mTurnData.participantsTurnBased.indexOf(myParticipantId)][indice][0]++;
+            else
+                Game.mTurnData.puntuacion[(short) Game.mTurnData.participantsTurnBased.indexOf(myParticipantId)][indice][1]++;
 
             Game.mTurnData.numPreguntasContestadas++;
 
@@ -1460,7 +1466,8 @@ public class PlayTurnBasedFragment extends Fragment {
                 .addOnFailureListener(createFailureListener("Hay un problema finalizando la partida"));
     }
 
-    public void showMessageFinishMatch(final TurnBasedMatch turnBasedMatch, boolean finishMatch) {
+    public void showMessageFinishMatch(final TurnBasedMatch turnBasedMatch,
+                                       boolean finishMatch) {
         Game.mTurnData = Turn.unpersist(turnBasedMatch.getData());
 
         String txtMatchResultPlayer = "";
@@ -1520,10 +1527,8 @@ public class PlayTurnBasedFragment extends Fragment {
 
         for (int i = 0; i < Game.mTurnData.participantsTurnBased.size(); i++) {
             int auxAnswers = 0;
-            for (int cont = 0; cont < Game.mTurnData.numPreguntas; cont++) {
-                if ((Game.mTurnData.puntuacion[cont][0] == i) && Game.mTurnData.puntuacion[cont][1] > 0) {
-                    auxAnswers++;
-                }
+            for (int cont = 0; cont < Game.mTurnData.categories.size(); cont++) {
+                auxAnswers += Game.mTurnData.puntuacion[i][cont][0];
             }
             if (maxAnswers < auxAnswers) {
                 maxAnswers = auxAnswers;
@@ -1566,7 +1571,8 @@ public class PlayTurnBasedFragment extends Fragment {
 
 
     // Rematch dialog
-    public void askForAcceptInvitation(final TurnBasedMatch match, String userInvitation, boolean showConfirmation) {
+    public void askForAcceptInvitation(final TurnBasedMatch match, String userInvitation,
+                                       boolean showConfirmation) {
         String invitationFrom = userInvitation;
         if (invitationFrom == null) {
             invitationFrom = getFirstPlayerGame(match);
@@ -1779,23 +1785,26 @@ public class PlayTurnBasedFragment extends Fragment {
         if (Game.mTurnData.participantsTurnBased.indexOf(myParticipantId) == -1)
             Game.mTurnData.participantsTurnBased.add(myParticipantId);
 
-        Game.mTurnData.puntuacion = new short[Game.mTurnData.numPreguntas][3];
-        for (int pos = 0; pos < Game.mTurnData.numPreguntas; pos++) {
-            Game.mTurnData.puntuacion[pos][0] = 0;
-            Game.mTurnData.puntuacion[pos][1] = 0;
-            Game.mTurnData.puntuacion[pos][2] = 0;
-        }
         Game.mTurnData.categories = new ArrayList<>();
         for (String idCategory : Game.listCategories) {
             int cont = 0;
             for (CategoryJSON category : categoriesJSON) {
                 if (idCategory.equals(category.getCategory())) {
-                    Game.mTurnData.categories.add(Integer.toString(cont));
+                    Game.mTurnData.categories.add((short) cont);
                     break;
                 }
                 cont++;
             }
         }
+
+        Game.mTurnData.puntuacion = new short[Game.mTurnData.numJugadores][Game.mTurnData.categories.size()][2];
+        for (int i = 0; i < Game.mTurnData.numJugadores; i++) {
+            for (int j = 0; j < Game.mTurnData.categories.size(); j++) {
+                Game.mTurnData.puntuacion[i][j][0] = 0;
+                Game.mTurnData.puntuacion[i][j][1] = 0;
+            }
+        }
+
 
         mTurnBasedMultiplayerClient.takeTurn(match.getMatchId(),
                 Game.mTurnData.persist(), myParticipantId)

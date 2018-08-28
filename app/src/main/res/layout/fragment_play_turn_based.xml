@@ -108,12 +108,13 @@
                     android:layout_marginRight="5dp"
                     android:layout_marginTop="5dp"
                     android:max="55"
-                    android:progress="5"
+                    android:progress="2"
                     android:thumb="@drawable/thumb_image"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/txtNumQuizzes"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"

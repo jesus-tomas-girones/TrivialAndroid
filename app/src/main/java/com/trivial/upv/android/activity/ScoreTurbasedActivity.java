@@ -66,8 +66,8 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
 
         List<Category> allCategories = TrivialJSonHelper.getInstance(this, false).getCategories(false);
         List<Category> categories = new ArrayList<>();
-        for (String categoryAux : Game.mTurnData.categories) {
-            int indice = Integer.parseInt(categoryAux);
+        for (short categoryAux : Game.mTurnData.categories) {
+            int indice = categoryAux;
             categories.add(allCategories.get(indice));
         }
 
@@ -82,33 +82,36 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
         for (int j = 0; j < categories.size() + 2; j++) {
             for (int i = 0; i < Game.mTurnData.numJugadores + 2; i++) {
                 int posAux = i + j * (Game.mTurnData.numJugadores + 2);
+                // (0,0)
                 if (i == 0 && j == 0) {
                     imagenes[posAux] = "";
                     score[posAux] = "";
-                } else if (j == 0 && i < Game.mTurnData.numJugadores + 1) {
-                    // Cabecera con imágenes del jugador
+                }
+                // Cabecera con imágenes del jugador
+                else if (j == 0 && i < Game.mTurnData.numJugadores + 1) {
                     ArrayList<Participant> participants = Game.mMatch.getParticipants();
-
                     if (i - 1 < participants.size() && participants.get(i - 1) != null) {
                         imagenes[posAux] = participants.get(i - 1).getIconImageUri().toString();
                     } else {
                         imagenes[posAux] = "default";
                     }
                     score[posAux] = "";
-                } else if (i == Game.mTurnData.numJugadores + 1 && j > 0 && j < categories.size() + 1) {
-                    // Score Total Cartegory
+                }
+                // Score Total Category
+                else if (i == Game.mTurnData.numJugadores + 1 && j > 0 && j < categories.size() + 1) {
                     imagenes[posAux] = "";
-
                     int totalQuizzes = 0;
                     int totalQuizzesAnsweredOK = 0;
-                    for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
-                        if ((Game.mTurnData.puntuacion[cont][2] == Short.parseShort(Game.mTurnData.categories.get(j - 1)))) {
-                            totalQuizzes++;
-                            if (Game.mTurnData.puntuacion[cont][1] > 0) {
-                                totalQuizzesAnsweredOK++;
-                            }
-
-                        }
+                    for (int cont = 0; cont < Game.mTurnData.numJugadores; cont++) {
+                        totalQuizzes += Game.mTurnData.puntuacion[cont][j - 1][0] + Game.mTurnData.puntuacion[cont][j - 1][1];
+                        totalQuizzesAnsweredOK += Game.mTurnData.puntuacion[cont][j - 1][0];
+//                        if (Game.mTurnData.puntuacion[cont][2] == Game.mTurnData.categories.get(j - 1)) {
+//                            totalQuizzes++;
+//                            if (Game.mTurnData.puntuacion[cont][1] > 0) {
+//                                totalQuizzesAnsweredOK++;
+//                            }
+//
+//                        }
                     }
                     score[posAux] = String.format(Locale.getDefault(), "%d/%d", totalQuizzesAnsweredOK, totalQuizzes);
 
@@ -118,13 +121,15 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                     if (i > 0 && i < Game.mTurnData.numJugadores + 1) {
                         int totalQuizzes = 0;
                         int totalQuizzesAnsweredOK = 0;
-                        for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
-                            if ((Game.mTurnData.puntuacion[cont][0] == i - 1)) {
-                                totalQuizzes++;
-                                if (Game.mTurnData.puntuacion[cont][1] > 0) {
-                                    totalQuizzesAnsweredOK++;
-                                }
-                            }
+                        for (int cont = 0; cont < Game.mTurnData.categories.size(); cont++) {
+                            totalQuizzes += Game.mTurnData.puntuacion[i - 1][cont][0] + Game.mTurnData.puntuacion[i - 1][cont][1];
+                            totalQuizzesAnsweredOK += Game.mTurnData.puntuacion[i - 1][cont][0];
+//                            if ((Game.mTurnData.puntuacion[cont][0] == i - 1)) {
+//                                totalQuizzes++;
+//                                if (Game.mTurnData.puntuacion[cont][1] > 0) {
+//                                    totalQuizzesAnsweredOK++;
+//                                }
+//                            }
                         }
 
                         String auxResult = "";
@@ -157,11 +162,15 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                         }
                     } else if (i == Game.mTurnData.numJugadores + 1) {
                         // Total Score
-                        int totalQuizzes = Game.mTurnData.numPreguntasContestadas;
+                        int totalQuizzes = 0;
                         int totalQuizzesAnsweredOK = 0;
-                        for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
-                            if (Game.mTurnData.puntuacion[cont][1] > 0)
-                                totalQuizzesAnsweredOK++;
+                        for (int x = 0; x < Game.mTurnData.numJugadores; x++) {
+                            for (int y = 0; y < Game.mTurnData.categories.size(); y++) {
+                                totalQuizzesAnsweredOK += Game.mTurnData.puntuacion[x][y][0];
+                                totalQuizzes += Game.mTurnData.puntuacion[x][y][0] + Game.mTurnData.puntuacion[x][y][1];
+                            }
+//                            if (Game.mTurnData.puntuacion[cont][1] > 0)
+//                                totalQuizzesAnsweredOK++;
                         }
                         score[posAux] = String.format(Locale.getDefault(), "%d/%d", totalQuizzesAnsweredOK, totalQuizzes);
                     } else {
@@ -179,14 +188,18 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                         // Score Total Categories x Player
                         int totalQuizzes = 0;
                         int totalQuizzesAnsweredOK = 0;
-                        for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
-                            if ((Game.mTurnData.puntuacion[cont][2] == Short.parseShort(Game.mTurnData.categories.get(j - 1))) && (Game.mTurnData.puntuacion[cont][0] == i - 1)) {
-                                totalQuizzes++;
-                                if (Game.mTurnData.puntuacion[cont][1] > 0) {
-                                    totalQuizzesAnsweredOK++;
-                                }
-                            }
-                        }
+
+                        totalQuizzes = Game.mTurnData.puntuacion[i - 1][j - 1][0] + Game.mTurnData.puntuacion[i - 1][j - 1][1];
+                        totalQuizzesAnsweredOK += Game.mTurnData.puntuacion[i - 1][j - 1][0];
+//
+//                        for (int cont = 0; cont < Game.mTurnData.numPreguntasContestadas; cont++) {
+//                            if (Game.mTurnData.puntuacion[cont][2] == Game.mTurnData.categories.get(j - 1) && Game.mTurnData.puntuacion[cont][0] == i - 1) {
+//                                totalQuizzes++;
+//                                if (Game.mTurnData.puntuacion[cont][1] > 0) {
+//                                    totalQuizzesAnsweredOK++;
+//                                }
+//                            }
+//                        }
                         score[posAux] = String.format(Locale.getDefault(), "%d/%d", totalQuizzesAnsweredOK, totalQuizzes);
                     } else
                         score[posAux] = "";

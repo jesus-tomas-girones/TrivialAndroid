@@ -332,8 +332,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
 //            int ran = new Random().nextInt(360);
 //
-//                if (speed > 20.0f)
-//                    speed = 20.33f;
+                if (speed > 20.0f)
+                    speed = 20.33f;
                 long ran = (long) (360.0f * speed);
 
                 long ajuste = ((lngDegrees + ran) % 360) % ((360 / numSectors));

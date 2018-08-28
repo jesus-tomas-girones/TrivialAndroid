@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -94,16 +95,11 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         if (index != -1) {
             for (int i = 0; i < intNumber; i++) {
                 // Cuantas preguntas hay de esa categoríaº
-                int numPreguntas = 0;
-                int numPreguntasOK = 0;
+                int numPreguntas;
+                int numPreguntasOK;
 
-                for (int j = 0; j < Game.mTurnData.numPreguntasContestadas; j++) {
-                    if (Game.mTurnData.puntuacion[j][2] == Short.parseShort(Game.mTurnData.categories.get(i)) && Game.mTurnData.puntuacion[j][0] == index) {
-                        numPreguntas++;
-                        if (Game.mTurnData.puntuacion[j][1] > 0)
-                            numPreguntasOK++;
-                    }
-                }
+                numPreguntas = Game.mTurnData.puntuacion[index][i][0] + Game.mTurnData.puntuacion[index][i][1];
+                numPreguntasOK = Game.mTurnData.puntuacion[index][i][0];
 //                score[i] = String.format("(%d/%d)", numPreguntasOK, numPreguntas);
                 score[i] = String.format("%d/%d", numPreguntasOK, numPreguntas);
             }
@@ -145,7 +141,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
         for (int i = 0; i < this.intNumber; i++) {
 //            CategoryJSON category = categories.get(i);
-            int indice = Integer.parseInt(Game.mTurnData.categories.get(i));
+            int indice = Game.mTurnData.categories.get(i);
             CategoryJSON category = null;
             if (indice < categories.size()) {
                 category = categories.get(indice);
@@ -201,13 +197,13 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //            Toast toast = Toast.makeText(RouletteActivity.this, category + "", Toast.LENGTH_SHORT);
 //            toast.setGravity(49, 0, 0);
 //            toast.show();
-
+//            Log.d("CATEGORY", category + "");
             // PlayQuiz
             CustomDialogFragment.showDialog(getSupportFragmentManager(), new FinishCounterEvent() {
                 @Override
                 public void onFinishedCount() {
                     Intent intent = new Intent();
-                    intent.putExtra("category", Integer.parseInt(Game.mTurnData.categories.get(category)));
+                    intent.putExtra("category", (int)Game.mTurnData.categories.get(category));
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
