@@ -165,11 +165,11 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     }
 
     private void playGameTurnBased() {
-        if (treeView.getSelectedNodes().size() >= 2) {
+        if (treeView.getSelectedNodes().size() >= 2 && treeView.getSelectedNodes().size() <=31) {
             getSelectedCategories();
             animateFloatButton();
         } else {
-            showWarning("Warning", "You must select at least 2 categories");
+            showWarning("Warning", "You must select at least 2 categories, and maximum of 31");
         }
     }
 
@@ -199,11 +199,15 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     private void getSelectedCategories() {
         List<TreeNode> selectedNodes = treeView.getSelectedNodes();
         Game.listCategories.clear();
+        int level = 0;
         TrivialJSonHelper instanceJSON = TrivialJSonHelper.getInstance(getContext(), false);
         for (int i = 0; i < selectedNodes.size(); i++) {
             CategoryJSON category = (CategoryJSON) selectedNodes.get(i).getValue();
             Game.listCategories.add(category.getCategory());
+            level += Math.pow(2, instanceJSON.findPosCategory(category.getCategory()));
         }
+
+        Game.level = level;
     }
 
     private void playGameOnline() {
@@ -324,7 +328,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
         ArrayList<Quiz> quizzes = new ArrayList<>();
         Game.listCategories.clear();
-        long level = 0;
+        int level = 0;
 
         TrivialJSonHelper instanceJSON = TrivialJSonHelper.getInstance(getContext(), false);
         for (int i = 0; i < selectedNodes.size(); i++) {

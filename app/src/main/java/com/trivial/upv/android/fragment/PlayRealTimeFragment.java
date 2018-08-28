@@ -96,7 +96,7 @@ public class PlayRealTimeFragment extends Fragment
             Game.listCategories.add(new String(category.getCategory()));
         }
 
-        Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
+        Game.level = (int) (Math.pow(2, categoriesJSON.size()) - 1);
     }
 
     @Override

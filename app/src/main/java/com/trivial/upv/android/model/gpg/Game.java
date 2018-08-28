@@ -51,7 +51,7 @@ public class Game {
     public static int tmpTotalTime = 250;
     public static String master;
     public static List<String> listCategories = new ArrayList<>();
-    public static long level;
+    public static int level;
     public static Invitation pendingInvitation;
 
 

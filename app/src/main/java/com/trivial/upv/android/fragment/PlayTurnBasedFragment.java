@@ -116,7 +116,7 @@ public class PlayTurnBasedFragment extends Fragment {
         for (CategoryJSON category : categoriesJSON) {
             Game.listCategories.add(new String(category.getCategory()));
         }
-//        Game.level = (long) (Math.pow(2, categoriesJSON.size()) - 1);
+        Game.level = (int) (Math.pow(2, categoriesJSON.size()) - 1);
     }
 
     @Override
@@ -246,7 +246,7 @@ public class PlayTurnBasedFragment extends Fragment {
         Bundle autoMatchCriteria = RoomConfig.createAutoMatchCriteria(sbPlayers.getProgress() - 1, sbPlayers.getProgress() - 1, 0);
 
         TurnBasedMatchConfig turnBasedMatchConfig = TurnBasedMatchConfig.builder()
-                .setAutoMatchCriteria(autoMatchCriteria).build();
+                .setAutoMatchCriteria(autoMatchCriteria).setVariant(Game.level).build();
 
         showSpinner();
 

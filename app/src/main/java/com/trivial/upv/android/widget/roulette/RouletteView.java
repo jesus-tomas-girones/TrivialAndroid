@@ -291,10 +291,10 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 //                Log.d("FLING", "topToBottom  ");
                 rotate(max * 2.0f / 360.0f);
         } else {
-            if (Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY)
+            if (Math.abs(velocityX) < SWIPE_THRESHOLD_VELOCITY)
                 return false;
             if ((e1.getX() - e2.getX()) * mDensity / 2.0f > SWIPE_MIN_DISTANCE) {
-//                Log.d("FLING", "swipe RightToLeft ");
+                rotate(max * 2.0f / 360.0f);
             } else if ((e2.getX() - e1.getX()) * mDensity / 2.0f > SWIPE_MIN_DISTANCE) {
 //                Log.d("FLING", "swipe LeftToright," + max);
                 rotate(max * 2.0f / 360.0f);
