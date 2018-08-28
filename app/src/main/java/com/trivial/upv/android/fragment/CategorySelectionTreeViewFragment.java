@@ -169,7 +169,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             getSelectedCategories();
             animateFloatButton();
         } else {
-            showWarning("Warning", "You mast select at least 2 categories");
+            showWarning("Warning", "You must select at least 2 categories");
         }
     }
 

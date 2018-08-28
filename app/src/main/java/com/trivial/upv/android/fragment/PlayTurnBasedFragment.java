@@ -583,7 +583,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
         Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
 
-        if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas || !playable) {
+        if (!Game.mTurnData.isFinishedMatch() || !playable) {
 
             Intent startIntent = new Intent(getActivity(), RouletteActivity.class);
             startIntent.putExtra("playable", playable);
@@ -801,7 +801,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 showWarning("Expired!", "This game is expired.  So sad!", null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
-                if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas) {
+                if (!Game.mTurnData.isFinishedMatch()) {
                     showWarning("Waiting for auto-match...",
                             "We're still waiting for an automatch partner.", actionButtonDone);
 
@@ -839,7 +839,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
                 // Should return results.
-                if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas) {
+                if (!Game.mTurnData.isFinishedMatch()) {
                     String textNextPlayer = "";
                     try {
                         textNextPlayer = "Next player: " + match.getParticipant(getNextParticipantId()).getDisplayName();
@@ -1163,12 +1163,18 @@ public class PlayTurnBasedFragment extends Fragment {
             case RC_CHOOOSE_CATEGORY:
 
                 if (resultCode != RESULT_OK)
-                    onLeaveClicked(null);
+                    return;
+
                 else {
-                    int categoryAux = intent.getIntExtra("category", -1);
-                    // If no play do nathing
-                    if (categoryAux != -1)
-                        startQuizzes(categoryAux);
+                    boolean leaveMatch = intent.getBooleanExtra("leave", false);
+                    if (leaveMatch)
+                        onLeaveClicked(null);
+                    else {
+                        int categoryAux = intent.getIntExtra("category", -1);
+                        // If no play do nathing
+                        if (categoryAux != -1)
+                            startQuizzes(categoryAux);
+                    }
                 }
                 break;
 
@@ -1367,10 +1373,10 @@ public class PlayTurnBasedFragment extends Fragment {
             else
                 Game.mTurnData.puntuacion[(short) Game.mTurnData.participantsTurnBased.indexOf(myParticipantId)][indice][1]++;
 
-            Game.mTurnData.numPreguntasContestadas++;
+//            Game.mTurnData.numPreguntasContestadas++;
 
-            final boolean finalPartida = Game.mTurnData.numPreguntasContestadas >= Game.mTurnData.numPreguntas;
-            Log.d(getClass().getSimpleName(), "finalPartida=" + finalPartida + " currentQuizz=" + Game.mTurnData.numPreguntasContestadas);
+            final boolean finalPartida = Game.mTurnData.isFinishedMatch();
+            Log.d(getClass().getSimpleName(), "finalPartida=" + finalPartida + " currentQuizz=" + Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId));
 
             if (finalPartida) {
                 if (Game.mTurnData.numTurnos >= 1) {
@@ -1400,7 +1406,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         Game.mMatch = turnBasedMatch;
 
                         Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
-                        if (Game.mTurnData.numPreguntasContestadas == Game.mTurnData.numPreguntas) {
+                        if (Game.mTurnData.isFinishedMatch()) {
                             showMessageFinishMatch(turnBasedMatch, false);
                         } else {
                             onUpdateMatch(turnBasedMatch);
@@ -1482,7 +1488,7 @@ public class PlayTurnBasedFragment extends Fragment {
         txtMatchResultPlayer = checkPlayerMatchResult(participant);
 
         // The new player doesn't play any turn.
-        if (Game.mTurnData.numPreguntasContestadas == Game.mTurnData.numPreguntas && finishMatch && Game.mTurnData.numTurnos == 1) {
+        if (Game.mTurnData.isFinishedMatch() && finishMatch && Game.mTurnData.numTurnos == 1) {
             txtMatchResultPlayer = "You've joind at the end of the match. Indeed, " + txtMatchResultPlayer;
         }
 
@@ -1772,9 +1778,9 @@ public class PlayTurnBasedFragment extends Fragment {
         String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
 
         Game.mTurnData = new Turn();
-        Game.mTurnData.numPreguntas = sbNumQuizzes.getProgress();
+//        Game.mTurnData.numPreguntas = sbNumQuizzes.getProgress();
 
-        Game.mTurnData.numPreguntasContestadas = 0;
+//        Game.mTurnData.numPreguntasContestadas = 0;
         Game.mTurnData.numTurnos = 0;
         Game.mTurnData.numJugadores = sbPlayers.getProgress();
         if (Game.mTurnData.participantsTurnBased != null)

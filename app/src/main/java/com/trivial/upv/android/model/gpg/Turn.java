@@ -17,9 +17,9 @@ public class Turn {
     // [][0]->Jugador (0) no se ha jugado
     // [][1]->[Puntuacion]}
     // [][2]->[Category]}
-    public int numPreguntas = 0;
+//    public int numPreguntas = 0;
     public int numTurnos = 0;
-    public int numPreguntasContestadas = 0;
+    //    public int numPreguntasContestadas = 0;
     public int numJugadores = 0;
     public short puntuacion[][][] = null;
     public List<String> participantsTurnBased = null;
@@ -31,9 +31,9 @@ public class Turn {
     public byte[] persist() {
         JSONObject retVal = new JSONObject();
         try {
-            retVal.put("numPreguntas", numPreguntas);
+//            retVal.put("numPreguntas", numPreguntas);
             retVal.put("numTurnos", numTurnos);
-            retVal.put("numPreguntasContestadas", numPreguntasContestadas);
+//            retVal.put("numPreguntasContestadas", numPreguntasContestadas);
             retVal.put("numJugadores", numJugadores);
             retVal.put("participantsTurnBased", participantsTurnBased);
             StringBuilder points = new StringBuilder();
@@ -66,15 +66,15 @@ public class Turn {
         Turn retVal = new Turn();
         try {
             JSONObject obj = new JSONObject(st);
-            if (obj.has("numPreguntas")) {
-                retVal.numPreguntas = obj.getInt("numPreguntas");
-            }
+//            if (obj.has("numPreguntas")) {
+//                retVal.numPreguntas = obj.getInt("numPreguntas");
+//            }
             if (obj.has("numTurnos")) {
                 retVal.numTurnos = obj.getInt("numTurnos");
             }
-            if (obj.has("numPreguntasContestadas")) {
-                retVal.numPreguntasContestadas = obj.getInt("numPreguntasContestadas");
-            }
+//            if (obj.has("numPreguntasContestadas")) {
+//                retVal.numPreguntasContestadas = obj.getInt("numPreguntasContestadas");
+//            }
 
             if (obj.has("numJugadores")) {
                 retVal.numJugadores = obj.getInt("numJugadores");
@@ -122,7 +122,7 @@ public class Turn {
 
             if (indexPlayer != -1) {
                 for (int pos = 0; pos < categories.size(); pos++) {
-                    auxPuntuacion+=puntuacion[indexPlayer][pos][0];
+                    auxPuntuacion += puntuacion[indexPlayer][pos][0];
                 }
                 auxPuntuacion *= PlayTurnBasedFragment.K_PUNTOS_POR_PREGUNTA;
             }
@@ -130,6 +130,39 @@ public class Turn {
         return auxPuntuacion;
     }
 
+    public boolean isFinishedMatch() {
+        boolean matchFinished = false;
+
+        for (int i = 0; i < numJugadores; i++) {
+            int auxNumCategoriesAnsweredOK = 0;
+            for (int j = 0; j < categories.size(); j++) {
+                if (puntuacion[i][j][0] > 0)
+                    auxNumCategoriesAnsweredOK++;
+            }
+            if (auxNumCategoriesAnsweredOK==categories.size())
+                return true;
+        }
+
+        return matchFinished;
+    }
+
+
+    public int getNunCategoriesOKFromPlayer(String playerId) {
+        int auxNumCategoriesAnsweredOK = 0;
+        if (participantsTurnBased != null) {
+            String myParticipantId = Game.mMatch.getParticipantId(playerId);
+            int indexPlayer = participantsTurnBased.indexOf(myParticipantId);
+
+            if (indexPlayer != -1) {
+                for (int pos = 0; pos < categories.size(); pos++) {
+                    if (puntuacion[indexPlayer][pos][0] > 0)
+                        auxNumCategoriesAnsweredOK++;
+                }
+            }
+        }
+        return auxNumCategoriesAnsweredOK;
+
+    }
 //    public int getNumQuizz() {
 //        int pos = 0;
 //        for (short[] quiz : puntuacion) {

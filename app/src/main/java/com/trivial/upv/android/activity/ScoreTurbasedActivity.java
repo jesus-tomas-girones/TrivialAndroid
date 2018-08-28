@@ -52,10 +52,10 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
 
     private void setupView() {
         category_title = (TextView) findViewById(R.id.category_title);
-        if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
-            category_title.setText(String.format(Locale.getDefault(), "Quizz (%d/%d)", (Game.mTurnData.numPreguntasContestadas + 1), Game.mTurnData.numPreguntas));
+        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
+            category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
         else
-            category_title.setText(String.format(Locale.getDefault(), "Finished Quizz"));
+            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
         btnBack = (ImageButton) findViewById(R.id.back);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,7 +133,7 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
                         }
 
                         String auxResult = "";
-                        if (Game.mTurnData.numPreguntasContestadas == Game.mTurnData.numPreguntas) {
+                        if (Game.mTurnData.isFinishedMatch()) {
                             if (i - 1 < Game.mMatch.getParticipants().size()) {
                                 if (Game.mMatch.getParticipants().get(i - 1).getResult() != null) {
                                     switch (Game.mMatch.getParticipants().get(i - 1).getResult().getResult()) {

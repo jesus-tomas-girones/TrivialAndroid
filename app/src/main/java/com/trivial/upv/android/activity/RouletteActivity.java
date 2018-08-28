@@ -122,10 +122,10 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     private void setupRoulette() {
         category_title = (TextView) findViewById(R.id.category_title);
         txtPoints = (TextView) findViewById(R.id.txtPoints);
-        if (Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
-            category_title.setText(String.format(Locale.getDefault(), "Quizz (%d/%d)", Game.mTurnData.numPreguntasContestadas + 1, Game.mTurnData.numPreguntas));
+        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
+            category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
         else
-            category_title.setText(String.format(Locale.getDefault(), "Finished Quizz"));
+            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
 
         txtPoints.setText(String.format(Locale.getDefault(), "Pts: %d", Game.mTurnData.calculateScorePlayer(Game.mPlayerId)));
         rouletteView = (RouletteView) findViewById(R.id.rouletteView);
@@ -242,7 +242,9 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     Theme mThemes[];
 
     public void leaveMatch(View v) {
-        setResult(Activity.RESULT_CANCELED);
+        Intent intent= new Intent();
+        intent.putExtra("leave", true);
+        setResult(Activity.RESULT_OK,intent);
         finish();
 //        if (this.intNumber < 10) {
 //            this.intNumber++;
