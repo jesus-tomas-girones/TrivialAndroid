@@ -1,10 +1,14 @@
 ﻿TodoList
 
 Pendiente
-        Al leer las categorías si da error al cargar el JSON que tome la versión de backup.
         Traducciones de Inglés y Español. (Jesús)
+29/08/2018
+        Se comprueba la integridad del fichero JSON y se estructura la carga de las categorías en un único punto.
 28/08/2018
-		Iniciados cambios para almacenar la puntuación por categorías.
+	MODO MULTIJUGADOR POR TURNOS:
+		Cambios para almacenar la puntuación por categorías (Fase 1)
+		Cambios para almacenar la puntuación por categorías (Fase 2)
+		Cuando se seleccionan las categorías y se juega una partida rápida, estas deben machear.
 27/08/2018
 		La ruleta ya no está limitada por las vueltas, ya que generaba la misma categoría siempre a máxima potencia. También se ha adaptado por si hubiera una única categoría.
 		Al pasar turno se indica el siguiente jugador y se muestra la ruleta (para ver estadísticas). Varios retoques del resto de proceso para adaptar este punto.		
