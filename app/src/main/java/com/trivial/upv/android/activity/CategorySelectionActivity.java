@@ -52,6 +52,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -73,15 +74,17 @@ import com.trivial.upv.android.fragment.AboutDialogFragment;
 import com.trivial.upv.android.fragment.CategorySelectionFragment;
 import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
 import com.trivial.upv.android.fragment.HelpDialogFragment;
-import com.trivial.upv.android.fragment.MainDialogFragment;
 import com.trivial.upv.android.fragment.PlayRealTimeFragment;
 import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
 import com.trivial.upv.android.helper.PreferencesHelper;
 import com.trivial.upv.android.model.Player;
 import com.trivial.upv.android.model.gpg.Game;
+import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
+
+import java.util.List;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
@@ -97,6 +100,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     private AvatarView avatar;
     private TextView title;
     private GoogleSignInClient mGoogleSignInClient = null;
+    private boolean retryGPG = false;
 
     public TextView getSubcategory_title() {
         return subcategory_title;
@@ -153,6 +157,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         // JVG.S
         mGoogleSignInClient = GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
         oneTimeGooglePlayGame = true;
+        retryGPG = true;
         // JVG.E
     }
 
@@ -163,9 +168,10 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             filtro = new IntentFilter(ACTION_RESP);
             filtro.addCategory(Intent.CATEGORY_DEFAULT);
         }
-        if (receiver == null)
+        if (receiver == null) {
             receiver = new ReceptorOperacion();
-
+            registerReceiver(receiver, filtro);
+        }
 //        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         if (checkInternetAccess()) {
             if (!TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
@@ -187,6 +193,15 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                     }
                 }.start();
 
+            } else {
+                // Load a freme (restore activity)
+                if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
+                    if (checkJsonIsCorrect(this)) {
+                        openRequiredFragment();
+                    } else {
+                        openSettingsWhenErrorDetectedInJson(this);
+                    }
+                }
             }
         } else {
             snackbar = Snackbar
@@ -195,13 +210,20 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                         @Override
                         public void onClick(View view) {
                             dismissSnackbar();
-
                             loadCategories();
                         }
                     });
 
             snackbar.show();
         }
+    }
+
+    private void openRequiredFragment() {
+        if (fragmentNameSaved == null || getSupportFragmentManager().findFragmentById(R.id.category_container) == null)
+            signInSilently(true);
+        else
+            signInSilently(false);
+        showScore();
     }
 
 
@@ -337,8 +359,13 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
                                 onConnected(task.getResult(), loadDefaultFragmentCategories);
                             } else {
                                 Log.d(TAG, "signInSilently(): failure", task.getException());
-                                if (loadDefaultFragmentCategories)
-                                    attachCategoryGridFragment();
+                                if (retryGPG) {
+                                    retryGPG = false;
+                                    signInSilently(loadDefaultFragmentCategories);
+                                } else {
+                                    if (loadDefaultFragmentCategories)
+                                        attachCategoryGridFragment();
+                                }
                             }
                         }
                     });
@@ -355,12 +382,20 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             synchronized (this) {
                 String result = intent.getExtras().getString("RESULT");
                 if ("OK".equals(result)) {
+
                     if (pDialog != null) {
                         pDialog.dismiss();
                         pDialog = null;
-                        signInSilently(true);
+//                        signInSilently(true);
 //                        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                     }
+
+                    if (checkJsonIsCorrect(context)) {
+                        openRequiredFragment();
+                    } else {
+                        openSettingsWhenErrorDetectedInJson(context);
+                    }
+
                     // Carga categorias
 //                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
 //                    if (fragment instanceof CategorySelectionFragment) {
@@ -398,6 +433,29 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             }
         }
 
+    }
+
+    private void openSettingsWhenErrorDetectedInJson(Context context) {
+        // El fichero está corrupto
+        Intent intentSettings = new Intent(CategorySelectionActivity.this, SettingsActivity.class);
+        context.startActivity(intentSettings);
+        finish();
+    }
+
+    private boolean checkJsonIsCorrect(Context context) {
+        // Hace un chequeo recorriendo la estructura de nodos para comprobar que el fichero está ok
+        try {
+//            TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).getScore();
+            List<CategoryJSON> categoriesJSON = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
+            for (int position = 0; position < categoriesJSON.size(); position++) {
+                TrivialJSonHelper.getInstance(this, false).isSolvedCurrentCategory(position);
+            }
+            return true;
+
+        } catch (Exception e) {
+            Toast.makeText(context, "El fichero .json podría contener algún error", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
     // JVG.E
 
@@ -477,25 +535,17 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
     protected void onResume() {
         super.onResume();
 
-        // Load a freme (restore activity)
-        if (TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).isLoaded()) {
-//         getSupportFragmentManager().findFragmentById(R.id.category_container) == null && c) {
-            if (fragmentNameSaved == null || getSupportFragmentManager().findFragmentById(R.id.category_container) == null)
-                signInSilently(true);
-            else
-                signInSilently(false);
-//            attachPlayTurnBasedFragment(ARG_TURNED_BASED_ONLINE);
-        }
-//        else {
-//            signInSilently(false);
-//        }
-        showScore();
+        // JVG.S
+//        Log.d("TRAZA", "onStart");
+        loadCategories();
+        // JVG.E
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         oneTimeGooglePlayGame = true;
+        retryGPG = true;
     }
 
     private void showScore() {
@@ -516,8 +566,8 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         super.onStart();
         // JVG.S
 //        Log.d("TRAZA", "onStart");
-        loadCategories();
-        registerReceiver(receiver, filtro);
+//        loadCategories();
+//        registerReceiver(receiver, filtro);
         // JVG.E
     }
 

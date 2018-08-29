@@ -129,7 +129,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
         txtPoints.setText(String.format(Locale.getDefault(), "Pts: %d", Game.mTurnData.calculateScorePlayer(Game.mPlayerId)));
         rouletteView = (RouletteView) findViewById(R.id.rouletteView);
-        rouletteView.setRotationEventListener(rotateEventLinestener, playable);
+        rouletteView.setRotationEventListener(rotateEventListener, playable);
 
         // Obtiene las categorías
         List<CategoryJSON> categories = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
@@ -179,7 +179,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         void onFinishedCount();
     }
 
-    RouletteView.RotateEventLisstener rotateEventLinestener = new RouletteView.RotateEventLisstener() {
+    RouletteView.RotateEventLisstener rotateEventListener = new RouletteView.RotateEventLisstener() {
         @Override
         public void rotateStart() {
 
@@ -264,8 +264,11 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
     @Override
     public void onShake(float speed) {
-        if (isRotationEnabled)
-            rouletteView.rotate(speed);
+        if (isRotationEnabled) {
+//            Log.d("SHAKESPEED", ""+ speed);
+            rotateEventListener.rotateStart();
+            rouletteView.rotate(speed*1.5f);}
+
     }
 
     public void showMatchScore(View view) {
