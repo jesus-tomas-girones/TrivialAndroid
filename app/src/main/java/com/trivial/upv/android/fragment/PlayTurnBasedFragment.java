@@ -44,7 +44,6 @@ import com.google.android.gms.games.multiplayer.ParticipantResult;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig;
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchUpdateCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -167,7 +166,7 @@ public class PlayTurnBasedFragment extends Fragment {
     private GoogleSignInClient mGoogleSignInClient = null;
 
     // Client used to interact with the TurnBasedMultiplayer system.
-    private TurnBasedMultiplayerClient mTurnBasedMultiplayerClient = null;
+//    private TurnBasedMultiplayerClient mTurnBasedMultiplayerClient = null;
 
     // Client used to interact with the Invitation system.
     private InvitationsClient mInvitationsClient = null;
@@ -251,7 +250,7 @@ public class PlayTurnBasedFragment extends Fragment {
         showSpinner();
 
         // Start the match
-        mTurnBasedMultiplayerClient.createMatch(turnBasedMatchConfig)
+        Game.mTurnBasedMultiplayerClient.createMatch(turnBasedMatchConfig)
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
@@ -264,7 +263,7 @@ public class PlayTurnBasedFragment extends Fragment {
     private void onCancelMatch(String matchId) {
         isDoingTurn = false;
 
-        showWarning("Match", "This match (" + matchId + ") was canceled.  " +
+        showWarning(true, "Match", "This match (" + matchId + ") was canceled.  " +
                 "All other players will have their game ended.", null);
     }
 
@@ -274,7 +273,7 @@ public class PlayTurnBasedFragment extends Fragment {
     public void onCancelClicked(View view) {
         showSpinner();
 
-        mTurnBasedMultiplayerClient.cancelMatch(Game.mMatch.getMatchId())
+        Game.mTurnBasedMultiplayerClient.cancelMatch(Game.mMatch.getMatchId())
                 .addOnSuccessListener(new OnSuccessListener<String>() {
                     @Override
                     public void onSuccess(String matchId) {
@@ -289,17 +288,17 @@ public class PlayTurnBasedFragment extends Fragment {
 
     private void onLeaveMatch() {
         isDoingTurn = false;
-        showWarning("Left", "You've left this match.", null);
+        showWarning(true, "Left", "You've left this match.", null);
 //        setViewVisibility();
     }
 
     // Leave the game during your turn. Note that there is a separate
-    // mTurnBasedMultiplayerClient.leaveMatch() if you want to leave NOT on your turn.
+    // Game.mTurnBasedMultiplayerClient.leaveMatch() if you want to leave NOT on your turn.
     public void onLeaveClicked(View view) {
         showSpinner();
-        String nextParticipantId = getNextParticipantId();
+        String nextParticipantId = Game.getNextParticipantId();
 
-        mTurnBasedMultiplayerClient.leaveMatchDuringTurn(Game.mMatch.getMatchId(), nextParticipantId)
+        Game.mTurnBasedMultiplayerClient.leaveMatchDuringTurn(Game.mMatch.getMatchId(), nextParticipantId)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -340,7 +339,7 @@ public class PlayTurnBasedFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 disableButtons();
-                if (mTurnBasedMultiplayerClient != null) {
+                if (Game.mTurnBasedMultiplayerClient != null) {
                     onQuickMatchClicked(view);
 //                showSpinner();
                 } else {
@@ -353,7 +352,7 @@ public class PlayTurnBasedFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 disableButtons();
-                if (mTurnBasedMultiplayerClient != null) {
+                if (Game.mTurnBasedMultiplayerClient != null) {
                     onStartMatchClicked(view);
 //                showSpinner();
                 } else {
@@ -366,7 +365,7 @@ public class PlayTurnBasedFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 disableButtons();
-                if (mTurnBasedMultiplayerClient != null) {
+                if (Game.mTurnBasedMultiplayerClient != null) {
                     onCheckGamesClicked(view);
 //                showSpinner();}
                 } else {
@@ -379,7 +378,7 @@ public class PlayTurnBasedFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 disableButtons();
-                if (mTurnBasedMultiplayerClient != null) {
+                if (Game.mTurnBasedMultiplayerClient != null) {
                     btnVer_Invitaciones_Click(view);
 //                showSpinner();
                 } else {
@@ -566,7 +565,7 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
     public void tryLogInGPG() {
-        showWarning("Google Play Games", "You aren't not log in! OK to try it", new ActionOnClickButton() {
+        showWarning(true, "Google Play Games", "You aren't not log in! OK to try it", new ActionOnClickButton() {
             @Override
             public void onClick() {
                 startSignInIntent();
@@ -597,7 +596,7 @@ public class PlayTurnBasedFragment extends Fragment {
             if (Game.mTurnData.numTurnos >= 1)
                 onFinishClicked(null);
             else {
-                String nextParticipantId = getNextParticipantId();
+                String nextParticipantId = Game.getNextParticipantId();
                 Game.mTurnData.numTurnos++;
                 nextTurn(nextParticipantId, nextParticipantId);
             }
@@ -677,7 +676,7 @@ public class PlayTurnBasedFragment extends Fragment {
         Log.d(TAG, "onDisconnected()");
 
 //        mGoogleSignInClient = null;
-        mTurnBasedMultiplayerClient = null;
+        Game.mTurnBasedMultiplayerClient = null;
         mInvitationsClient = null;
 //        setViewVisibility();
         if (!retry) {
@@ -695,7 +694,7 @@ public class PlayTurnBasedFragment extends Fragment {
 //            mSignedInAccount = googleSignInAccount;
 //        Log.d(TAG, "onConnected(): connected to Google APIs");
         retry = false;
-        mTurnBasedMultiplayerClient = Games.getTurnBasedMultiplayerClient(getActivity(), googleSignInAccount);
+        Game.mTurnBasedMultiplayerClient = Games.getTurnBasedMultiplayerClient(getActivity(), googleSignInAccount);
         mInvitationsClient = Games.getInvitationsClient(getActivity(), googleSignInAccount);
         enableButtons();
         Games.getPlayersClient(getActivity(), googleSignInAccount)
@@ -779,7 +778,7 @@ public class PlayTurnBasedFragment extends Fragment {
         // Likewise, we are registering the optional MatchUpdateListener, which
         // will replace notifications you would get otherwise. You do *NOT* have
         // to register a MatchUpdateListener.
-        mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
+//        Game.mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
 
         ((CategorySelectionActivity) getActivity()).animateToolbarNavigateCategories(false);
 //        }
@@ -795,24 +794,24 @@ public class PlayTurnBasedFragment extends Fragment {
 
         switch (status) {
             case TurnBasedMatch.MATCH_STATUS_CANCELED:
-                showWarning("Canceled!", "This game was canceled!", null);
+                showWarning(true, "Canceled!", "This game was canceled!", null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-                showWarning("Expired!", "This game is expired.  So sad!", null);
+                showWarning(true, "Expired!", "This game is expired.  So sad!", null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                 if (!Game.mTurnData.isFinishedMatch()) {
-                    showWarning("Waiting for auto-match...",
+                    showWarning(true, "Waiting for auto-match...",
                             "We're still waiting for an automatch partner.", actionButtonDone);
 
-                } else showWarning("Complete!",
+                } else showWarning(true, "Complete!",
                         "This game is over; someone finished it, and so did you!  " +
                                 "There is nothing to be done.", actionButtonDone);
 
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                    showWarning("Complete!",
+                    showWarning(true, "Complete!",
                             "This game is over; someone finished it, and so did you!  " +
                                     "There is nothing to be done.", actionButtonDone);
                     break;
@@ -842,16 +841,16 @@ public class PlayTurnBasedFragment extends Fragment {
                 if (!Game.mTurnData.isFinishedMatch()) {
                     String textNextPlayer = "";
                     try {
-                        textNextPlayer = "Next player: " + match.getParticipant(getNextParticipantId()).getDisplayName();
+                        textNextPlayer = "Next player: " + match.getParticipant(Game.getNextParticipantId()).getDisplayName();
                     } catch (Exception ex) {
                     }
-                    showWarning("It's not your turn...", textNextPlayer, actionButtonDone);
-                } else showWarning("Complete!",
+                    showWarning(false, "It's not your turn...", textNextPlayer, actionButtonDone);
+                } else showWarning(true, "Complete!",
                         "This game is over; someone finished it, and so did you!  " +
                                 "There is nothing to be done.", actionButtonDone);
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
-                showWarning("Good inititative!",
+                showWarning(true, "Good inititative!",
                         "Still waiting for invitations.\n\nBe patient!", actionButtonDone);
 
         }
@@ -1020,56 +1019,58 @@ public class PlayTurnBasedFragment extends Fragment {
     private android.app.AlertDialog mAlertDialog;
 
     // Generic warning/info dialog
-    public void showWarning(String title, String message, final ActionOnClickButton actionButton) {
-
+    public void showWarning(boolean showDialog, String title, String message, final ActionOnClickButton actionButton) {
         dismissSpinner();
-        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
 
-        // set title
-        alertDialogBuilder.setTitle(title).setMessage(message);
+        if (showDialog) {
+            android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+            // set title
+            alertDialogBuilder.setTitle(title).setMessage(message);
 
-        // set dialog message
-        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // if this button is clicked, close
-                        // current activity
-                        if (actionButton != null)
-                            actionButton.onClick();
-                    }
-                });
-
-        // create alert dialog
-        mAlertDialog = alertDialogBuilder.create();
-
-        // show it
-        mAlertDialog.show();
+            // set dialog message
+            alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            // if this button is clicked, close
+                            // current activity
+                            if (actionButton != null)
+                                actionButton.onClick();
+                        }
+                    });
+            // create alert dialog
+            mAlertDialog = alertDialogBuilder.create();
+            // show it
+            mAlertDialog.show();
+        } else {
+            if (actionButton != null)
+                actionButton.onClick();
+        }
     }
 
     public void showErrorMessage(int stringId) {
-        showWarning("Warning", getResources().getString(stringId), null);
+        showWarning(true, "Warning", getResources().getString(stringId), null);
     }
 
 
-    private TurnBasedMatchUpdateCallback mMatchUpdateCallback = new TurnBasedMatchUpdateCallback() {
-        @Override
-        public void onTurnBasedMatchReceived(@NonNull TurnBasedMatch turnBasedMatch) {
-            Toast.makeText(getActivity(), "A match was updated.", Toast.LENGTH_LONG).show();
-        }
-
-        @Override
-        public void onTurnBasedMatchRemoved(@NonNull String matchId) {
-            Toast.makeText(getActivity(), "A match was removed.", Toast.LENGTH_SHORT).show();
-        }
-    };
+//    private TurnBasedMatchUpdateCallback mMatchUpdateCallback = new TurnBasedMatchUpdateCallback() {
+//        @Override
+//        public void onTurnBasedMatchReceived(@NonNull TurnBasedMatch turnBasedMatch) {
+//            Toast.makeText(getActivity(), "A match was updated.", Toast.LENGTH_LONG).show();
+//        }
+//
+//        @Override
+//        public void onTurnBasedMatchRemoved(@NonNull String matchId) {
+//            Toast.makeText(getActivity(), "A match was removed.", Toast.LENGTH_SHORT).show();
+//        }
+//    };
 
     private static final int RC_SIGN_IN = 9001;
 
     // Displays your inbox. You will get back onActivityResult where
 // you will need to figure out what you clicked on.
     public void onCheckGamesClicked(View view) {
-        mTurnBasedMultiplayerClient.getInboxIntent()
+        Game.mTurnBasedMultiplayerClient.getInboxIntent()
                 .addOnSuccessListener(new OnSuccessListener<Intent>() {
                     @Override
                     public void onSuccess(Intent intent) {
@@ -1130,7 +1131,7 @@ public class PlayTurnBasedFragment extends Fragment {
 //                            .setMessage(message)
 //                            .setNeutralButton(android.R.string.ok, null)
 //                            .show();
-                    showWarning("Google Play Games", "No ha sido posible conectar con Google Play Games", null);
+                    showWarning(true, "Google Play Games", "No ha sido posible conectar con Google Play Games", null);
                 }
                 break;
 
@@ -1303,47 +1304,13 @@ public class PlayTurnBasedFragment extends Fragment {
             mInvitationsClient.unregisterInvitationCallback(mInvitationCallback);
         }
 
-        if (mTurnBasedMultiplayerClient != null) {
-            mTurnBasedMultiplayerClient.unregisterTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
-        }
+//        if (Game.mTurnBasedMultiplayerClient != null) {
+//            Game.mTurnBasedMultiplayerClient.unregisterTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
+//        }
     }
 
 
-    /**
-     * Get the next participant. In this function, we assume that we are
-     * round-robin, with all known players going before all automatch players.
-     * This is not a requirement; players can go in any order. However, you can
-     * take turns in any order.
-     *
-     * @return participantId of next player, or null if automatching
-     */
-    public String getNextParticipantId() {
 
-        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
-
-        ArrayList<String> participantIds = Game.mMatch.getParticipantIds();
-
-        int desiredIndex = -1;
-
-        for (int i = 0; i < participantIds.size(); i++) {
-            if (participantIds.get(i).equals(myParticipantId)) {
-                desiredIndex = i + 1;
-            }
-        }
-
-        if (desiredIndex < participantIds.size()) {
-            return participantIds.get(desiredIndex);
-        }
-
-        if (Game.mMatch.getAvailableAutoMatchSlots() <= 0) {
-            // You've run out of automatch slots, so we roulette_rotate over.
-            return participantIds.get(0);
-        } else {
-            // You have not yet fully automatched, so null will find a new
-            // person to play against.
-            return null;
-        }
-    }
 
     // Upload your new gamestate, then take a turn, and pass it on to the next
 // player.
@@ -1353,7 +1320,7 @@ public class PlayTurnBasedFragment extends Fragment {
         if (Game.mTurnData != null) {
 
             String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
-            String nextParticipantId = getNextParticipantId();
+            String nextParticipantId = Game.getNextParticipantId();
             // Create the next turn
             if (Game.mTurnData.participantsTurnBased.indexOf(myParticipantId) == -1)
                 Game.mTurnData.participantsTurnBased.add(myParticipantId);
@@ -1398,7 +1365,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
     public void nextTurn(String myParticipantId, String nextParticipantId) {
         showSpinner();
-        mTurnBasedMultiplayerClient.takeTurn(Game.mMatch.getMatchId(),
+        Game.mTurnBasedMultiplayerClient.takeTurn(Game.mMatch.getMatchId(),
                 Game.mTurnData.persist(), Game.category == null || Game.category.getScore() == 0 ? nextParticipantId : myParticipantId)
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
@@ -1418,13 +1385,13 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
     public void finishFinishedMatch() {
-        mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId())
+        Game.mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId())
                 .addOnSuccessListener(
                         new OnSuccessListener<TurnBasedMatch>() {
                             @Override
                             public void onSuccess(TurnBasedMatch turnBasedMatch) {
 
-                                showWarning("Complete!",
+                                showWarning(true, "Complete!",
                                         "This game is over; someone finished it, and so did you!  " +
                                                 "There is nothing to be done.", actionButtonDone);
 //                                Toast.makeText(getActivity(),
@@ -1459,7 +1426,7 @@ public class PlayTurnBasedFragment extends Fragment {
             }
             list.add(participantResult);
         }
-        mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId(), Game.mTurnData.persist(), list)
+        Game.mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId(), Game.mTurnData.persist(), list)
                 .addOnSuccessListener(
                         new OnSuccessListener<TurnBasedMatch>() {
                             @Override
@@ -1626,7 +1593,7 @@ public class PlayTurnBasedFragment extends Fragment {
     // If you choose to rematch, then call it and wait for a response.
     public void rematch() {
         showSpinner();
-        mTurnBasedMultiplayerClient.rematch(Game.mMatch.getMatchId())
+        Game.mTurnBasedMultiplayerClient.rematch(Game.mMatch.getMatchId())
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
@@ -1812,7 +1779,7 @@ public class PlayTurnBasedFragment extends Fragment {
         }
 
 
-        mTurnBasedMultiplayerClient.takeTurn(match.getMatchId(),
+        Game.mTurnBasedMultiplayerClient.takeTurn(match.getMatchId(),
                 Game.mTurnData.persist(), myParticipantId)
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override

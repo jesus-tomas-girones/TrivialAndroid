@@ -53,6 +53,7 @@ public class Game {
     public static List<String> listCategories = new ArrayList<>();
     public static int level;
     public static Invitation pendingInvitation;
+    public static TurnBasedMultiplayerClient mTurnBasedMultiplayerClient;
 
 
     public static void resetGameVars() {
@@ -81,5 +82,41 @@ public class Game {
             }
         }
         return total;
+    }
+
+    /**
+     * Get the next participant. In this function, we assume that we are
+     * round-robin, with all known players going before all automatch players.
+     * This is not a requirement; players can go in any order. However, you can
+     * take turns in any order.
+     *
+     * @return participantId of next player, or null if automatching
+     */
+    public static String getNextParticipantId() {
+
+        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
+
+        ArrayList<String> participantIds = Game.mMatch.getParticipantIds();
+
+        int desiredIndex = -1;
+
+        for (int i = 0; i < participantIds.size(); i++) {
+            if (participantIds.get(i).equals(myParticipantId)) {
+                desiredIndex = i + 1;
+            }
+        }
+
+        if (desiredIndex < participantIds.size()) {
+            return participantIds.get(desiredIndex);
+        }
+
+        if (Game.mMatch.getAvailableAutoMatchSlots() <= 0) {
+            // You've run out of automatch slots, so we roulette_rotate over.
+            return participantIds.get(0);
+        } else {
+            // You have not yet fully automatched, so null will find a new
+            // person to play against.
+            return null;
+        }
     }
 }

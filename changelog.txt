@@ -2,6 +2,11 @@
 
 Pendiente
         Traducciones de Inglés y Español. (Jesús)
+		Pregunta con múltiples opciones no se ve correctamente.
+30/08/2018
+		Los estados del juego suceden dentro de la partida cargada en la Actividad de la Ruleta
+		La ruleta se modifica para que no haya límite de velocidad.
+		Nuevo método para escribir el estado de la partida en el interior de la ruleta
 29/08/2018
         Se comprueba la integridad del fichero JSON y se estructura la carga de las categorías en un único punto.
 28/08/2018

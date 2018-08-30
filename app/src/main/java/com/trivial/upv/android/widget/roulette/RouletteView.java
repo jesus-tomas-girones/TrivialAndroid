@@ -3,6 +3,7 @@ package com.trivial.upv.android.widget.roulette;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,6 +17,7 @@ import android.media.SoundPool;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -43,6 +45,18 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     private String images[] = null;
     private RectF oval;
     private Theme[] themes;
+
+    public String getLine1() {
+        return line1;
+    }
+
+    public void setLine1(String line1) {
+        this.line1 = line1;
+        this.invalidate();
+    }
+
+    private String line1;
+    private String line2;
     private boolean isRotating;
     private RotateEventLisstener rotationEventListener;
     private boolean playable = false;
@@ -56,7 +70,14 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     public void setupView() {
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        new Thread(new Runnable() {
+            public void run() {
+                soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+                idSoundRoulette = soundPool.load(getContext(), R.raw.tick, 0);
+                idSoundYourTurn = soundPool.load(getContext(), R.raw.alleluia, 0);
 
+            }
+        }).start();
         final DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         mDensity = displayMetrics.density;
@@ -92,6 +113,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         this.numSectors = sectors;
         this.images = images;
         this.themes = mThemes;
+        this.line1 = line1;
+        this.line2 = line2;
 
         // Recycle
         if (mBitmaps != null) {
@@ -241,7 +264,107 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 //            pathIndicador.lineTo(getWidth()/2 - getWidth()/2/11, 0);
 //            pathIndicador.close();
 //            canvas.drawPath(pathIndicador, paintIndicador);
+
+            if (line1 != null) {
+                Paint mpaint = new Paint();
+                mpaint.setColor(Color.WHITE);
+                mpaint.setStyle(Paint.Style.FILL);
+
+                Paint paint2 = new Paint();
+                paint2.setColor(Color.BLACK);
+                mpaint.setColor(Color.WHITE);
+                mpaint.setStyle(Paint.Style.FILL);
+                paint2.setColor(Color.BLACK);
+                paint2.setTextSize(convertDpToPixel(20, getContext()));  //set text size
+//                paint2.setTextAlign(Paint.Align.CENTER);
+                float maxW = 0;
+                String[] splitedLines = line1.split("\n");
+                for (String line : splitedLines) {
+                    float w = paint2.measureText(line) / 2;
+                    if (w > maxW) {
+                        maxW = w;
+                    }
+                }
+                float totalYSize = (splitedLines.length - 1) * (-paint2.ascent() + paint2.descent());
+                float yy = r - totalYSize / 2;
+
+                for (String line : line1.split("\n")) {
+                    float textSize = paint2.getTextSize();
+                    Path path = roundedRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, yy + textSize / 3, convertDpToPixel(5, getContext()), convertDpToPixel(5, getContext()), true, true, true, true);
+//                    canvas.drawRoundRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, yy + textSize / 3, convertDpToPixel(2,getContext()),convertDpToPixel(2,getContext()),mpaint);
+                    mpaint.setColor(Color.WHITE);
+                    mpaint.setStyle(Paint.Style.FILL);
+                    canvas.drawPath(path,mpaint);
+                    mpaint.setColor(Color.BLACK);
+                    mpaint.setStyle(Paint.Style.STROKE);
+                    canvas.drawPath(path,mpaint);
+                    canvas.drawText(line, r - maxW, yy, paint2);
+                    yy += -paint2.ascent() + paint2.descent();
+                }
+            }
         }
+
+    }
+    private static Path roundedRect(
+            float left, float top, float right, float bottom, float rx, float ry,
+            boolean tl, boolean tr, boolean br, boolean bl
+    ){
+        Path path = new Path();
+        if (rx < 0) rx = 0;
+        if (ry < 0) ry = 0;
+        float width = right - left;
+        float height = bottom - top;
+        if (rx > width / 2) rx = width / 2;
+        if (ry > height / 2) ry = height / 2;
+        float widthMinusCorners = (width - (2 * rx));
+        float heightMinusCorners = (height - (2 * ry));
+
+        path.moveTo(right, top + ry);
+        if (tr)
+            path.rQuadTo(0, -ry, -rx, -ry);//top-right corner
+        else{
+            path.rLineTo(0, -ry);
+            path.rLineTo(-rx,0);
+        }
+        path.rLineTo(-widthMinusCorners, 0);
+        if (tl)
+            path.rQuadTo(-rx, 0, -rx, ry); //top-left corner
+        else{
+            path.rLineTo(-rx, 0);
+            path.rLineTo(0,ry);
+        }
+        path.rLineTo(0, heightMinusCorners);
+
+        if (bl)
+            path.rQuadTo(0, ry, rx, ry);//bottom-left corner
+        else{
+            path.rLineTo(0, ry);
+            path.rLineTo(rx,0);
+        }
+
+        path.rLineTo(widthMinusCorners, 0);
+        if (br)
+            path.rQuadTo(rx, 0, rx, -ry); //bottom-right corner
+        else{
+            path.rLineTo(rx,0);
+            path.rLineTo(0, -ry);
+        }
+
+        path.rLineTo(0, -heightMinusCorners);
+
+        path.close();//Given close, last lineto can be removed.
+
+        return path;
+    }
+    public static float convertDpToPixel(float dp, Context context) {
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        float px = dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        return px;
+    }
+
+    public static float convertPixelsToDp(float px, Context context) {
+        return px / ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     private long lngDegrees = 0;
@@ -286,18 +409,18 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                 return false;
             if ((e1.getY() - e2.getY()) * mDensity / 2.0f > SWIPE_MIN_DISTANCE) {
 //                Log.d("FLING", "bottomToTop: " + max);
-                rotate(max * 2.0f / 360.0f);
+                rotate(max / 360.0f);
             } else if ((e2.getY() - e1.getY()) * mDensity / 2.0f > SWIPE_MIN_DISTANCE)
 //                Log.d("FLING", "topToBottom  ");
-                rotate(max * 2.0f / 360.0f);
+                rotate(max / 360.0f);
         } else {
             if (Math.abs(velocityX) < SWIPE_THRESHOLD_VELOCITY)
                 return false;
             if ((e1.getX() - e2.getX()) * mDensity / 2.0f > SWIPE_MIN_DISTANCE) {
-                rotate(max * 2.0f / 360.0f);
+                rotate(max / 360.0f);
             } else if ((e2.getX() - e1.getX()) * mDensity / 2.0f > SWIPE_MIN_DISTANCE) {
 //                Log.d("FLING", "swipe LeftToright," + max);
-                rotate(max * 2.0f / 360.0f);
+                rotate(max / 360.0f);
             }
         }
         return true;
@@ -322,22 +445,17 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     public void rotate(float speed) {
         if (playable) {
             if (!isRotating && speed > 0.5f) {
-
-                Log.d("ROTATE", "ROTACION");
                 isRotating = true;
                 this.speed = speed;
-                soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
-                idSonido = soundPool.load(getContext(), R.raw.tick, 0);
+
                 parar = false;
 
 //            int ran = new Random().nextInt(360);
-//
-                if (speed > 20.0f)
-                    speed = 20.33f;
                 long ran = (long) (360.0f * speed);
-
                 long ajuste = ((lngDegrees + ran) % 360) % ((360 / numSectors));
-
+//                Log.d("ROTATE", ran +"");
+//                Log.d("ROTATE",((int) (((double) numSectors)
+//                        - Math.floor(((double) lngDegrees) / (360.0d / ((double) numSectors)))) - 1) + "");
                 if (ajuste <= K_ADJUST_ROULETTE_EDGE) {
                     ran = ran + K_ADJUST_ROULETTE_DEGREES_EDGE;
 //                    Log.d("RAN" , "RAN AJUSTADO");
@@ -356,7 +474,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                 rotateAnimation.setAnimationListener(new Animation.AnimationListener() {
                     @Override
                     public void onAnimationStart(Animation animation) {
-                        playSound();
+                        playSoundRoulette();
                         rotationEventListener.rotateStart();
                     }
 
@@ -382,11 +500,12 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     }
 
     private SoundPool soundPool = null;
-    private int idSonido = 0;
+    private int idSoundRoulette = 0;
+    private int idSoundYourTurn = 0;
     long lastTime = 0;
     boolean parar = false;
 
-    public void playSound() {
+    public void playSoundRoulette() {
         final ValueAnimator animacion = ValueAnimator.ofFloat(0, 10);
         animacion.setDuration((long) (360 * speed + lngDegrees));
         animacion.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -403,10 +522,10 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                     public void run() {
                         if (parar) {
                             parar = false;
-                            soundPool.play(idSonido, 0.5f, 0.5f, 1, 0, 1f);
+                            soundPool.play(idSoundRoulette, 0.5f, 0.5f, 1, 0, 1f);
                         } else if (System.currentTimeMillis() - lastTime >= (long) (15.0f + 10f * (Float.parseFloat(valueAnimator.getAnimatedValue().toString())))) {
                             lastTime = System.currentTimeMillis();
-                            soundPool.play(idSonido, 0.5f, 0.5f, 1, 0, 1f);
+                            soundPool.play(idSoundRoulette, 0.5f, 0.5f, 1, 0, 1f);
                         }
                     }
                 }).start();
@@ -415,21 +534,30 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         animacion.start();
     }
 
+    public void playSoundIsYourTurn() {
+        soundPool.play(idSoundYourTurn, 0.5f, 0.5f, 1, 0, 1f);
+    }
+
     public void resumeSound() {
-        if (soundPool != null)
-            soundPool.resume(idSonido);
+        if (soundPool != null) {
+            soundPool.resume(idSoundRoulette);
+            soundPool.resume(idSoundYourTurn);
+        }
+
     }
 
     public void destroySound() {
         if (soundPool != null) {
-            soundPool.stop(idSonido);
+            soundPool.stop(idSoundRoulette);
+            soundPool.stop(idSoundYourTurn);
             soundPool.release();
         }
     }
 
     public void pauseSound() {
         if (soundPool != null) {
-            soundPool.pause(idSonido);
+            soundPool.pause(idSoundRoulette);
+            soundPool.pause(idSoundYourTurn);
         }
     }
 

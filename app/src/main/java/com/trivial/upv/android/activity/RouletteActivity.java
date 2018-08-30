@@ -2,8 +2,11 @@ package com.trivial.upv.android.activity;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,12 +16,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchUpdateCallback;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.RouletteScorePlayerAdapter;
 import com.trivial.upv.android.fragment.CustomDialogFragment;
+import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.gpg.Game;
+import com.trivial.upv.android.model.gpg.Turn;
 import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.roulette.RouletteView;
@@ -53,11 +61,136 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //        requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState);
         setContentView(R.layout.roulette_activity);
-        setupView();
+        playable = getIntent().getBooleanExtra("playable", false);
+        setupView(true);
+
     }
 
-    private void setupView() {
-        playable = getIntent().getBooleanExtra("playable", false);
+    private TurnBasedMatchUpdateCallback mMatchUpdateCallback = new TurnBasedMatchUpdateCallback() {
+        @Override
+        public void onTurnBasedMatchReceived(@NonNull TurnBasedMatch turnBasedMatch) {
+            updateMatch(turnBasedMatch);
+        }
+
+        @Override
+        public void onTurnBasedMatchRemoved(@NonNull String matchId) {
+            Toast.makeText(RouletteActivity.this, "A match was removed.", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+
+    private AlertDialog mAlertDialog = null;
+
+    // Generic warning/info dialog
+    public void showWarning(String title, String message, final PlayTurnBasedFragment.ActionOnClickButton actionButton) {
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
+        // set title
+        alertDialogBuilder.setTitle(title).setMessage(message);
+        // set dialog message
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // if this button is clicked, close
+                        // current activity
+                        if (actionButton != null)
+                            actionButton.onClick();
+                    }
+                });
+        // create alert dialog
+        mAlertDialog = alertDialogBuilder.create();
+        // show it
+        mAlertDialog.show();
+    }
+
+    PlayTurnBasedFragment.ActionOnClickButton finishActivity = new PlayTurnBasedFragment.ActionOnClickButton() {
+        @Override
+        public void onClick() {
+            finish();
+        }
+    };
+
+    public void updateMatch(TurnBasedMatch match) {
+        if (match.getMatchId().equals(Game.mMatch.getMatchId())) {
+            Game.mMatch = match;
+            Game.mTurnData = Turn.unpersist(match.getData());
+            int status = match.getStatus();
+            int turnStatus = match.getTurnStatus();
+
+            switch (status) {
+                case TurnBasedMatch.MATCH_STATUS_CANCELED:
+                    showWarning("Canceled!", "This game was canceled!", finishActivity);
+                    return;
+                case TurnBasedMatch.MATCH_STATUS_EXPIRED:
+                    showWarning("Expired!", "This game is expired.  So sad!", finishActivity);
+                    return;
+                case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
+                    if (!Game.mTurnData.isFinishedMatch()) {
+                        rouletteView.setLine1("Waiting\nfor auto-match...");
+//                        showWarning("Waiting for auto-match...",
+//                                "We're still waiting for an automatch partner.", null);
+
+                    } else {
+                        rouletteView.setLine1("Complete!");
+//                        showWarning("Complete!",
+//                                "This game is over; someone finished it, and so did you!  " +
+//                                        "There is nothing to be done.", null);
+                    }
+                    return;
+                case TurnBasedMatch.MATCH_STATUS_COMPLETE:
+                    if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
+                        rouletteView.setLine1("Complete!");
+//                        showWarning("Complete!",
+//                                "This game is over; someone finished it, and so did you!  " +
+//                                        "There is nothing to be done.", null);
+                        break;
+                    }
+                    // Note that in this state, you must still call "Finish" yourself,
+                    // so we allow this to continue.
+                    rouletteView.setLine1("Complete!");
+//                showWarning("Complete!",
+//                        "This game is over; someone finished it!  You can only finish it now.", actionButtonDone);
+                    ////// TO DO
+//                    finishFinishedMatch();
+                    return;
+            }
+
+            // OK, it's active. Check on turn status.
+            switch (turnStatus) {
+                case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
+                    playable = true;
+                    rouletteView.playSoundIsYourTurn();
+                    setupView(false);
+                    break;
+                case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
+                    // Should return results.
+                    if (!Game.mTurnData.isFinishedMatch()) {
+                        String textNextPlayer = "";
+                        try {
+                            textNextPlayer = "Next player\n\n" + match.getParticipant(Game.getNextParticipantId()).getDisplayName();
+                            rouletteView.setLine1(textNextPlayer);
+                        } catch (Exception ex) {
+                        }
+//                        showWarning("It's not your turn...", textNextPlayer, null);
+                    } else {
+//                        showWarning("Complete!",
+//                                "This game is over; someone finished it, and so did you!  " +
+//                                        "There is nothing to be done.", null);
+                        rouletteView.setLine1("Complete!");
+                    }
+                    break;
+                case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
+                    rouletteView.setLine1("Still waiting for invitations!");
+//                    showWarning("Good inititative!",
+//                            "Still waiting for invitations.\n\nBe patient!", null);
+                    break;
+            }
+        }
+    }
+
+
+    private void setupView(boolean updateRoulete) {
+
 //        btnRotate = (Button) findViewById(R.id.buttonStart);
         btnBack = (ImageButton) findViewById(R.id.back);
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -70,8 +203,10 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         btnCancelMatch = (Button) findViewById(R.id.buttonAbandon);
         if (!playable)
             btnCancelMatch.setVisibility(View.INVISIBLE);
+        else
+            btnCancelMatch.setVisibility(View.VISIBLE);
 
-        setupRoulette();
+        setupRoulette(updateRoulete);
         setupScorePlayer();
     }
 
@@ -119,7 +254,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         mRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
-    private void setupRoulette() {
+    private void setupRoulette(boolean update) {
         category_title = (TextView) findViewById(R.id.category_title);
         txtPoints = (TextView) findViewById(R.id.txtPoints);
         if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
@@ -157,6 +292,9 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             shakeListener = new ShakeListener(this);
             shakeListener.setOnShakeListener(this);
         }
+
+        if (update)
+        updateMatch(Game.mMatch);
     }
 
     @Override
@@ -165,6 +303,9 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         if (shakeListener != null)
             shakeListener.resume();
         rouletteView.resumeSound();
+        if (Game.mTurnBasedMultiplayerClient != null)
+            Game.mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
+
     }
 
     @Override
@@ -173,6 +314,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         if (shakeListener != null)
             shakeListener.pause();
         rouletteView.pauseSound();
+
     }
 
     public interface FinishCounterEvent {
@@ -203,7 +345,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 @Override
                 public void onFinishedCount() {
                     Intent intent = new Intent();
-                    intent.putExtra("category", (int)Game.mTurnData.categories.get(category));
+                    intent.putExtra("category", (int) Game.mTurnData.categories.get(category));
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                     overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -217,6 +359,8 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     protected void onDestroy() {
         super.onDestroy();
         rouletteView.destroySound();
+        if (Game.mTurnBasedMultiplayerClient != null)
+            Game.mTurnBasedMultiplayerClient.unregisterTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
     }
 
     @Override
@@ -242,9 +386,9 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     Theme mThemes[];
 
     public void leaveMatch(View v) {
-        Intent intent= new Intent();
+        Intent intent = new Intent();
         intent.putExtra("leave", true);
-        setResult(Activity.RESULT_OK,intent);
+        setResult(Activity.RESULT_OK, intent);
         finish();
 //        if (this.intNumber < 10) {
 //            this.intNumber++;
@@ -267,7 +411,8 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         if (isRotationEnabled) {
 //            Log.d("SHAKESPEED", ""+ speed);
             rotateEventListener.rotateStart();
-            rouletteView.rotate(speed*1.5f);}
+            rouletteView.rotate(speed * 1.5f);
+        }
 
     }
 
@@ -277,4 +422,6 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
+
+
 }
