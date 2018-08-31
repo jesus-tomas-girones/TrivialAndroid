@@ -801,17 +801,17 @@ public class PlayTurnBasedFragment extends Fragment {
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                 if (!Game.mTurnData.isFinishedMatch()) {
-                    showWarning(true, "Waiting for auto-match...",
+                    showWarning(false, "Waiting for auto-match...",
                             "We're still waiting for an automatch partner.", actionButtonDone);
 
-                } else showWarning(true, "Complete!",
+                } else showWarning(false, "Complete!",
                         "This game is over; someone finished it, and so did you!  " +
                                 "There is nothing to be done.", actionButtonDone);
 
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                    showWarning(true, "Complete!",
+                    showWarning(false, "Complete!",
                             "This game is over; someone finished it, and so did you!  " +
                                     "There is nothing to be done.", actionButtonDone);
                     break;
@@ -831,7 +831,9 @@ public class PlayTurnBasedFragment extends Fragment {
             case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
                 if (match.getData() != null) {
                     // This is a game that has already started, so I'll just roulette_rotate
-                    setGameplayUI();
+                    // Check if the nextTurnPlayer is asigned
+                    writeCurrenPartcipantPlayer();
+//                    setGameplayUI();
                 } else {
                     startMatch(match);
                 }
@@ -1390,7 +1392,7 @@ public class PlayTurnBasedFragment extends Fragment {
                             @Override
                             public void onSuccess(TurnBasedMatch turnBasedMatch) {
 
-                                showWarning(true, "Complete!",
+                                showWarning(false, "Complete!",
                                         "This game is over; someone finished it, and so did you!  " +
                                                 "There is nothing to be done.", actionButtonDone);
 //                                Toast.makeText(getActivity(),
@@ -1456,15 +1458,18 @@ public class PlayTurnBasedFragment extends Fragment {
         // The new player doesn't play any turn.
         if (Game.mTurnData.isFinishedMatch() && finishMatch && Game.mTurnData.numTurnos == 1) {
             txtMatchResultPlayer = "You've joind at the end of the match. Indeed, " + txtMatchResultPlayer;
-        }
 
-        showAlertMessage("Partida Finalizada", txtMatchResultPlayer, new ActionOnClickButton() {
-            @Override
-            public void onClick() {
-                Game.mTurnData = null;
-                onUpdateMatch(turnBasedMatch);
-            }
-        });
+            showAlertMessage("Partida Finalizada", txtMatchResultPlayer, new ActionOnClickButton() {
+                @Override
+                public void onClick() {
+                    Game.mTurnData = null;
+                    onUpdateMatch(turnBasedMatch);
+                }
+            });
+        } else {
+            Game.mTurnData = null;
+            onUpdateMatch(turnBasedMatch);
+        }
     }
 
     public static String checkPlayerMatchResult(Participant participant) {
@@ -1651,12 +1656,13 @@ public class PlayTurnBasedFragment extends Fragment {
 //        }
 
 //        return tmpValue;
-        if (progresValue > 8)
-            progresValue = 8;
+        if (progresValue > MAX_NUM_PLAYERS)
+            progresValue = MAX_NUM_PLAYERS;
 
         return progresValue;
     }
 
+    public static final int MAX_NUM_PLAYERS = 4;
 
     private void showSeekbarsProgress() {
         txtPlayers.setText(getString(R.string.num_players) + sbPlayers.getProgress() + "/" + (sbPlayers.getMax() - 1));
@@ -1724,12 +1730,34 @@ public class PlayTurnBasedFragment extends Fragment {
 //        dismissSpinner();
 
         if (match.getData() != null) {
-            // This is a game that has already started, so I'll just roulette_rotate
             updateMatch(match);
             return;
         }
 
         startMatch(match);
+    }
+
+    private void writeCurrenPartcipantPlayer() {
+        String currentParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
+        if (Game.mTurnData.idParticipantTurn == null || Game.mTurnData.participantsTurnBased.indexOf(Game.mTurnData.idParticipantTurn) == -1) {
+            showSpinner();
+            Game.mTurnData.idParticipantTurn = currentParticipantId;
+            if (Game.mTurnData.participantsTurnBased.indexOf(Game.mTurnData.idParticipantTurn) == -1)
+                Game.mTurnData.participantsTurnBased.add(Game.mTurnData.idParticipantTurn);
+            Game.mTurnBasedMultiplayerClient.takeTurn(Game.mMatch.getMatchId(),
+                    Game.mTurnData.persist(), Game.mTurnData.idParticipantTurn)
+                    .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
+                        @Override
+                        public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                            Game.mMatch = turnBasedMatch;
+                            Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
+                            setGameplayUI();
+                        }
+                    })
+                    .addOnFailureListener(createFailureListener("There was a problem updating current player"));
+        } else {
+            setGameplayUI();
+        }
     }
 
     // startMatch() happens in response to the createTurnBasedMatch()

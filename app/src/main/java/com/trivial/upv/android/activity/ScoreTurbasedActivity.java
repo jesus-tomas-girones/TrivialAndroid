@@ -18,14 +18,11 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.RouletteScorePlayerAdapter;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.gpg.Game;
-import com.trivial.upv.android.model.gpg.Turn;
 import com.trivial.upv.android.persistence.TrivialJSonHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import javax.xml.transform.Result;
 
 import static com.trivial.upv.android.fragment.PlayTurnBasedFragment.K_PUNTOS_POR_PREGUNTA;
 
@@ -52,10 +49,10 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
 
     private void setupView() {
         category_title = (TextView) findViewById(R.id.category_title);
-        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
-            category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
-        else
-            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
+//        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
+        category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
+//        else
+//            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
         btnBack = (ImageButton) findViewById(R.id.back);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,7 +198,7 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
             }
         }
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_categories);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
 //        mRecyclerView.setHasFixedSize(true);

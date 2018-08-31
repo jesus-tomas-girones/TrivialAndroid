@@ -61,7 +61,8 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     private boolean playable = false;
     private RecyclerView mRecyclerView2;
     private GridLayoutManager mLayoutManager2;
-    private RouletteScorePlayerAdapter mAdapter2;
+    //    private RouletteScorePlayerAdapter mAdapter2;
+    private RouletteScoreCategoriesAdapter mAdapter2;
     private boolean playSound = false;
 
 
@@ -155,7 +156,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     return;
                 case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                     if (!Game.mTurnData.isFinishedMatch()) {
-                        rouletteView.setLine1("Waiting for\nauto-match...");
+                        rouletteView.setLine1("Waiting for\nan automatch partner...");
 //                        showWarning("Waiting for auto-match...",
 //                                "We're still waiting for an automatch partner.", null);
 
@@ -174,6 +175,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
                         showMessageFinishMatch(match);
+                        setupView(false);
                         break;
                     }
                     // Note that in this state, you must still call "Finish" yourself,
@@ -263,12 +265,13 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             btnCancelMatch.setVisibility(View.VISIBLE);
 
         setupRoulette(updateRoulete);
-        setupScorePlayerCategories();
-        setupScorePlayerByPlayer();
+//        setupScorePlayerCategories();
+//        setupScorePlayerByPlayer();
+        setupScorePlayerByPlayer2();
     }
 
     private void setupScorePlayerCategories() {
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view_categories);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -311,11 +314,63 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     }
 
 
-    private void setupScorePlayerByPlayer() {
-        int totalCategories = Game.mTurnData.categories.size();
+//    private void setupScorePlayerByPlayer() {
+//        int totalCategories = Game.mTurnData.categories.size();
+//        int totalPlayers = Game.mTurnData.numJugadores;
+//
+//        mRecyclerView2 = (RecyclerView) findViewById(R.id.my_recycler_view2);
+//        // use this setting to improve performance if you know that changes
+//        // in content do not change the layout size of the RecyclerView
+//        mRecyclerView2.setHasFixedSize(true);
+//
+//        // use a linear layout manager
+//        mLayoutManager2 = new GridLayoutManager(this, Math.min(10, totalPlayers));
+//        mRecyclerView2.setLayoutManager(mLayoutManager2);
+//
+//        String score2[] = new String[totalPlayers];
+//        String imgPlayers[] = new String[totalPlayers];
+//
+//        // Pivot the first player is the firs position
+//        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
+//        int index = Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
+//        String tmpString = score2[index];
+//        score2[0] = tmpString;
+//        int posCont = 1;
+//        for (int i = 0; i < totalPlayers; i++) {
+//
+//            int numCategories = 0;
+//            for (int j = 0; j < Game.mTurnData.categories.size(); j++) {
+//                if (Game.mTurnData.puntuacion[i][j][0] > 0) {
+//                    numCategories++;
+//                }
+//            }
+//            int posInsert;
+//            if (index != i) {
+//                posInsert = posCont;
+//                posCont++;
+//            } else {
+//                posInsert = 0;
+//            }
+//            score2[posInsert] = String.format(Locale.getDefault(), "%d/%d", numCategories, totalCategories);
+//            ArrayList<Participant> participants = Game.mMatch.getParticipants();
+//            if (i < participants.size() && participants.get(i) != null) {
+//                imgPlayers[posInsert] = participants.get(i).getIconImageUri().toString();
+//            } else {
+//                imgPlayers[posInsert] = "default";
+//            }
+//        }
+//        mAdapter2 = new RouletteScorePlayerAdapter(getApplicationContext(), score2, imgPlayers);
+//        mRecyclerView2.setAdapter(mAdapter2);
+//        mRecyclerView2.setFitsSystemWindows(true);
+//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView2.getContext(),
+//                DividerItemDecoration.HORIZONTAL);
+//        mRecyclerView2.addItemDecoration(dividerItemDecoration);
+//    }
+
+    private void setupScorePlayerByPlayer2() {
         int totalPlayers = Game.mTurnData.numJugadores;
 
-        mRecyclerView2 = (RecyclerView) findViewById(R.id.my_recycler_view2);
+        mRecyclerView2 = (RecyclerView) findViewById(R.id.recycler_view_players);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView2.setHasFixedSize(true);
@@ -324,23 +379,32 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         mLayoutManager2 = new GridLayoutManager(this, Math.min(10, totalPlayers));
         mRecyclerView2.setLayoutManager(mLayoutManager2);
 
-        String score2[] = new String[totalPlayers];
         String imgPlayers[] = new String[totalPlayers];
 
         // Pivot the first player is the firs position
         String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
         int index = Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
-        String tmpString = score2[index];
-        score2[0] = tmpString;
-        int posCont = 1;
-        for (int i = 0; i < totalPlayers; i++) {
 
-            int numCategories = 0;
-            for (int j = 0; j < Game.mTurnData.categories.size(); j++) {
-                if (Game.mTurnData.puntuacion[i][j][0] > 0) {
-                    numCategories++;
-                }
+        int indexCurrentTurnPlayer = -1;
+        if (Game.mTurnData.idParticipantTurn != null ) {
+            indexCurrentTurnPlayer = Game.mMatch.getParticipantIds().indexOf(Game.mTurnData.idParticipantTurn);
+        }
+        else {
+            indexCurrentTurnPlayer = Game.mTurnData.participantsTurnBased.size();
+            if (indexCurrentTurnPlayer<Game.mTurnData.numJugadores) {
+
+            } else {
+                indexCurrentTurnPlayer = Game.mTurnData.numJugadores-1;
             }
+        }
+        int posCont = 1;
+        List[] imagesCategories = new List[Game.mTurnData.numJugadores];
+        List[] themesCategories = new List[Game.mTurnData.numJugadores];
+
+        List<CategoryJSON> categories = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
+
+        boolean assigned = false;
+        for (int i = 0; i < totalPlayers; i++) {
             int posInsert;
             if (index != i) {
                 posInsert = posCont;
@@ -348,7 +412,29 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             } else {
                 posInsert = 0;
             }
-            score2[posInsert] = String.format(Locale.getDefault(), "%d/%d", numCategories, totalCategories);
+
+            if (indexCurrentTurnPlayer == i && !assigned) {
+                indexCurrentTurnPlayer = posInsert;
+                assigned = true;
+            }
+
+            imagesCategories[posInsert] = new ArrayList<Integer>();
+            themesCategories[posInsert] = new ArrayList<Integer>();
+            for (int j = 0; j < Game.mTurnData.categories.size(); j++) {
+                if (Game.mTurnData.puntuacion[i][j][0] > 0) {
+                    int indexCategory = Game.mTurnData.categories.get(j);
+                    CategoryJSON category = null;
+                    if (indexCategory < categories.size()) {
+                        category = categories.get(indexCategory);
+                        themesCategories[posInsert].add(Theme.valueOf(category.getTheme()));
+                        imagesCategories[posInsert].add(category.getImg());
+                    } else {
+                        // The game is corrupt
+                        Log.w(TAG, "The game is corrupt");
+                    }
+                }
+            }
+
             ArrayList<Participant> participants = Game.mMatch.getParticipants();
             if (i < participants.size() && participants.get(i) != null) {
                 imgPlayers[posInsert] = participants.get(i).getIconImageUri().toString();
@@ -356,7 +442,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 imgPlayers[posInsert] = "default";
             }
         }
-        mAdapter2 = new RouletteScorePlayerAdapter(getApplicationContext(), score2, imgPlayers);
+        mAdapter2 = new RouletteScoreCategoriesAdapter(getApplicationContext(), indexCurrentTurnPlayer, imgPlayers, imagesCategories, themesCategories);
         mRecyclerView2.setAdapter(mAdapter2);
         mRecyclerView2.setFitsSystemWindows(true);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView2.getContext(),
@@ -367,10 +453,10 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     private void setupRoulette(boolean update) {
         category_title = (TextView) findViewById(R.id.category_title);
         txtPoints = (TextView) findViewById(R.id.txtPoints);
-        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
+//        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
             category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
-        else
-            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
+//        else
+//            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
 
         txtPoints.setText(String.format(Locale.getDefault(), "Pts: %d", Game.mTurnData.calculateScorePlayer(Game.mPlayerId)));
         rouletteView = (RouletteView) findViewById(R.id.rouletteView);
@@ -396,7 +482,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 // The game is corrupt
             }
         }
-        rouletteView.setNumSectors(intNumber, imagenes, mThemes);
+        rouletteView.setNumSectors(false, intNumber, imagenes, mThemes);
 
         if (playable) {
             shakeListener = new ShakeListener(this);
@@ -535,6 +621,4 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
-
-
 }

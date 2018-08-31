@@ -45,7 +45,7 @@
     <!-- A RecyclerView with some commonly used attributes -->
     <android.support.v7.widget.RecyclerView
         android:layout_marginTop="5dp"
-        android:id="@+id/my_recycler_view"
+        android:id="@+id/recycler_view_categories"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

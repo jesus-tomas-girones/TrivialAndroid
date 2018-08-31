@@ -87,7 +87,7 @@
                     android:layout_marginLeft="5dp"
                     android:layout_marginRight="5dp"
                     android:layout_marginTop="5dp"
-                    android:max="9"
+                    android:max="5"
                     android:progress="2"
                     android:thumb="@drawable/thumb_image"
                     android:visibility="visible" />

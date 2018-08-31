@@ -17,7 +17,6 @@ import android.media.SoundPool;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -40,7 +39,7 @@ import static java.lang.Thread.sleep;
 
 public class RouletteView extends View implements GestureDetector.OnGestureListener {
 
-    private static final int SIZE_BORDER = 10;
+    private int SIZE_BORDER = 10;
     private static final String TAB = "RoluetteView";
     private static final int K_ADJUST_ROULETTE_EDGE = 2;
     private static final int K_ADJUST_ROULETTE_DEGREES_EDGE = 5;
@@ -111,13 +110,13 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         return numSectors;
     }
 
-    public synchronized void setNumSectors(int sectors, String[] images, Theme[] mThemes) {
+    public synchronized void setNumSectors(final boolean minified, int sectors, String[] images, Theme[] mThemes) {
         this.numSectors = sectors;
         this.images = images;
         this.themes = mThemes;
-        this.line1 = line1;
-        this.line2 = line2;
 
+        if (minified)
+            SIZE_BORDER = 5;
         // Recycle
         if (mBitmaps != null) {
             for (int i = 0; i < mBitmaps.length; i++) {
@@ -150,8 +149,10 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 //                                    int x= (int)((float)mBitmaps[finalI].getWidth()*scala);
 //                                    int y = (int)((float)mBitmaps[finalI].getHeight()*scala);
 ////
-                                    mBitmaps[finalI] = getResizedBitmap(mBitmaps[finalI], (int) ((float) mBitmaps[finalI].getWidth() * 1.5f), (int) ((float) mBitmaps[finalI].getHeight() * 1.5f));
-
+                                    if (!minified)
+                                        mBitmaps[finalI] = getResizedBitmap(mBitmaps[finalI], (int) ((float) mBitmaps[finalI].getWidth() * 1.5f), (int) ((float) mBitmaps[finalI].getHeight() * 1.5f));
+                                    else
+                                        mBitmaps[finalI] = getResizedBitmap(mBitmaps[finalI], (int) convertDpToPixel(20, getContext()), (int) convertDpToPixel(20, getContext()));
                                     RouletteView.this.invalidate();
                                 }
                         }
@@ -167,7 +168,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         }
     }
 
-    private int numSectors = 1;
+    private int numSectors = 0;
 
 
     private float angulo;
@@ -200,62 +201,73 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     @Override
     protected void onDraw(Canvas canvas) {
-        angulo = 360.0f / (float) numSectors;
+        if (numSectors != 0) {
+            angulo = 360.0f / (float) numSectors;
+            boolean userCenter = true;
+            int x, y;
+            for (int i = 0; i < numSectors; i++) {
+                if (i < themes.length)
+                    paint.setColor(ContextCompat.getColor(getContext(), themes[i].getWindowBackgroundColor()));
 
-        int x, y;
-        for (int i = 0; i < numSectors; i++) {
-            if (i < themes.length)
-                paint.setColor(ContextCompat.getColor(getContext(), themes[i].getWindowBackgroundColor()));
-            paint.setStyle(Paint.Style.FILL);
-            canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, paint);
-
-            path.reset();
-            if (numSectors > 1) {
-                path.arcTo(oval, (((float) i) * angulo - 90.0f), angulo);
-                path.lineTo(getWidth() / 2, getWidth() / 2);
-                path.close();
-            } else {
-                path.addCircle((float) (getWidth() / 2), (float) (getWidth() / 2), (float) r, Path.Direction.CW);
-            }
-
-            synchronized (this) {
-                Bitmap mBitmap = mBitmaps[i];
-                if (mBitmap != null) {
-                    canvas.save();
-                    canvas.clipPath(path, Region.Op.INTERSECT);
-
-                    double trad = ((((float) i) * angulo - 90.0f) + angulo / 2) * (Math.PI / 180d); // = 5.1051
-                    x = (int) (r * Math.cos(trad));
-                    x += r;
-                    x += (r - x) / 3;
-
+                paint.setStyle(Paint.Style.FILL);
+                path.reset();
+                if (numSectors > 0) {
                     if (numSectors > 1) {
-                        y = (int) (r * Math.sin(trad));
-                        y += r;
-                        y += (r - y) / 3;
-                    } else y = r;
+                        canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, paint);
+                        path.arcTo(oval, (((float) i) * angulo - 90.0f), angulo);
+                        path.lineTo(getWidth() / 2, getWidth() / 2);
+                        path.close();
 
-                    x -= mBitmap.getWidth() / 2;
-                    y -= mBitmap.getHeight() / 2;
-
-//                    Log.d("LOG", ((((float) i) * angulo - 90.0f) + angulo / 2) + "");
-                    if (numSectors > 1)
-                        canvas.rotate((((float) i) * angulo - 90.0f) + angulo / 2 + 90.0f, x + mBitmap.getWidth() / 2, y + mBitmap.getHeight() / 2);
-                    canvas.drawBitmap(mBitmap, x, y, null);
-
-                    try {
-                        canvas.restore();
-                    } catch (Exception e) {
+                    }
+                    else { canvas.drawCircle(r,r, r-SIZE_BORDER/2, paint);
+                        path.addCircle(r,r, r-SIZE_BORDER/2, Path.Direction.CCW);
+                    }
+                    if (numSectors > 1) {
 
                     }
                 }
-            }
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.BLACK);
-            paint.setStrokeWidth(SIZE_BORDER);
-            canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, true, paint);
 
-            // Draw
+                synchronized (this) {
+                    Bitmap mBitmap = mBitmaps[i];
+                    if (mBitmap != null) {
+                        canvas.save();
+                        canvas.clipPath(path, Region.Op.INTERSECT);
+
+                        double trad = ((((float) i) * angulo - 90.0f) + angulo / 2) * (Math.PI / 180d); // = 5.1051
+                        x = (int) (r * Math.cos(trad));
+                        x += r;
+                        x += (r - x) / 3;
+
+                        if (numSectors > 1) {
+                            y = (int) (r * Math.sin(trad));
+                            y += r;
+                            y += (r - y) / 3;
+                        } else y = r;
+
+                        x -= mBitmap.getWidth() / 2;
+                        y -= mBitmap.getHeight() / 2;
+
+//                    Log.d("LOG", ((((float) i) * angulo - 90.0f) + angulo / 2) + "");
+                        if (numSectors > 1)
+                            canvas.rotate((((float) i) * angulo - 90.0f) + angulo / 2 + 90.0f, x + mBitmap.getWidth() / 2, y + mBitmap.getHeight() / 2);
+                        canvas.drawBitmap(mBitmap, x, y, null);
+
+                        try {
+                            canvas.restore();
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setColor(Color.BLACK);
+                paint.setStrokeWidth(SIZE_BORDER);
+
+
+                if (numSectors == 1) userCenter = false;
+                else userCenter = true;
+                canvas.drawArc(oval, (((float) i) * angulo - 90.0f), angulo, userCenter, paint);
+                // Draw
 //            Paint paintIndicador = new Paint();
 //            paintIndicador.setColor(Color.BLACK);
 //            paintIndicador.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -266,39 +278,46 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 //            pathIndicador.lineTo(getWidth()/2 - getWidth()/2/11, 0);
 //            pathIndicador.close();
 //            canvas.drawPath(pathIndicador, paintIndicador);
-            synchronized (RouletteView.this) {
-                if (line1 != null) {
-                    Paint mpaint = new Paint();
-                    Paint paint2 = new Paint();
-                    paint2.setColor(Color.BLACK);
-                    paint2.setTextSize(convertDpToPixel(20, getContext()));  //set text size
+                synchronized (RouletteView.this) {
+                    if (line1 != null) {
+                        Paint mpaint = new Paint();
+                        Paint paint2 = new Paint();
+                        paint2.setColor(Color.BLACK);
+                        paint2.setTextSize(convertDpToPixel(20, getContext()));  //set text size
 //                paint2.setTextAlign(Paint.Align.CENTER);
-                    float maxW = 0;
-                    String[] splitedLines = line1.split("\n");
-                    for (String line : splitedLines) {
-                        float w = paint2.measureText(line) / 2;
-                        if (w > maxW) {
-                            maxW = w;
+                        float maxW = 0;
+                        String[] splitedLines = line1.split("\n");
+                        for (String line : splitedLines) {
+                            float w = paint2.measureText(line) / 2;
+                            if (w > maxW) {
+                                maxW = w;
+                            }
                         }
-                    }
-                    float totalYSize = (splitedLines.length - 1) * (-paint2.ascent() + paint2.descent());
-                    float yy = r - totalYSize / 2;
+                        float totalYSize = (splitedLines.length - 1) * (-paint2.ascent() + paint2.descent());
+                        float yy = r - totalYSize / 2;
 
-                    float textSize = paint2.getTextSize();
-                    Path path = roundedRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, r + totalYSize / 2 + textSize / 3, convertDpToPixel(5, getContext()), convertDpToPixel(5, getContext()), true, true, true, true);
-                    mpaint.setColor(Color.WHITE);
-                    mpaint.setStyle(Paint.Style.FILL);
-                    canvas.drawPath(path, mpaint);
-                    mpaint.setColor(Color.BLACK);
-                    mpaint.setStyle(Paint.Style.STROKE);
-                    canvas.drawPath(path, mpaint);
+                        float textSize = paint2.getTextSize();
+                        Path path = roundedRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, r + totalYSize / 2 + textSize / 3, convertDpToPixel(5, getContext()), convertDpToPixel(5, getContext()), true, true, true, true);
+                        mpaint.setColor(Color.WHITE);
+                        mpaint.setStyle(Paint.Style.FILL);
+                        canvas.drawPath(path, mpaint);
+                        mpaint.setColor(Color.BLACK);
+                        mpaint.setStyle(Paint.Style.STROKE);
+                        canvas.drawPath(path, mpaint);
 
-                    for (String line : line1.split("\n")) {
-                        canvas.drawText(line, r - maxW, yy, paint2);
-                        yy += -paint2.ascent() + paint2.descent();
+                        for (String line : line1.split("\n")) {
+                            canvas.drawText(line, r - maxW, yy, paint2);
+                            yy += -paint2.ascent() + paint2.descent();
+                        }
                     }
                 }
             }
+        } else {
+            // Draw a Circle
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setColor(Color.BLACK);
+            paint.setStrokeWidth(SIZE_BORDER);
+            canvas.drawArc(oval, 0, 360, false, paint);
         }
     }
 
@@ -435,6 +454,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         void rotateStart();
 
         void rotateEnd(int category);
+
     }
 
     private float speed;
@@ -453,6 +473,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                 parar = false;
 
 //            int ran = new Random().nextInt(360);
+                if (speed>20.0f)
+                    speed=20.0f;
                 long ran = (long) (360.0f * speed) + new Random().nextInt(360);
                 long ajuste = ((lngDegrees + ran) % 360) % ((360 / numSectors));
 //                Log.d("ROTATE", ran +"");
