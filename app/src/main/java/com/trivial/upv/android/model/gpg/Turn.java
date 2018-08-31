@@ -24,6 +24,7 @@ public class Turn {
     public short puntuacion[][][] = null;
     public List<String> participantsTurnBased = null;
     public List<Short> categories;
+    public String idParticipantTurn;
 
     public Turn() {
     }
@@ -45,6 +46,7 @@ public class Turn {
             }
             retVal.put("puntuacion", points.toString());
             retVal.put("categories", categories);
+            retVal.put("idParticipantTurn", idParticipantTurn);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -108,6 +110,9 @@ public class Turn {
                     }
                 }
             }
+            if (obj.has("idParticipantTurn")) {
+                retVal.idParticipantTurn = obj.getString("idParticipantTurn");
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -139,7 +144,7 @@ public class Turn {
                 if (puntuacion[i][j][0] > 0)
                     auxNumCategoriesAnsweredOK++;
             }
-            if (auxNumCategoriesAnsweredOK==categories.size())
+            if (auxNumCategoriesAnsweredOK == categories.size())
                 return true;
         }
 

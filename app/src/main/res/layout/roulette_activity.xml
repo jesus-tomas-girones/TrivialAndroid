@@ -77,11 +77,20 @@
 
     <!-- A RecyclerView with some commonly used attributes -->
     <android.support.v7.widget.RecyclerView
+        android:layout_above="@id/my_recycler_view"
+        android:id="@+id/my_recycler_view2"
+        android:scrollbars="horizontal"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <!-- A RecyclerView with some commonly used attributes -->
+    <android.support.v7.widget.RecyclerView
         android:layout_above="@id/layoutButtons"
         android:id="@+id/my_recycler_view"
         android:scrollbars="horizontal"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="0dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <!--<ImageView-->
@@ -97,13 +106,14 @@
         android:id="@+id/layoutButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:layout_alignParentBottom="true">
 
 
         <Button
             android:id="@+id/buttonAbandon"
             android:layout_width="0dp"
-            android:layout_height="45dp"
+            android:layout_height="40dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight="1"
@@ -126,7 +136,7 @@
         <Button
             android:id="@+id/buttonScore"
             android:layout_width="0dp"
-            android:layout_height="45dp"
+            android:layout_height="40dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_weight="1"

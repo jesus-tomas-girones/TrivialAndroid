@@ -135,6 +135,6 @@
     <string name="new_match">New Game</string>
     <string name="num_quizzes">Num Quizzes</string>
     <string name="leave_game">Leave Game </string>
-    <string name="score">Score</string>
+    <string name="score">Statistics</string>
     <!--JTG.E-->
 </resources>

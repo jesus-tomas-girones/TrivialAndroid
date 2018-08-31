@@ -101,6 +101,6 @@
     <string name="new_match">Nueva Partida</string>
     <string name="num_quizzes">Num Preguntas</string>
     <string name="leave_game">Dejar Juego </string>
-    <string name="score">Puntuación</string>
+    <string name="score">Estadísticas</string>
     <!--JTG.E-->
 </resources>

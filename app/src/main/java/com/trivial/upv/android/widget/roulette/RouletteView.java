@@ -34,6 +34,8 @@ import com.trivial.upv.android.R;
 import com.trivial.upv.android.helper.singleton.volley.VolleySingleton;
 import com.trivial.upv.android.model.Theme;
 
+import java.util.Random;
+
 import static java.lang.Thread.sleep;
 
 public class RouletteView extends View implements GestureDetector.OnGestureListener {
@@ -264,51 +266,46 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 //            pathIndicador.lineTo(getWidth()/2 - getWidth()/2/11, 0);
 //            pathIndicador.close();
 //            canvas.drawPath(pathIndicador, paintIndicador);
-
-            if (line1 != null) {
-                Paint mpaint = new Paint();
-                mpaint.setColor(Color.WHITE);
-                mpaint.setStyle(Paint.Style.FILL);
-
-                Paint paint2 = new Paint();
-                paint2.setColor(Color.BLACK);
-                mpaint.setColor(Color.WHITE);
-                mpaint.setStyle(Paint.Style.FILL);
-                paint2.setColor(Color.BLACK);
-                paint2.setTextSize(convertDpToPixel(20, getContext()));  //set text size
+            synchronized (RouletteView.this) {
+                if (line1 != null) {
+                    Paint mpaint = new Paint();
+                    Paint paint2 = new Paint();
+                    paint2.setColor(Color.BLACK);
+                    paint2.setTextSize(convertDpToPixel(20, getContext()));  //set text size
 //                paint2.setTextAlign(Paint.Align.CENTER);
-                float maxW = 0;
-                String[] splitedLines = line1.split("\n");
-                for (String line : splitedLines) {
-                    float w = paint2.measureText(line) / 2;
-                    if (w > maxW) {
-                        maxW = w;
+                    float maxW = 0;
+                    String[] splitedLines = line1.split("\n");
+                    for (String line : splitedLines) {
+                        float w = paint2.measureText(line) / 2;
+                        if (w > maxW) {
+                            maxW = w;
+                        }
                     }
-                }
-                float totalYSize = (splitedLines.length - 1) * (-paint2.ascent() + paint2.descent());
-                float yy = r - totalYSize / 2;
+                    float totalYSize = (splitedLines.length - 1) * (-paint2.ascent() + paint2.descent());
+                    float yy = r - totalYSize / 2;
 
-                for (String line : line1.split("\n")) {
                     float textSize = paint2.getTextSize();
-                    Path path = roundedRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, yy + textSize / 3, convertDpToPixel(5, getContext()), convertDpToPixel(5, getContext()), true, true, true, true);
-//                    canvas.drawRoundRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, yy + textSize / 3, convertDpToPixel(2,getContext()),convertDpToPixel(2,getContext()),mpaint);
+                    Path path = roundedRect(r - maxW - textSize / 2, yy - textSize, r + maxW + textSize / 2, r + totalYSize / 2 + textSize / 3, convertDpToPixel(5, getContext()), convertDpToPixel(5, getContext()), true, true, true, true);
                     mpaint.setColor(Color.WHITE);
                     mpaint.setStyle(Paint.Style.FILL);
-                    canvas.drawPath(path,mpaint);
+                    canvas.drawPath(path, mpaint);
                     mpaint.setColor(Color.BLACK);
                     mpaint.setStyle(Paint.Style.STROKE);
-                    canvas.drawPath(path,mpaint);
-                    canvas.drawText(line, r - maxW, yy, paint2);
-                    yy += -paint2.ascent() + paint2.descent();
+                    canvas.drawPath(path, mpaint);
+
+                    for (String line : line1.split("\n")) {
+                        canvas.drawText(line, r - maxW, yy, paint2);
+                        yy += -paint2.ascent() + paint2.descent();
+                    }
                 }
             }
         }
-
     }
+
     private static Path roundedRect(
             float left, float top, float right, float bottom, float rx, float ry,
             boolean tl, boolean tr, boolean br, boolean bl
-    ){
+    ) {
         Path path = new Path();
         if (rx < 0) rx = 0;
         if (ry < 0) ry = 0;
@@ -322,31 +319,31 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         path.moveTo(right, top + ry);
         if (tr)
             path.rQuadTo(0, -ry, -rx, -ry);//top-right corner
-        else{
+        else {
             path.rLineTo(0, -ry);
-            path.rLineTo(-rx,0);
+            path.rLineTo(-rx, 0);
         }
         path.rLineTo(-widthMinusCorners, 0);
         if (tl)
             path.rQuadTo(-rx, 0, -rx, ry); //top-left corner
-        else{
+        else {
             path.rLineTo(-rx, 0);
-            path.rLineTo(0,ry);
+            path.rLineTo(0, ry);
         }
         path.rLineTo(0, heightMinusCorners);
 
         if (bl)
             path.rQuadTo(0, ry, rx, ry);//bottom-left corner
-        else{
+        else {
             path.rLineTo(0, ry);
-            path.rLineTo(rx,0);
+            path.rLineTo(rx, 0);
         }
 
         path.rLineTo(widthMinusCorners, 0);
         if (br)
             path.rQuadTo(rx, 0, rx, -ry); //bottom-right corner
-        else{
-            path.rLineTo(rx,0);
+        else {
+            path.rLineTo(rx, 0);
             path.rLineTo(0, -ry);
         }
 
@@ -356,6 +353,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
         return path;
     }
+
     public static float convertDpToPixel(float dp, Context context) {
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
@@ -426,7 +424,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         return true;
     }
 
-    public void setRotationEventListener(RotateEventLisstener rotationEventListener, boolean playable) {
+    public void setRotationEventListener(RotateEventLisstener rotationEventListener,
+                                         boolean playable) {
         this.rotationEventListener = rotationEventListener;
         this.playable = playable;
     }
@@ -445,13 +444,16 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     public void rotate(float speed) {
         if (playable) {
             if (!isRotating && speed > 0.5f) {
+                synchronized (RouletteView.this) {
+                    line1 = null;
+                }
                 isRotating = true;
                 this.speed = speed;
 
                 parar = false;
 
 //            int ran = new Random().nextInt(360);
-                long ran = (long) (360.0f * speed);
+                long ran = (long) (360.0f * speed) + new Random().nextInt(360);
                 long ajuste = ((lngDegrees + ran) % 360) % ((360 / numSectors));
 //                Log.d("ROTATE", ran +"");
 //                Log.d("ROTATE",((int) (((double) numSectors)
@@ -497,6 +499,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
                 startAnimation(rotateAnimation);
             }
         }
+
     }
 
     private SoundPool soundPool = null;
@@ -535,7 +538,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     }
 
     public void playSoundIsYourTurn() {
-        soundPool.play(idSoundYourTurn, 0.5f, 0.5f, 1, 0, 1f);
+        if (soundPool != null)
+            soundPool.play(idSoundYourTurn, 0.5f, 0.5f, 1, 0, 1f);
     }
 
     public void resumeSound() {

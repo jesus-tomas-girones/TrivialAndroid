@@ -841,7 +841,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 if (!Game.mTurnData.isFinishedMatch()) {
                     String textNextPlayer = "";
                     try {
-                        textNextPlayer = "Next player: " + match.getParticipant(Game.getNextParticipantId()).getDisplayName();
+                        textNextPlayer = "Next player: " + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
                     } catch (Exception ex) {
                     }
                     showWarning(false, "It's not your turn...", textNextPlayer, actionButtonDone);
@@ -1310,8 +1310,6 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
 
-
-
     // Upload your new gamestate, then take a turn, and pass it on to the next
 // player.
     public void onDoneClicked(View view) {
@@ -1365,8 +1363,9 @@ public class PlayTurnBasedFragment extends Fragment {
 
     public void nextTurn(String myParticipantId, String nextParticipantId) {
         showSpinner();
+        Game.mTurnData.idParticipantTurn = (Game.category == null || Game.category.getScore() == 0) ? nextParticipantId : myParticipantId;
         Game.mTurnBasedMultiplayerClient.takeTurn(Game.mMatch.getMatchId(),
-                Game.mTurnData.persist(), Game.category == null || Game.category.getScore() == 0 ? nextParticipantId : myParticipantId)
+                Game.mTurnData.persist(), Game.mTurnData.idParticipantTurn)
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
@@ -1468,7 +1467,7 @@ public class PlayTurnBasedFragment extends Fragment {
         });
     }
 
-    private String checkPlayerMatchResult(Participant participant) {
+    public static String checkPlayerMatchResult(Participant participant) {
         String auxText = "";
 
         if (participant == null) {
@@ -1778,6 +1777,7 @@ public class PlayTurnBasedFragment extends Fragment {
             }
         }
 
+        Game.mTurnData.idParticipantTurn = myParticipantId;
 
         Game.mTurnBasedMultiplayerClient.takeTurn(match.getMatchId(),
                 Game.mTurnData.persist(), myParticipantId)

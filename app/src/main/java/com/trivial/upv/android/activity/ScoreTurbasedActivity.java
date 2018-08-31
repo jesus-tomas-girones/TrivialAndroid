@@ -70,15 +70,9 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
             int indice = categoryAux;
             categories.add(allCategories.get(indice));
         }
-
-
         this.intNumber = (Game.mTurnData.numJugadores + 2) * (categories.size() + 2);
-
-
         imagenes = new String[this.intNumber];
         String score[] = new String[intNumber];
-
-
         for (int j = 0; j < categories.size() + 2; j++) {
             for (int i = 0; i < Game.mTurnData.numJugadores + 2; i++) {
                 int posAux = i + j * (Game.mTurnData.numJugadores + 2);

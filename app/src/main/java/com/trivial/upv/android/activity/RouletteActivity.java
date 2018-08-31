@@ -18,8 +18,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.games.multiplayer.Participant;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchUpdateCallback;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.adapter.RouletteScorePlayerAdapter;
 import com.trivial.upv.android.fragment.CustomDialogFragment;
@@ -32,8 +35,11 @@ import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.roulette.RouletteView;
 import com.trivial.upv.android.widget.roulette.ShakeListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static com.trivial.upv.android.fragment.PlayTurnBasedFragment.checkPlayerMatchResult;
 
 public class RouletteActivity extends AppCompatActivity implements ShakeListener.OnShakeListener {
 
@@ -53,6 +59,10 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     private TextView category_title;
     private TextView txtPoints;
     private boolean playable = false;
+    private RecyclerView mRecyclerView2;
+    private GridLayoutManager mLayoutManager2;
+    private RouletteScorePlayerAdapter mAdapter2;
+    private boolean playSound = false;
 
 
     @Override
@@ -66,15 +76,17 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
     }
 
+    private String TAG = RouletteActivity.class.getSimpleName();
     private TurnBasedMatchUpdateCallback mMatchUpdateCallback = new TurnBasedMatchUpdateCallback() {
         @Override
         public void onTurnBasedMatchReceived(@NonNull TurnBasedMatch turnBasedMatch) {
-            updateMatch(turnBasedMatch);
+            updateMatch(turnBasedMatch, true);
         }
 
         @Override
         public void onTurnBasedMatchRemoved(@NonNull String matchId) {
-            Toast.makeText(RouletteActivity.this, "A match was removed.", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(RouletteActivity.this, "A match was removed.", Toast.LENGTH_SHORT).show();
+            Log.w(TAG, "A mas was removed + " + matchId);
         }
     };
 
@@ -110,12 +122,29 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         }
     };
 
-    public void updateMatch(TurnBasedMatch match) {
+    public void showMessageFinishMatch(final TurnBasedMatch turnBasedMatch) {
+
+        String txtMatchResultPlayer = "";
+        Participant participant = null;
+        try {
+            String participantId = null;
+            participantId = turnBasedMatch.getParticipantId(Game.mPlayerId);
+            participant = turnBasedMatch.getParticipant(participantId);
+
+        } catch (IllegalStateException ex) {
+        }
+        txtMatchResultPlayer = checkPlayerMatchResult(participant);
+
+        showWarning("Partida Finalizada", txtMatchResultPlayer, null);
+    }
+
+    public void updateMatch(TurnBasedMatch match, boolean playSound) {
         if (match.getMatchId().equals(Game.mMatch.getMatchId())) {
             Game.mMatch = match;
             Game.mTurnData = Turn.unpersist(match.getData());
             int status = match.getStatus();
             int turnStatus = match.getTurnStatus();
+
 
             switch (status) {
                 case TurnBasedMatch.MATCH_STATUS_CANCELED:
@@ -126,7 +155,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     return;
                 case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                     if (!Game.mTurnData.isFinishedMatch()) {
-                        rouletteView.setLine1("Waiting\nfor auto-match...");
+                        rouletteView.setLine1("Waiting for\nauto-match...");
 //                        showWarning("Waiting for auto-match...",
 //                                "We're still waiting for an automatch partner.", null);
 
@@ -135,6 +164,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
+                        showMessageFinishMatch(match);
                     }
                     return;
                 case TurnBasedMatch.MATCH_STATUS_COMPLETE:
@@ -143,34 +173,38 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
+                        showMessageFinishMatch(match);
                         break;
                     }
                     // Note that in this state, you must still call "Finish" yourself,
                     // so we allow this to continue.
-                    rouletteView.setLine1("Complete!");
+//                    rouletteView.setLine1("Complete!");
 //                showWarning("Complete!",
 //                        "This game is over; someone finished it!  You can only finish it now.", actionButtonDone);
-                    ////// TO DO
-//                    finishFinishedMatch();
+                    finishFinishedMatch();
                     return;
             }
 
             // OK, it's active. Check on turn status.
             switch (turnStatus) {
                 case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
+                    if (playSound)
+                        rouletteView.playSoundIsYourTurn();
                     playable = true;
-                    rouletteView.playSoundIsYourTurn();
+                    rouletteView.setLine1("\nIt's your turn!\n ");
                     setupView(false);
                     break;
                 case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
                     // Should return results.
+
                     if (!Game.mTurnData.isFinishedMatch()) {
                         String textNextPlayer = "";
                         try {
-                            textNextPlayer = "Next player\n\n" + match.getParticipant(Game.getNextParticipantId()).getDisplayName();
+                            textNextPlayer = "Next player\n\n" + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
                             rouletteView.setLine1(textNextPlayer);
                         } catch (Exception ex) {
                         }
+                        setupView(false);
 //                        showWarning("It's not your turn...", textNextPlayer, null);
                     } else {
 //                        showWarning("Complete!",
@@ -180,12 +214,34 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     }
                     break;
                 case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
-                    rouletteView.setLine1("Still waiting for invitations!");
+                    rouletteView.setLine1("Still waiting for\ninvitations!");
 //                    showWarning("Good inititative!",
 //                            "Still waiting for invitations.\n\nBe patient!", null);
                     break;
             }
         }
+    }
+
+    public void finishFinishedMatch() {
+        Game.mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId())
+                .addOnSuccessListener(
+                        new OnSuccessListener<TurnBasedMatch>() {
+                            @Override
+                            public void onSuccess(TurnBasedMatch turnBasedMatch) {
+                                rouletteView.setLine1("Complete!");
+//                                showWarning("Complete!",
+//                                        "This game is over; someone finished it, and so did you!  " +
+//                                                "There is nothing to be done.", null);
+                                showMessageFinishMatch(Game.mMatch);
+                            }
+                        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(RouletteActivity.this,
+                                "Hay un problema finalizando la partida", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 
@@ -207,10 +263,11 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             btnCancelMatch.setVisibility(View.VISIBLE);
 
         setupRoulette(updateRoulete);
-        setupScorePlayer();
+        setupScorePlayerCategories();
+        setupScorePlayerByPlayer();
     }
 
-    private void setupScorePlayer() {
+    private void setupScorePlayerCategories() {
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -244,7 +301,6 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 score[i] = String.format("%d/%d", 0, 0);
             }
         }
-        // 2 imagenes
 
         mAdapter = new RouletteScorePlayerAdapter(getApplicationContext(), score, imagenes);
         mRecyclerView.setAdapter(mAdapter);
@@ -252,6 +308,60 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
                 DividerItemDecoration.HORIZONTAL);
         mRecyclerView.addItemDecoration(dividerItemDecoration);
+    }
+
+
+    private void setupScorePlayerByPlayer() {
+        int totalCategories = Game.mTurnData.categories.size();
+        int totalPlayers = Game.mTurnData.numJugadores;
+
+        mRecyclerView2 = (RecyclerView) findViewById(R.id.my_recycler_view2);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView2.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager2 = new GridLayoutManager(this, Math.min(10, totalPlayers));
+        mRecyclerView2.setLayoutManager(mLayoutManager2);
+
+        String score2[] = new String[totalPlayers];
+        String imgPlayers[] = new String[totalPlayers];
+
+        // Pivot the first player is the firs position
+        String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);
+        int index = Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
+        String tmpString = score2[index];
+        score2[0] = tmpString;
+        int posCont = 1;
+        for (int i = 0; i < totalPlayers; i++) {
+
+            int numCategories = 0;
+            for (int j = 0; j < Game.mTurnData.categories.size(); j++) {
+                if (Game.mTurnData.puntuacion[i][j][0] > 0) {
+                    numCategories++;
+                }
+            }
+            int posInsert;
+            if (index != i) {
+                posInsert = posCont;
+                posCont++;
+            } else {
+                posInsert = 0;
+            }
+            score2[posInsert] = String.format(Locale.getDefault(), "%d/%d", numCategories, totalCategories);
+            ArrayList<Participant> participants = Game.mMatch.getParticipants();
+            if (i < participants.size() && participants.get(i) != null) {
+                imgPlayers[posInsert] = participants.get(i).getIconImageUri().toString();
+            } else {
+                imgPlayers[posInsert] = "default";
+            }
+        }
+        mAdapter2 = new RouletteScorePlayerAdapter(getApplicationContext(), score2, imgPlayers);
+        mRecyclerView2.setAdapter(mAdapter2);
+        mRecyclerView2.setFitsSystemWindows(true);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView2.getContext(),
+                DividerItemDecoration.HORIZONTAL);
+        mRecyclerView2.addItemDecoration(dividerItemDecoration);
     }
 
     private void setupRoulette(boolean update) {
@@ -291,10 +401,13 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         if (playable) {
             shakeListener = new ShakeListener(this);
             shakeListener.setOnShakeListener(this);
+        } else {
+            shakeListener = null;
         }
 
-        if (update)
-        updateMatch(Game.mMatch);
+        if (update) {
+            updateMatch(Game.mMatch, false);
+        }
     }
 
     @Override
@@ -319,12 +432,12 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
     public interface FinishCounterEvent {
         void onFinishedCount();
+
     }
 
     RouletteView.RotateEventLisstener rotateEventListener = new RouletteView.RotateEventLisstener() {
         @Override
         public void rotateStart() {
-
             isRotationEnabled = false;
 //            btnRotate.setVisibility(View.INVISIBLE);
             btnScore.setVisibility(View.INVISIBLE);
@@ -377,7 +490,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     }
 
     public void onClickButtonRotation(View v) {
-        if (this.isRotationEnabled) {
+        if (isRotationEnabled) {
             rouletteView.rotate(10);
         }
     }

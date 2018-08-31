@@ -8,8 +8,8 @@
 
     <ImageButton
         android:id="@+id/imgCategory"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="center" />
 
     <TextView
@@ -18,5 +18,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:textAppearance="@style/Topeka.TextAppearance.ListItem" />
+        android:textAppearance="@style/Topeka.TextAppearance.ListItemSecondary" />
 </LinearLayout>
