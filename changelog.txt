@@ -3,6 +3,12 @@
 Pendiente
         Traducciones de Inglés y Español. (Jesús)
 		Pregunta con múltiples opciones no se ve correctamente.
+02/08/2018 Se añade la opción rematch si un jugador hace todas las categorías del tirón (en un único turno)
+		Corrección de errores mínimos.
+		Se elimina la comprobación del json ya que daba errores mientras se actualizaban los datos de las categorias en modo repaso.
+01/08/2018 Corrección de animación cuando se pulsa rápidamente en modo repaso (antes se producía error)
+31/08/2018
+		Nueva Puntuación en Ruleta (muestra el total de categorías gráficamente dentrodo de una ruleta.
 30/08/2018
 		Los estados del juego suceden dentro de la partida cargada en la Actividad de la Ruleta
 		La ruleta se modifica para que no haya límite de velocidad.
