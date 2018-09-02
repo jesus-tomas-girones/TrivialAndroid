@@ -254,7 +254,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                        onInitiateMatch(turnBasedMatch);
+                        onInitiateMatch(turnBasedMatch, false);
                     }
                 })
                 .addOnFailureListener(createFailureListener("There was a problem creating a match!"));
@@ -263,8 +263,10 @@ public class PlayTurnBasedFragment extends Fragment {
     private void onCancelMatch(String matchId) {
         isDoingTurn = false;
 
-        showWarning(true, "Match", "This match (" + matchId + ") was canceled.  " +
+        showWarning(true, "Match", "This match was canceled.  " +
                 "All other players will have their game ended.", null);
+//        showWarning(true, "Match", "This match (" + matchId + ") was canceled.  " +
+//                "All other players will have their game ended.", null);
     }
 
     // In-game controls
@@ -835,7 +837,7 @@ public class PlayTurnBasedFragment extends Fragment {
                     writeCurrenPartcipantPlayer();
 //                    setGameplayUI();
                 } else {
-                    startMatch(match);
+                    startMatch(match, false);
                 }
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
@@ -847,7 +849,7 @@ public class PlayTurnBasedFragment extends Fragment {
                     } catch (Exception ex) {
                     }
                     showWarning(false, "It's not your turn...", textNextPlayer, actionButtonDone);
-                } else showWarning(true, "Complete!",
+                } else showWarning(false, "Complete!",
                         "This game is over; someone finished it, and so did you!  " +
                                 "There is nothing to be done.", actionButtonDone);
                 break;
@@ -1169,10 +1171,11 @@ public class PlayTurnBasedFragment extends Fragment {
                     return;
 
                 else {
-                    boolean leaveMatch = intent.getBooleanExtra("leave", false);
-                    if (leaveMatch)
-                        onLeaveClicked(null);
-                    else {
+                    boolean cancelMatch = intent.getBooleanExtra("cancel", false);
+                    if (cancelMatch) {
+//                        onLeaveClicked(null);
+                        onCancelClicked(null);
+                    } else {
                         int categoryAux = intent.getIntExtra("category", -1);
                         // If no play do nathing
                         if (categoryAux != -1)
@@ -1377,7 +1380,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         if (Game.mTurnData.isFinishedMatch()) {
                             showMessageFinishMatch(turnBasedMatch, false);
                         } else {
-                            onUpdateMatch(turnBasedMatch);
+                            onUpdateMatch(turnBasedMatch, false);
                         }
                     }
                 })
@@ -1463,12 +1466,12 @@ public class PlayTurnBasedFragment extends Fragment {
                 @Override
                 public void onClick() {
                     Game.mTurnData = null;
-                    onUpdateMatch(turnBasedMatch);
+                    onUpdateMatch(turnBasedMatch, true);
                 }
             });
         } else {
             Game.mTurnData = null;
-            onUpdateMatch(turnBasedMatch);
+            onUpdateMatch(turnBasedMatch, false);
         }
     }
 
@@ -1505,7 +1508,7 @@ public class PlayTurnBasedFragment extends Fragment {
         for (int i = 0; i < Game.mTurnData.participantsTurnBased.size(); i++) {
             int auxAnswers = 0;
             for (int cont = 0; cont < Game.mTurnData.categories.size(); cont++) {
-                auxAnswers += Game.mTurnData.puntuacion[i][cont][0];
+                auxAnswers += (Game.mTurnData.puntuacion[i][cont][0] > 0 ? 1 : 0);
             }
             if (maxAnswers < auxAnswers) {
                 maxAnswers = auxAnswers;
@@ -1601,7 +1604,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 .addOnSuccessListener(new OnSuccessListener<TurnBasedMatch>() {
                     @Override
                     public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                        onInitiateMatch(turnBasedMatch);
+                        onInitiateMatch(turnBasedMatch, true);
                     }
                 })
                 .addOnFailureListener(createFailureListener("There was a problem starting a rematch!"));
@@ -1610,10 +1613,10 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
 
-    public void onUpdateMatch(TurnBasedMatch match) {
+    public void onUpdateMatch(TurnBasedMatch match, boolean canRematch) {
 //        dismissSpinner();
 
-        if (match.canRematch()) {
+        if (match.canRematch() && canRematch) {
             askForRematch(match);
         } else {
             continueOnUpdateMatch(match);
@@ -1718,7 +1721,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
 //                Game.category = TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayTimeReal(SharedPreferencesStorage.getInstance(getContext()).readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONLINE_NUM_QUIZZES, 10), Game.listCategories);
 //                startQuizzes();
-                        onInitiateMatch(turnBasedMatch);
+                        onInitiateMatch(turnBasedMatch, false);
                         Log.d(TAG, "Juego por Turnos Creado");
                     }
                 }).addOnFailureListener(createFailureListener("There was a problem creating a match!"));
@@ -1726,7 +1729,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
     }
 
-    private void onInitiateMatch(TurnBasedMatch match) {
+    private void onInitiateMatch(TurnBasedMatch match, boolean fromRematch) {
 //        dismissSpinner();
 
         if (match.getData() != null) {
@@ -1734,7 +1737,7 @@ public class PlayTurnBasedFragment extends Fragment {
             return;
         }
 
-        startMatch(match);
+        startMatch(match, fromRematch);
     }
 
     private void writeCurrenPartcipantPlayer() {
@@ -1766,7 +1769,7 @@ public class PlayTurnBasedFragment extends Fragment {
 // game, saving our initial state. Calling takeTurn() will
 // callback to OnTurnBasedMatchUpdated(), which will show the game
 // UI.
-    public void startMatch(TurnBasedMatch match) {
+    public void startMatch(TurnBasedMatch match, boolean fromRematch) {
 //        showSpinner();
         Game.mMatch = match;
         String myParticipantId = Game.mMatch.getParticipantId(Game.mPlayerId);

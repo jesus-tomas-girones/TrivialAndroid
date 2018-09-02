@@ -65,6 +65,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     private RouletteScoreCategoriesAdapter mAdapter2;
     private boolean playSound = false;
 
+    private boolean playFinished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,19 +125,22 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     };
 
     public void showMessageFinishMatch(final TurnBasedMatch turnBasedMatch) {
+        if (!playFinished) {
+            playFinished = true;
+            String txtMatchResultPlayer = "";
+            Participant participant = null;
+            try {
+                String participantId = null;
+                participantId = turnBasedMatch.getParticipantId(Game.mPlayerId);
+                participant = turnBasedMatch.getParticipant(participantId);
 
-        String txtMatchResultPlayer = "";
-        Participant participant = null;
-        try {
-            String participantId = null;
-            participantId = turnBasedMatch.getParticipantId(Game.mPlayerId);
-            participant = turnBasedMatch.getParticipant(participantId);
+            } catch (IllegalStateException ex) {
+            }
+            txtMatchResultPlayer = checkPlayerMatchResult(participant);
 
-        } catch (IllegalStateException ex) {
+            showWarning("Partida Finalizada", txtMatchResultPlayer, null);
+            setupView(false);
         }
-        txtMatchResultPlayer = checkPlayerMatchResult(participant);
-
-        showWarning("Partida Finalizada", txtMatchResultPlayer, null);
     }
 
     public void updateMatch(TurnBasedMatch match, boolean playSound) {
@@ -213,6 +217,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
                         rouletteView.setLine1("Complete!");
+                        showMessageFinishMatch(Game.mMatch);
                     }
                     break;
                 case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
@@ -386,15 +391,14 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         int index = Game.mTurnData.participantsTurnBased.indexOf(myParticipantId);
 
         int indexCurrentTurnPlayer = -1;
-        if (Game.mTurnData.idParticipantTurn != null ) {
+        if (Game.mTurnData.idParticipantTurn != null) {
             indexCurrentTurnPlayer = Game.mMatch.getParticipantIds().indexOf(Game.mTurnData.idParticipantTurn);
-        }
-        else {
+        } else {
             indexCurrentTurnPlayer = Game.mTurnData.participantsTurnBased.size();
-            if (indexCurrentTurnPlayer<Game.mTurnData.numJugadores) {
+            if (indexCurrentTurnPlayer < Game.mTurnData.numJugadores) {
 
             } else {
-                indexCurrentTurnPlayer = Game.mTurnData.numJugadores-1;
+                indexCurrentTurnPlayer = Game.mTurnData.numJugadores - 1;
             }
         }
         int posCont = 1;
@@ -421,17 +425,22 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             imagesCategories[posInsert] = new ArrayList<Integer>();
             themesCategories[posInsert] = new ArrayList<Integer>();
             for (int j = 0; j < Game.mTurnData.categories.size(); j++) {
+                int indexCategory = Game.mTurnData.categories.get(j);
+                CategoryJSON category = null;
+                if (indexCategory < categories.size()) {
+                    category = categories.get(indexCategory);
+                } else {
+                    // The game is corrupt
+                    Log.w(TAG, "The game is corrupt");
+                    finish();
+                }
+
                 if (Game.mTurnData.puntuacion[i][j][0] > 0) {
-                    int indexCategory = Game.mTurnData.categories.get(j);
-                    CategoryJSON category = null;
-                    if (indexCategory < categories.size()) {
-                        category = categories.get(indexCategory);
-                        themesCategories[posInsert].add(Theme.valueOf(category.getTheme()));
-                        imagesCategories[posInsert].add(category.getImg());
-                    } else {
-                        // The game is corrupt
-                        Log.w(TAG, "The game is corrupt");
-                    }
+                    themesCategories[posInsert].add(Theme.valueOf(category.getTheme()));
+                    imagesCategories[posInsert].add(category.getImg());
+                } else {
+                    themesCategories[posInsert].add(null);
+                    imagesCategories[posInsert].add(null);
                 }
             }
 
@@ -442,7 +451,10 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 imgPlayers[posInsert] = "default";
             }
         }
-        mAdapter2 = new RouletteScoreCategoriesAdapter(getApplicationContext(), indexCurrentTurnPlayer, imgPlayers, imagesCategories, themesCategories);
+
+        mAdapter2 = new
+
+                RouletteScoreCategoriesAdapter(getApplicationContext(), indexCurrentTurnPlayer, imgPlayers, imagesCategories, themesCategories);
         mRecyclerView2.setAdapter(mAdapter2);
         mRecyclerView2.setFitsSystemWindows(true);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mRecyclerView2.getContext(),
@@ -454,7 +466,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         category_title = (TextView) findViewById(R.id.category_title);
         txtPoints = (TextView) findViewById(R.id.txtPoints);
 //        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
-            category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
+        category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
 //        else
 //            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
 
@@ -586,7 +598,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
     public void leaveMatch(View v) {
         Intent intent = new Intent();
-        intent.putExtra("leave", true);
+        intent.putExtra("cancel", true);
         setResult(Activity.RESULT_OK, intent);
         finish();
 //        if (this.intNumber < 10) {

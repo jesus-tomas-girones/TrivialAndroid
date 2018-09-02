@@ -444,18 +444,19 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
     private boolean checkJsonIsCorrect(Context context) {
         // Hace un chequeo recorriendo la estructura de nodos para comprobar que el fichero está ok
-        try {
-//            TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).getScore();
-            List<CategoryJSON> categoriesJSON = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
-            for (int position = 0; position < categoriesJSON.size(); position++) {
-                TrivialJSonHelper.getInstance(this, false).isSolvedCurrentCategory(position);
-            }
-            return true;
-
-        } catch (Exception e) {
-            Toast.makeText(context, "El fichero .json podría contener algún error", Toast.LENGTH_SHORT).show();
-            return false;
-        }
+//        try {
+////            TrivialJSonHelper.getInstance(CategorySelectionActivity.this, false).getScore();
+//            List<CategoryJSON> categoriesJSON = TrivialJSonHelper.getInstance(this, false).getCategoriesJSON();
+//            for (int position = 0; position < categoriesJSON.size(); position++) {
+//                TrivialJSonHelper.getInstance(this, false).isSolvedCurrentCategory(position);
+//            }
+//            return true;
+//
+//        } catch (Exception e) {
+//            Toast.makeText(context, "El fichero .json podría contener algún error", Toast.LENGTH_SHORT).show();
+//            return false;
+//        }
+        return true;
     }
     // JVG.E
 
@@ -471,7 +472,7 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         //JVG.S
 //        supportPostponeEnterTransition();
         scoreView = (TextView) findViewById(R.id.score_main);
-        backButton = (ImageButton) findViewById(R.id.back);
+//        backButton = (ImageButton) findViewById(R.id.back);
 //        title = (TextView) findViewById(R.id.title);
         subcategory_title = (TextView) findViewById(R.id.sub_category_title);
         //JVG.E
@@ -502,12 +503,24 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
         }
     }
 
+    public interface ActionOnFinishAnimation {
+        public void onFinishedAnimation();
+    }
+
+
+
     private void goToPreviusCategory() {
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.category_container);
         if (fragment instanceof CategorySelectionFragment) {
-            TrivialJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
-            ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null);
-            showToolbarSubcategories();
+//            TrivialJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
+            ((CategorySelectionFragment) fragment).animateTransitionSubcategories(null, new ActionOnFinishAnimation() {
+                @Override
+                public void onFinishedAnimation() {
+                    TrivialJSonHelper.getInstance(getBaseContext(), false).navigatePreviusCategory();
+                    showToolbarSubcategories();
+                }
+            });
+
         } else {
             FragmentManager fm = getSupportFragmentManager();
             fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -581,10 +594,12 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 
         //JVG.S
         ImageButton back = (ImageButton) findViewById(R.id.back);
-        back.setOnClickListener(new View.OnClickListener() {
+        backButton = (ImageButton) findViewById(R.id.back);
+        backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToPreviusCategory();
+//                goToPreviusCategory();
+                onBackPressed();
             }
         });
 

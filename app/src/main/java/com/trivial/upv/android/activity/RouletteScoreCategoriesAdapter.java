@@ -118,7 +118,7 @@ class RouletteScoreCategoriesAdapter extends android.support.v7.widget.RecyclerV
 
         //background color
         TypedArray array = context.getTheme().obtainStyledAttributes(new int[] {
-                android.R.attr.colorBackground,
+                android.R.attr.background,
         });
         backgroundColor = array.getColor(0, 0xFF00FF);
         array.recycle();

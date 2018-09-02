@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -46,6 +47,7 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     private String images[] = null;
     private RectF oval;
     private Theme[] themes;
+    private int backgroundColor;
 
     public String getLine1() {
         return line1;
@@ -91,6 +93,13 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
         paint = new Paint();
         path = new Path();
+
+        //background color
+        TypedArray array = getContext().getTheme().obtainStyledAttributes(new int[]{
+                android.R.attr.background,
+        });
+        backgroundColor = array.getColor(0, 0xFF00FF);
+        array.recycle();
     }
 
     Paint paint;
@@ -133,7 +142,8 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         for (int i = 0; i < numSectors; i++) {
 
             final int finalI = i;
-            if (i < images.length) {
+            if (i < images.length && images[i]!=null) {
+
                 imageLoader.get(images[i], new ImageLoader.ImageListener() {
                     @Override
                     public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
@@ -206,8 +216,10 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
             boolean userCenter = true;
             int x, y;
             for (int i = 0; i < numSectors; i++) {
-                if (i < themes.length)
+                if (i < themes.length && themes[i] != null)
                     paint.setColor(ContextCompat.getColor(getContext(), themes[i].getWindowBackgroundColor()));
+                else
+                    paint.setColor(backgroundColor);
 
                 paint.setStyle(Paint.Style.FILL);
                 path.reset();
