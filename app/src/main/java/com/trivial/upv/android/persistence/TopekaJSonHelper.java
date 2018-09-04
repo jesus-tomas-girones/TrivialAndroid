@@ -703,7 +703,16 @@ public class TopekaJSonHelper {
 
     public boolean isSolvedCurrentCategory(int id) {
         if (TopekaJSonHelper.getInstance(mContext, false).isLoaded()) {
-            int numQuizzes = getNumQuizzesForCategory(categoriesCurrent.get(id));
+            //JTG.S
+            // java.lang.IndexOutOfBoundsException: Index: 9, Size: 9
+            //numQuizzes = getNumQuizzesForCategory(categoriesCurrent.get(id));
+            int numQuizzes;
+            try {
+                numQuizzes = getNumQuizzesForCategory(categoriesCurrent.get(id));
+            } catch (IndexOutOfBoundsException excepcion) {
+                return false;
+            }
+            //JTG.E
             int getNumSolvedByCategory = getScoreCategory(categoriesCurrent.get(id));
 
             return numQuizzes - getNumSolvedByCategory == 0;
