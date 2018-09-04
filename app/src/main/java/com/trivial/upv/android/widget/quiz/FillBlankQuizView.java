@@ -68,9 +68,9 @@ public class FillBlankQuizView extends TextInputQuizView<FillBlankQuiz> {
     }
 
     /**
-     * Creates and returns views that display the start and end of a question.
+     * Creates and returns views that display the roulette_rotate and end of a question.
      *
-     * @param start The content of the start view.
+     * @param start The content of the roulette_rotate view.
      * @param end The content of the end view.
      * @return The created views within an appropriate container.
      */

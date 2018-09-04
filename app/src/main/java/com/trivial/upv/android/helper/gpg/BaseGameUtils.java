@@ -67,17 +67,17 @@ public class BaseGameUtils {
     }
 
     /**
-     * For use in sample code only. Checks if the sample was set up correctly,
+     * For use in sample code only. Checks if the sample was set roulette_up correctly,
      * including changing the package name to a non-Google package name and
      * replacing the placeholder IDs. Shows alert dialogs to notify about problems.
      * DO NOT call this method from a production app, it's meant only for samples!
      * @param resIds the resource IDs to check for placeholders
-     * @return true if sample is set up correctly; false otherwise.
+     * @return true if sample is set roulette_up correctly; false otherwise.
      */
     public static boolean verifySampleSetup(Activity activity, int... resIds) {
         StringBuilder problems = new StringBuilder();
         boolean problemFound = false;
-        problems.append("The following set up problems were found:\n\n");
+        problems.append("The following set roulette_up problems were found:\n\n");
 
         // Did the developer forget to change the package name?
         if (activity.getPackageName().startsWith("com.google.example.games")) {

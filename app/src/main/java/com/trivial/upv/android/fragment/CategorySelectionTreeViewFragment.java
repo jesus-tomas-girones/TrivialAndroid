@@ -3,14 +3,13 @@ package com.trivial.upv.android.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
-import android.app.ActivityOptions;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
@@ -24,17 +23,14 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.google.android.gms.games.Games;
-import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.CategorySelectionActivity;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.helper.singleton.SharedPreferencesStorage;
-import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.json.CategoryJSON;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.fab.CheckableFab;
 import com.trivial.upv.android.widget.treeview.TreeViewFactoryNode;
 
@@ -45,10 +41,9 @@ import java.util.Random;
 import me.texy.treeview.TreeNode;
 import me.texy.treeview.TreeView;
 
-import static android.app.Activity.RESULT_OK;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
-import static com.trivial.upv.android.activity.QuizActivity.ARG_ONLINE;
-import static com.trivial.upv.android.fragment.PlayOnlineFragment.RC_SELECT_PLAYERS;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 
 public class CategorySelectionTreeViewFragment extends Fragment {
     private static final String MODE = "mode";
@@ -60,12 +55,13 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     private TreeView treeView;
     private CheckableFab mSubmitAnswer;
     private String mode = null;
+    private AlertDialog mAlertDialog = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mode = getArguments().getString(MODE);
+        Game.mode = mode;
     }
 
     public static CategorySelectionTreeViewFragment newInstance(String mode) {
@@ -140,23 +136,14 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void inviteClick() {
-        final int NUMERO_MINIMO_OPONENTES = Game.tmpNumPlayers - 1, NUMERO_MAXIMO_OPONENTES = Game.tmpNumPlayers - 1;
-        // show list of invitable players
-        Intent intent = Games.RealTimeMultiplayer.getSelectOpponentsIntent(Game.mGoogleApiClient, NUMERO_MINIMO_OPONENTES, NUMERO_MAXIMO_OPONENTES);
-        //switchToScreen(R.id.screen_wait);
-        getActivity().startActivityForResult(intent, RC_SELECT_PLAYERS);
-//        Games.Achievements.unlock(Game.mGoogleApiClient, getString(R.string.logro_invitar));
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        setUpQuizGrid(view);
+        setupQuizGrid(view);
         super.onViewCreated(view, savedInstanceState);
     }
 
     // JVG.E
-    private void setUpQuizGrid(View view) {
+    private void setupQuizGrid(View view) {
         initView(view);
 
     }
@@ -165,13 +152,62 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     private void playGame() {
         if (mode.equals(ARG_ONE_PLAYER)) {
             playGameOnePlayer();
-        } else if (mode.equals(ARG_ONLINE)) {
+        } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
             Game.resetGameVars();
             Game.minAutoMatchPlayers = Game.tmpNumPlayers - 1;
             Game.maxAutoMatchPlayers = Game.tmpNumPlayers - 1;
             playGameOnline();
+        } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
+            Game.resetGameVars();
+            playGameTurnBased();
         }
 
+    }
+
+    private void playGameTurnBased() {
+        if (treeView.getSelectedNodes().size() >= 2 && treeView.getSelectedNodes().size() <=31) {
+            getSelectedCategories();
+            animateFloatButton();
+        } else {
+            showWarning("Warning", "You must select at least 2 categories, and maximum of 31");
+        }
+    }
+
+    // Generic warning/info dialog
+    public void showWarning(String title, String message) {
+
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
+
+        // set title
+        alertDialogBuilder.setTitle(title).setMessage(message);
+
+        // set dialog message
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+        // create alert dialog
+        mAlertDialog = alertDialogBuilder.create();
+
+        // show it
+        mAlertDialog.show();
+    }
+
+    private void getSelectedCategories() {
+        List<TreeNode> selectedNodes = treeView.getSelectedNodes();
+        Game.listCategories.clear();
+        int level = 0;
+        TrivialJSonHelper instanceJSON = TrivialJSonHelper.getInstance(getContext(), false);
+        for (int i = 0; i < selectedNodes.size(); i++) {
+            CategoryJSON category = (CategoryJSON) selectedNodes.get(i).getValue();
+            Game.listCategories.add(category.getCategory());
+            level += Math.pow(2, instanceJSON.findPosCategory(category.getCategory()));
+        }
+
+        Game.level = level;
     }
 
     private void playGameOnline() {
@@ -181,7 +217,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 //            Game.numPlayers = Game.tmpNumPlayers;
 //            Game.totalTime = Game.tmpTotalTime;
 //
-//            Game.category = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
+//            Game.category = TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
             animateFloatButton();
         }
     }
@@ -193,7 +229,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         Game.tmpTotalTime = sps.readIntPreference(SharedPreferencesStorage.PREF_URL_MODE_ONE_PLAYER_TOTAL_TIME, 250);
 
         if (getRandomQuizzesFromSelectedCategories(Game.tmpNumQuizzes)) {
-            Game.category = TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
+            Game.category = TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine();
             Game.numQuizzes = Game.tmpNumQuizzes;
             Game.numPlayers = Game.tmpNumPlayers;
             Game.totalTime = Game.tmpTotalTime;
@@ -206,14 +242,16 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     public void animateFloatButton() {
         final Intent startIntent;
         if (mode.equals(ARG_ONE_PLAYER)) {
-            startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
-        } else if (mode.equals(ARG_ONLINE)) {
-            //startIntent = QuizActivity.getStartIntent(getActivity(), TopekaJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
-
+            startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
+        } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
+            //startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
+            startIntent = null;
+        } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
+            //startIntent = QuizActivity.getStartIntent(getActivity(), TrivialJSonHelper.getInstance(getContext(), false).getCategoryPlayGameOffLine());
             startIntent = null;
         } else {
-            startIntent = null;
-            Log.d(TAG, "AnimateFloatButton option incorrect");
+//            startIntent = null;
+//            Log.d(TAG, "AnimateFloatButton option incorrect");
             return;
         }
 
@@ -246,10 +284,12 @@ public class CategorySelectionTreeViewFragment extends Fragment {
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     if (mode.equals(ARG_ONE_PLAYER)) {
-                        ActivityCompat.startActivity(getActivity(), startIntent,
-                                ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+//                        startActivity(startIntent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle() ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+                        startActivity(startIntent, null);
                         mSubmitAnswer.show();
-                    } else if (mode.equals(ARG_ONLINE)) {
+                    } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
+                        getActivity().onBackPressed();
+                    } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
                         getActivity().onBackPressed();
                     }
 
@@ -259,9 +299,11 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             anim.start();
         } else {
             if (mode.equals(ARG_ONE_PLAYER)) {
-                ActivityCompat.startActivity(getActivity(), startIntent,
+                startActivity(startIntent,
                         null);
-            } else if (mode.equals(ARG_ONLINE)) {
+            } else if (mode.equals(ARG_REAL_TIME_ONLINE)) {
+                getActivity().onBackPressed();
+            } else if (mode.equals(ARG_TURNED_BASED_ONLINE)) {
                 getActivity().onBackPressed();
             }
 //            removeFragmentIfMultiplayerGame();
@@ -286,9 +328,9 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
         ArrayList<Quiz> quizzes = new ArrayList<>();
         Game.listCategories.clear();
-        long level = 0;
+        int level = 0;
 
-        TopekaJSonHelper instanceJSON = TopekaJSonHelper.getInstance(getContext(), false);
+        TrivialJSonHelper instanceJSON = TrivialJSonHelper.getInstance(getContext(), false);
         for (int i = 0; i < selectedNodes.size(); i++) {
             CategoryJSON category = (CategoryJSON) selectedNodes.get(i).getValue();
             Game.listCategories.add(category.getCategory());
@@ -312,7 +354,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         String description = null;
         String video = null;
 
-        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
+        TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
         Game.level = level;
 //        Log.d("LEVEL", "Level:" + Game.level);
         return true;
@@ -373,7 +415,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         String description = null;
         String video = null;
 
-        TopekaJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
+        TrivialJSonHelper.getInstance(getContext(), false).createCategoryPlayGameOffLine(tmpQuizzes, tmpImg, tmpTheme, mode, moreInfo, description, video);
 
         return true;
     }
@@ -398,13 +440,14 @@ public class CategorySelectionTreeViewFragment extends Fragment {
         return tmpQuizzes;
     }
 
-    // Change the fragment mode: ONE_PLAYER, TWO_PLAYER
+    // Change the fragment mode: ONE_PLAYER, REALTIME_MULTIPLAYER
     public void changeMode(String newMode) {
         if (mode == null || !mode.equals(newMode))
             switch (mode) {
                 case QuizActivity.ARG_ONE_PLAYER:
 
-                case QuizActivity.ARG_ONLINE:
+                case QuizActivity.ARG_REAL_TIME_ONLINE:
+                case QuizActivity.ARG_TURNED_BASED_ONLINE:
                     changeTitleActionBar(newMode);
                     mode = newMode;
                     break;
@@ -420,8 +463,12 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
                 ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category));
                 break;
-            case ARG_ONLINE:
+            case ARG_REAL_TIME_ONLINE:
                 ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category_online));
+                ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(false);
+                break;
+            case ARG_TURNED_BASED_ONLINE:
+                ((CategorySelectionActivity) getActivity()).setToolbarTitle(getString(R.string.choose_category_turnbased));
                 ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(false);
                 break;
             default:
@@ -447,7 +494,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             @Override
             public void onClick() {
                 if (treeView.getSelectedNodes().size() > 0) {
-//                    if (mode.equals(ARG_ONLINE)) {
+//                    if (mode.equals(ARG_REAL_TIME_ONLINE)) {
 //                        if (inviteItem != null)
 //                            inviteItem.setVisible(true);
 //                    }
@@ -467,12 +514,13 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     }
 
     private void buildTreeNodes() {
-        if (TopekaJSonHelper.getInstance(getActivity(), false).isLoaded()) {
-            List<CategoryJSON> categoriesJSON = TopekaJSonHelper.getInstance(getActivity(), false).getCategoriesJSON();
+        if (TrivialJSonHelper.getInstance(getActivity(), false).isLoaded()) {
+            List<CategoryJSON> categoriesJSON = TrivialJSonHelper.getInstance(getActivity(), false).getCategoriesJSON();
             if (categoriesJSON != null) {
                 int level = 0;
                 for (CategoryJSON category : categoriesJSON) {
                     TreeNode treeNode = new TreeNode(category);
+                    treeNode.setLevel(0);
                     if (category.getSubcategories() != null)
                         buildTreeSubcategory(treeNode, category.getSubcategories(), level + 1);
                     root.addChild(treeNode);
@@ -484,16 +532,19 @@ public class CategorySelectionTreeViewFragment extends Fragment {
     private void buildTreeSubcategory(TreeNode parentNode, List<CategoryJSON> categoriesJSON, int level) {
         TreeNode treeNode = null;
 
-        if (mode.equals(ARG_ONLINE) && level >= MAX_LEVEL) {
+        if ((mode.equals(ARG_REAL_TIME_ONLINE) || (mode.equals(ARG_TURNED_BASED_ONLINE))) && level >= MAX_LEVEL) {
             return;
         }
-        if (categoriesJSON != null) for (CategoryJSON category : categoriesJSON)
-            if (category.getSubcategories() != null) {
-                treeNode = new TreeNode(category);
-                treeNode.setLevel(level);
-                buildTreeSubcategory(treeNode, category.getSubcategories(), level + 1);
-                parentNode.addChild(treeNode);
+        if (categoriesJSON != null) {
+            for (CategoryJSON category : categoriesJSON) {
+                if (category.getSubcategories() != null) {
+                    treeNode = new TreeNode(category);
+                    treeNode.setLevel(level);
+                    buildTreeSubcategory(treeNode, category.getSubcategories(), level + 1);
+                    parentNode.addChild(treeNode);
+                }
             }
+        }
 
     }
 

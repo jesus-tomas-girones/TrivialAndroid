@@ -1,40 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root_view"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
         <LinearLayout
-            android:id="@+id/login_actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginTop="10dp"
             android:background="@drawable/border"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:padding="10dp">
 
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/sign_in_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/theme_red_text"
-                android:visibility="gone" />
+            <ImageView
+                android:id="@+id/imgAvatar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitXY" />
 
-            <!--<Button-->
-            <!--android:id="@+id/sign_out_button"-->
+            <TextView
+                android:id="@+id/txtNameAvatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Body1"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/login_actions"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="wrap_content"-->
-            <!--android:backgroundTint="@color/light_grey"-->
-            <!--android:text="Desconectar"-->
-            <!--android:textColor="@android:color/black"-->
-            <!--android:visibility="gone" />-->
-        </LinearLayout>
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:background="@drawable/border"-->
+            <!--android:orientation="vertical"-->
+            <!--android:padding="10dp">-->
+
+            <!--<com.google.android.gms.common.SignInButton-->
+                <!--android:id="@+id/sign_in_button"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:textColor="@color/theme_red_text"-->
+                <!--android:visibility="gone" />-->
+
+            <!--&lt;!&ndash;<Button&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/sign_out_button"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:backgroundTint="@color/light_grey"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:text="Desconectar"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:textColor="@android:color/black"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:visibility="gone" />&ndash;&gt;-->
+        <!--</LinearLayout>-->
 
 
         <LinearLayout
@@ -190,4 +215,4 @@
                 android:textColor="@android:color/black" />
         </LinearLayout>
     </LinearLayout>
-</android.support.design.widget.CoordinatorLayout>
+</ScrollView>

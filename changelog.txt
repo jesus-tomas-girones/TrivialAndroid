@@ -1,4 +1,107 @@
-Completed Tasks
+﻿TodoList
+
+Pendiente
+        Traducciones de Inglés y Español. (Jesús)
+		Pregunta con múltiples opciones no se ve correctamente.
+02/08/2018 Se añade la opción rematch si un jugador hace todas las categorías del tirón (en un único turno)
+		Corrección de errores mínimos.
+		Se elimina la comprobación del json ya que daba errores mientras se actualizaban los datos de las categorias en modo repaso.
+01/08/2018 Corrección de animación cuando se pulsa rápidamente en modo repaso (antes se producía error)
+31/08/2018
+		Nueva Puntuación en Ruleta (muestra el total de categorías gráficamente dentrodo de una ruleta.
+30/08/2018
+		Los estados del juego suceden dentro de la partida cargada en la Actividad de la Ruleta
+		La ruleta se modifica para que no haya límite de velocidad.
+		Nuevo método para escribir el estado de la partida en el interior de la ruleta
+29/08/2018
+        Se comprueba la integridad del fichero JSON y se estructura la carga de las categorías en un único punto.
+28/08/2018
+	MODO MULTIJUGADOR POR TURNOS:
+		Cambios para almacenar la puntuación por categorías (Fase 1)
+		Cambios para almacenar la puntuación por categorías (Fase 2)
+		Cuando se seleccionan las categorías y se juega una partida rápida, estas deben machear.
+27/08/2018
+		La ruleta ya no está limitada por las vueltas, ya que generaba la misma categoría siempre a máxima potencia. También se ha adaptado por si hubiera una única categoría.
+		Al pasar turno se indica el siguiente jugador y se muestra la ruleta (para ver estadísticas). Varios retoques del resto de proceso para adaptar este punto.		
+		
+26/08/2018
+        Cuando se encripta la aplicación con proguard crashea. (Fixed) Se ha excluido de la encriptación el fichero del modelo json
+		Se ha mejorado el control de errores de GPG cuando no se puede conectar.
+        En las invitaciones se captura el jugador que invita o con quién se está jugando.
+25/08/2018
+		La ruleta tiene un fallo si se intente hacer SWIPE varias veces (se ralenteza). Tiene relación con el SONIDO de la ruleta (FIX)
+		Se corrige falle si se cambia de modo Multijugador a Repaso.
+24/08/2018
+    Invitaciones:
+        Ahora las invitaciones inician la partida online automáticamente (an ambos modos)
+	Correcciones:
+		Bloque de botones en partura  MODO MULTIJUGADOR POR TURNOS y  MODO JUGADOR EN RED (TIEMPO REAL) al no aceptar invitación. (FIXED)
+		Ruleta:
+			Imágenes de la ruleta no son las iniciales si estamos en modo Review y recibimos una notificación de unirnos a una partida. (FIXED)
+			on shake NO se desactiva una vez seleccionada una categoría (Fixed) 
+23/08/2018
+    MODO MULTIJUGADOR POR TURNOS:
+        Se añade el total de preguntas acertadas y falladas en el score total de la partida. (Finalizada)
+        Ya es posible acceder a partidas finalizadas para ver la puntuación (Finalizado)
+        Mensaje de alerta de unirse a partida ya Finalizada (no hay más preguntas pendientes en Jugadores al hazar (Finalizada)
+        Aviso al dejar una partida multijugador con categoría seleccionada (se pierde turno) (Finalizada)
+		Sólo se puede pulsar un botón a la vez
+    MODO JUGADOR EN RED (TIEMPO REAL)
+        Se añade cabecera del jugador
+        Sólo se puede pulsar un botón a la vez
+22/08/2018
+    Se añade temporizador de 30 segundos en el modo multijugador.
+    Se añade frame de espera antes de la rouleta y antes de empezar a jugar (este último con contador)
+
+21/08/2018
+    Se hace merge en la rama multijugador y se sube ha GitHub.
+
+20/08/2018
+    Ruleta modificada
+        La ruleta se puede mover con gestos swype.
+        Se añade la puntuación del jugador actual así como se segrega por categorías.
+    Nueva actividad para ver las estadistcas de la partida.
+        Se puede visualizar el estado completo de la partida:
+            jugadores
+            respuestas acertadas por categoría y/o por jugador
+
+12/08/2018:
+    Problema INTERNAL ERROR: 8. Conectar a GPG si se desconecta (Fixed)
+    Ruleta Widget Dinámica Finalizado, con sonido incluido. La ruleta hace un crop en cada sector de la misma si la imagen es demasiado grande.
+    También se lanza haciendo el gesto Shake! (DONE)
+        Mejora: adaptar tamaño de las imágenes al tamaño de los sector (DONE)
+    Se añade la descripción del jugador en la selección de la partida. Se rediseña además con la inclusión de:
+        - Número de jugadores.
+        - Número de preguntas.
+02/08/2018
+	Problema detectado en juego "un jugador". Al seleccionar una categoría crashea la aplicación. (FIX)
+	    Se ha actalizado la libreria TreeView. Había incompatibilidad.
+	Las anmaciones salen "raras" en los juegos multijugador". "Login a GPG? (FIXED)
+	Problema detectado en la carga de un json con preguntas. Luego se queda la cache corrupta revisar (FIX)
+	    Había un .txt que tenía un intro demás entra la primera pregunta y el título de las preguntas. Se ha modificado la carga para que no crashee
+
+02/08/2018
+                Invitaciones ventana principal. Se controla tanto en jugador tiempo real como por turnos
+                GPG está obsoleto en multiplayer game.  
+                    Rengenieria:
+                        QuizActivity (FIXED)
+                        PlayOnlineFragment (FIXED)
+                        Problemas con las invitaciones tiempo real (FIXED)
+			Se cambia el comportamiento de startActvityForResult. Ahora lo controla cada fragmento y no la activida. Esto ha hecho que no se marque una 			categoría completada (FIXED)
+
+
+
+29/07/2018: Se elimina ventana inicial.
+            Se inicia juego multijugador
+                Ventana por turnos
+                Ruleta
+                Enganchar con Quizzes
+                Pendiente de reingenieria con GPG (TurnBasedGame)
+
+
+22/07/2018 Juego multijugador hasta 8 jugadores (de 2,3,4,5,6,7,8)
+           Migrar a Gradle 4 y GPS 4.0.1
+
 
 Main Acitivity: 
 ---------------

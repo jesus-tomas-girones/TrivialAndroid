@@ -66,7 +66,8 @@ import com.trivial.upv.android.widget.fab.CheckableFab;
 import org.xml.sax.Attributes;
 
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
-import static com.trivial.upv.android.activity.QuizActivity.ARG_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 
 /**
  * This is the base class for displaying a {@link Quiz}.
@@ -254,8 +255,9 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
                     //JVG.S
                     if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
                         ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
-                    }
-                    if (mCategory.getId().equals(ARG_ONLINE)) {
+                    } else if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
+                        ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
+                    } else if (((QuizActivity)getContext()).isMatchTurnBased()) {
                         ((QuizActivity) getContext()).cancelPostDelayHandlerPlayGame();
                     }
                     submitAnswer(v);
@@ -318,7 +320,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
     /**
      * Sets the quiz to answered or unanswered.
      *
-     * @param answered <code>true</code> if an answer was selected, else <code>false</code>.
+     * @param answered <code>true</code> if an answer was roulette_selection, else <code>false</code>.
      */
     protected void allowAnswer(final boolean answered) {
         if (null != mSubmitAnswer) {
@@ -410,7 +412,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
             }
         }
 
-        if (!mCategory.getId().equals(ARG_ONLINE) && !answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
+        if (!mCategory.getId().equals(ARG_REAL_TIME_ONLINE) && !((QuizActivity)getContext()).isMatchTurnBased() && !answerCorrect && posAnswer >= 0 && comments != null && !comments.isEmpty()) {
 
             Snackbar snackbar = Snackbar
                     .make(findViewById(R.id.absQuizViewContainer), comments, Snackbar.LENGTH_INDEFINITE)
@@ -445,7 +447,7 @@ public abstract class AbsQuizView<Q extends Quiz> extends FrameLayout implements
 
     private void resizeView() {
         final float widthHeightRatio = (float) getHeight() / (float) getWidth();
-        // Animate X and Y scaling separately to allow different start delays.
+        // Animate X and Y scaling separately to allow different roulette_rotate delays.
         // object animators for x and y with different durations and then run them independently
         resizeViewProperty(View.SCALE_X, .5f, 200);
         resizeViewProperty(View.SCALE_Y, .5f / widthHeightRatio, 300);

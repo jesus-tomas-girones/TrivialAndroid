@@ -35,9 +35,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.android.gms.games.Games;
+import com.google.android.gms.games.RealTimeMultiplayerClient;
 import com.google.android.gms.games.multiplayer.Participant;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
 import com.trivial.upv.android.R;
 import com.trivial.upv.android.activity.QuizActivity;
 import com.trivial.upv.android.adapter.QuizAdapter;
@@ -51,7 +50,7 @@ import com.trivial.upv.android.model.Theme;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.gpg.ScoreOnline;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.AvatarView;
 import com.trivial.upv.android.widget.quiz.AbsQuizView;
 
@@ -59,7 +58,8 @@ import java.util.List;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 import static com.trivial.upv.android.activity.QuizActivity.ARG_ONE_PLAYER;
-import static com.trivial.upv.android.activity.QuizActivity.ARG_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_REAL_TIME_ONLINE;
+import static com.trivial.upv.android.activity.QuizActivity.ARG_TURNED_BASED_ONLINE;
 import static com.trivial.upv.android.activity.QuizActivity.MAX_RETRY_TIMES;
 
 
@@ -109,10 +109,10 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         //mCategory = TopekaDatabaseHelper.getCategoryWith(getActivity(), categoryId);
         if (categoryId.equals(ARG_ONE_PLAYER)) {
             mCategory = Game.category;
-        } else if (categoryId.equals(ARG_ONLINE)) {
+        } else if (((QuizActivity) getActivity()).isMatchOnline() || ((QuizActivity) getActivity()).isMatchTurnBased()) {
             mCategory = Game.category;
         } else {
-            mCategory = TopekaJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
+            mCategory = TrivialJSonHelper.getInstance(getContext(), false).getCategoryWith(categoryId);
         }
         //JVG.E
         super.onCreate(savedInstanceState);
@@ -170,8 +170,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         if (!isAdded()) {
             return;
         }
-        mProgressText
-                .setText(getString(R.string.quiz_of_quizzes, currentQuizPosition, mQuizSize));
+        mProgressText.setText(getString(R.string.quiz_of_quizzes, String.valueOf(currentQuizPosition), String.valueOf(mQuizSize)));
         mProgressBar.setProgress(currentQuizPosition);
     }
 
@@ -215,9 +214,13 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 //                                ((QuizActivity) getActivity()).setTimeToNextItem(TIME_TO_ANSWER_PLAY_GAME);
                                 setTimeLeftText(Game.totalTime * 1000);
                                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
-                            } else if (mCategory.getId().equals(ARG_ONLINE)) {
+                            } else if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
                                 ((QuizActivity) getActivity()).setTimeToNextItem(Game.totalTime * 1000);
                                 setTimeLeftText(Game.totalTime * 1000);
+                                ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
+                            } else if (((QuizActivity) getActivity()).isMatchTurnBased()) {
+                                ((QuizActivity) getActivity()).setTimeToNextItem(Game.K_TIME_TO_ANSWER_TURN_BASED * 1000);
+                                setTimeLeftText(Game.K_TIME_TO_ANSWER_TURN_BASED * 1000);
                                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
                             }
                             return true;
@@ -295,27 +298,29 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 //                ((QuizActivity) getActivity()).setTimeToNextItem((TIME_TO_ANSWER_PLAY_GAME));
 //                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
-            }
-            if (mCategory.getId().equals(ARG_ONLINE)) {
+            } else if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
 //                TIME X TOTAL QUIZZES
 //                ((QuizActivity) getActivity()).setTimeToNextItem((TIME_TO_ANSWER_PLAY_GAME));
 //                setTimeLeftText(TIME_TO_ANSWER_PLAY_GAME);
+                ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
+            } else if (((QuizActivity) getActivity()).isMatchTurnBased()) {
                 ((QuizActivity) getActivity()).postDelayHandlerPlayGame();
             }
             /// Actualizar el estado de los test
             //TopekaDatabaseHelper.updateCategory(getActivity(), mCategory);
             switch (mCategory.getId()) {
                 case ARG_ONE_PLAYER:
-                case ARG_ONLINE:
+                case ARG_REAL_TIME_ONLINE:
                     break;
                 default:
                     // Update score
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
-                        }
-                    }.start();
+                    if (!((QuizActivity) getActivity()).isMatchTurnBased())
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
+                            }
+                        }.start();
             }
 
             //JVG.E
@@ -325,7 +330,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         return false;
     }
 
-    private void markCategorySolved() {
+    public void markCategorySolved() {
         mCategory.setSolved(true);
 
         //JVG.S
@@ -333,16 +338,17 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         /// Actualizar el estado de los test
         switch (mCategory.getId()) {
             case ARG_ONE_PLAYER:
-            case ARG_ONLINE:
+            case ARG_REAL_TIME_ONLINE:
                 break;
             default:
-                // Update score
-                new Thread() {
-                    @Override
-                    public void run() {
-                        TopekaJSonHelper.getInstance(getContext(), false).updateCategory();
-                    }
-                }.start();
+                if (!((QuizActivity) getActivity()).isMatchTurnBased())
+                    // Update score
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            TrivialJSonHelper.getInstance(getContext(), false).updateCategory();
+                        }
+                    }.start();
         }
         //JVG.E
     }
@@ -361,7 +367,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
         mTimeLeftText.setText(getString(R.string.x_points, mCategory.getScore()));
         if (mCategory.getId().equals(QuizActivity.ARG_ONE_PLAYER)) {
 //            mTimeLeftText.setVisibility(View.INVISIBLE);
-        } else if (mCategory.getId().equals(QuizActivity.ARG_ONLINE)) {
+        } else if (mCategory.getId().equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
 //            mTimeLeftText.setVisibility(View.INVISIBLE);
 
             byte[] message = new String(mCategory.getScore() + "|" + (((QuizActivity) getActivity()).timeToNextItem / 1000)).getBytes();
@@ -374,7 +380,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
             }
 
             for (Participant p : Game.mParticipants) {
-                if (!p.getParticipantId().equals(Game.mMyId) && p.isConnectedToRoom() && p.getStatus()==Participant.STATUS_JOINED) {
+                if (!p.getParticipantId().equals(Game.mMyId) && p.isConnectedToRoom() && p.getStatus() == Participant.STATUS_JOINED) {
                     sendMessageScore(tmpMessage, p.getParticipantId(), 1);
                 }
             }
@@ -383,28 +389,28 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     }
 
     private void sendMessageScore(final byte[] tmpMessage, final String participantId, final int numTimesSended) {
-                Games.RealTimeMultiplayer.sendReliableMessage(Game.mGoogleApiClient, new RealTimeMultiplayer.ReliableMessageSentCallback() {
-                    @Override
-                    public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientParticipantId) {
-                        if (statusCode == STATUS_OK) {
+        ((QuizActivity) getActivity()).mRealTimeMultiplayerClient.sendReliableMessage(tmpMessage, Game.mRoomId, participantId, new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
+            @Override
+            public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientParticipantId) {
+                if (statusCode == STATUS_OK) {
 
-                        } else {
-                            Log.d("GPG", "Error enviando mensaje tipo P" + numTimesSended);
-                            if (numTimesSended <= MAX_RETRY_TIMES) {
-                                sendMessageScore(tmpMessage, participantId, numTimesSended + 1);
-                            } else {
-                                ((QuizActivity) getActivity()).showGameError("Why: Sending Score!", false);
-                            }
-                        }
+                } else {
+                    Log.d("GPG", "Error enviando mensaje tipo P" + numTimesSended);
+                    if (numTimesSended <= MAX_RETRY_TIMES) {
+                        sendMessageScore(tmpMessage, participantId, numTimesSended + 1);
+                    } else {
+                        ((QuizActivity) getActivity()).showGameError("Why: Sending Score!", false);
                     }
-                }, tmpMessage, Game.mRoomId, participantId);
+                }
+            }
+        });
     }
 
     // JVG.S
     ProgressDialog pWaitingProgress = null;
 
     public void showSummary() {
-        if (mCategory.getId().equals(QuizActivity.ARG_ONLINE)) {
+        if (mCategory.getId().equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
             pWaitingProgress = new ProgressDialog(getContext());
             pWaitingProgress.setTitle("Waiting Players...");
             pWaitingProgress.show();
@@ -423,8 +429,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     //JVG.E
 
     public void showSummaryOffLine() {
-        @SuppressWarnings("ConstantConditions")
-        final ListView scorecardView = (ListView) getView().findViewById(R.id.scorecard);
+        @SuppressWarnings("ConstantConditions") final ListView scorecardView = (ListView) getView().findViewById(R.id.scorecard);
         mScoreAdapter = getScoreAdapter();
         scorecardView.setAdapter(mScoreAdapter);
         scorecardView.setVisibility(View.VISIBLE);
@@ -469,7 +474,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
 
     public void generateScoreOnline(String participant, int points, int timeLeft) {
 
-        Log.d("TRAZASCORE", ((participant == null) ? Game.mMyId : participant) + " " + " " + points + " " + timeLeft);
+//        Log.d("TRAZASCORE", ((participant == null) ? Game.mMyId : participant) + " " + " " + points + " " + timeLeft);
 //        scoreOnline.getmScoreOnline().clear();
 //        for (Participant p : Game.mParticipants) {
 //            if (p.getParticipantId().equals(Game.mMyId)) {
@@ -536,7 +541,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
             }
         }
 
-        // Add the rest of the participants
+        // Add the rest of the participantsTurnBased
         for (Participant p : Game.mParticipants) {
             int cont = 0;
             for (ScoreOnline.Score score : scoreOnline.getScoreOnline()) {
@@ -559,7 +564,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     }
 
     public void checkScoreNumParticipants() {
-        Log.d("TRAZA", "Closing Dialog!" + "" + scoreOnline.areAnyPendingScore());
+//        Log.d("TRAZA", "Closing Dialog!" + "" + scoreOnline.areAnyPendingScore());
         if (!scoreOnline.areAnyPendingScore()) {
             if (pWaitingProgress != null) {
                 pWaitingProgress.dismiss();

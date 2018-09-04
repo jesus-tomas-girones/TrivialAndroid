@@ -53,7 +53,7 @@ public class AutoGridView extends GridView {
 				}
 			}
 		}
-		Log.d(TAG, "numColumns set to: " + numColumns);
+//		Log.d(TAG, "numColumns set to: " + numColumns);
 	}
 
 	
@@ -70,7 +70,7 @@ public class AutoGridView extends GridView {
 		this.numColumns = numColumns;
 		super.setNumColumns(numColumns);
 	
-		Log.d(TAG, "setSelection --> " + previousFirstVisible);
+//		Log.d(TAG, "setSelection --> " + previousFirstVisible);
 		setSelection(previousFirstVisible);
 	}
 	

@@ -34,7 +34,7 @@ public interface QuizTable {
     String COLUMN_MIN = "min";
     String COLUMN_MAX = "max";
     String COLUMN_STEP = "step";
-    String COLUMN_START = "start";
+    String COLUMN_START = "roulette_rotate";
     String COLUMN_END = "end";
     String COLUMN_SOLVED = "solved";
 

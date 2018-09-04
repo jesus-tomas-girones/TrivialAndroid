@@ -20,7 +20,7 @@ public class TreeViewFactoryNode extends BaseNodeViewFactory {
     @Override
     public BaseNodeViewBinder getNodeViewBinder(View view, int level) {
         BaseNodeViewBinder newNode;
-        Log.d("TRAZA", "" + level);
+//        Log.d("TRAZA", "" + level);
         switch (level) {
             case 0:
                 newNode = new FirstLevelNodeViewBinder(view, mOnCheckBoxListener);

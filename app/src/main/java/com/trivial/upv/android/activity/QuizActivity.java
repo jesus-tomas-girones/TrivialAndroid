@@ -55,19 +55,31 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesActivityResultCodes;
-import com.google.android.gms.games.GamesStatusCodes;
+import com.google.android.gms.games.Player;
+import com.google.android.gms.games.PlayersClient;
+import com.google.android.gms.games.RealTimeMultiplayerClient;
+import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Participant;
+import com.google.android.gms.games.multiplayer.realtime.OnRealTimeMessageReceivedListener;
 import com.google.android.gms.games.multiplayer.realtime.RealTimeMessage;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMessageReceivedListener;
-import com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer;
 import com.google.android.gms.games.multiplayer.realtime.Room;
 import com.google.android.gms.games.multiplayer.realtime.RoomConfig;
-import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateListener;
-import com.google.android.gms.games.multiplayer.realtime.RoomUpdateListener;
+import com.google.android.gms.games.multiplayer.realtime.RoomStatusUpdateCallback;
+import com.google.android.gms.games.multiplayer.realtime.RoomUpdateCallback;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -80,7 +92,7 @@ import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
 import com.trivial.upv.android.model.gpg.Game;
 import com.trivial.upv.android.model.quiz.Quiz;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.TextSharedElementCallback;
 
 import java.io.UnsupportedEncodingException;
@@ -92,8 +104,7 @@ import java.util.Map;
 
 import static com.google.android.gms.games.GamesStatusCodes.STATUS_OK;
 
-public class QuizActivity extends AppCompatActivity implements
-        /*GPG*/ RoomStatusUpdateListener, RoomUpdateListener, RealTimeMessageReceivedListener {
+public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
     private static final String IMAGE_CATEGORY = "image_category_";
@@ -101,7 +112,8 @@ public class QuizActivity extends AppCompatActivity implements
     private static final String FRAGMENT_TAG = "Quiz";
     // JVG.S
     public static final String ARG_ONE_PLAYER = "PLAY_OFFLINE";
-    public static final String ARG_ONLINE = "PLAY_TWO_PLAYERS";
+    public static final String ARG_REAL_TIME_ONLINE = "PLAY_TWO_PLAYERS";
+    public static final String ARG_TURNED_BASED_ONLINE = "PLAY_TURN_BASED";
     public static final int TIME_TO_ANSWER_PLAY_GAME = 3000;
     public static final String ARG_INVITATION_TO_PLAY = "INVITATION_TO_PLAY";
     // JVG.E
@@ -164,46 +176,130 @@ public class QuizActivity extends AppCompatActivity implements
             mSavedStateIsPlaying = savedInstanceState.getBoolean(STATE_IS_PLAYING);
         }
         super.onCreate(savedInstanceState);
+
+
         populate(categoryId);
         int categoryNameTextSize = getResources()
                 .getDimensionPixelSize(R.dimen.category_item_text_size);
         int paddingStart = getResources().getDimensionPixelSize(R.dimen.spacing_double);
         final int startDelay = getResources().getInteger(R.integer.toolbar_transition_duration);
-        ActivityCompat.setEnterSharedElementCallback(this,
-                new TextSharedElementCallback(categoryNameTextSize, paddingStart) {
-                    @Override
-                    public void onSharedElementStart(List<String> sharedElementNames,
-                                                     List<View> sharedElements,
-                                                     List<View> sharedElementSnapshots) {
-                        super.onSharedElementStart(sharedElementNames,
-                                sharedElements,
-                                sharedElementSnapshots);
-                        mToolbarBack.setScaleX(0f);
-                        mToolbarBack.setScaleY(0f);
-                    }
-
-                    @Override
-                    public void onSharedElementEnd(List<String> sharedElementNames,
-                                                   List<View> sharedElements,
-                                                   List<View> sharedElementSnapshots) {
-                        super.onSharedElementEnd(sharedElementNames,
-                                sharedElements,
-                                sharedElementSnapshots);
-                        // Make sure to perform this animation after the transition has ended.
-                        ViewCompat.animate(mToolbarBack)
-                                .setStartDelay(startDelay)
-                                .scaleX(1f)
-                                .scaleY(1f)
-                                .alpha(1f);
-                    }
-                });
 
         // JVG.S
-        if (mCategory.getId().equals(ARG_ONLINE)) {
-            iniciarPartidaEnTiempoReal();
+        // Partida en tiempo real (Play OnLine)
+        if (isMatchOnline() || isMatchTurnBased()) {
+            mGoogleSignInClient = GoogleSignIn.getClient(this,
+                    new GoogleSignInOptions.Builder(
+                            GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                            .build());
+
+//            startSignInIntent();
+//            iniciarPartidaEnTiempoReal();
+        } else if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
+
+        } else {
+            // Load animation from action bar
+            ActivityCompat.setEnterSharedElementCallback(this,
+                    new TextSharedElementCallback(categoryNameTextSize, paddingStart) {
+                        @Override
+                        public void onSharedElementStart(List<String> sharedElementNames,
+                                                         List<View> sharedElements,
+                                                         List<View> sharedElementSnapshots) {
+                            super.onSharedElementStart(sharedElementNames,
+                                    sharedElements,
+                                    sharedElementSnapshots);
+                            mToolbarBack.setScaleX(0f);
+                            mToolbarBack.setScaleY(0f);
+                        }
+
+                        @Override
+                        public void onSharedElementEnd(List<String> sharedElementNames,
+                                                       List<View> sharedElements,
+                                                       List<View> sharedElementSnapshots) {
+                            super.onSharedElementEnd(sharedElementNames,
+                                    sharedElements,
+                                    sharedElementSnapshots);
+                            // Make sure to perform this animation after the transition has ended.
+                            ViewCompat.animate(mToolbarBack)
+                                    .setStartDelay(startDelay)
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .alpha(1f);
+                        }
+                    });
+
         }
         // JVG.E
     }
+
+    public boolean isMatchOnline() {
+        if (Game.mode != null)
+            return Game.mode.equals(ARG_REAL_TIME_ONLINE);
+        return false;
+    }
+
+    public boolean isMatchTurnBased() {
+        if (Game.mode != null)
+            return Game.mode.equals(ARG_TURNED_BASED_ONLINE);
+        return false;
+
+    }
+
+    public void startSignInIntent() {
+        startActivityForResult(mGoogleSignInClient.getSignInIntent(),
+                RC_SIGN_IN);
+    }
+
+    public void signOut() {
+        mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            onDisconnected();
+                        } else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Error al desconectar el cliente.", Toast.LENGTH_LONG);
+                        }
+                    }
+                });
+    }
+
+    public void onDisconnected() {
+        showGameError("No ha sido posible desconectar", true);
+    }
+
+    private void onConnected(GoogleSignInAccount googleSignInAccount) {
+        if (mSignedInAccount != googleSignInAccount) {
+            mSignedInAccount = googleSignInAccount;
+            PlayersClient playersClient = Games.getPlayersClient(this,
+                    googleSignInAccount);
+            playersClient.getCurrentPlayer()
+                    .addOnSuccessListener(new OnSuccessListener<Player>() {
+                        @Override
+                        public void onSuccess(Player player) {
+                            mPlayerId = player.getPlayerId();
+
+                            if (isMatchOnline()) {
+                                iniciarPartidaEnTiempoReal();
+                            }
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Hay un problema para obtener el id del jugador!"
+                                    , Toast.LENGTH_LONG).show();
+                        }
+                    });
+        }
+    }
+
+    // GPG variables
+    private GoogleSignInClient mGoogleSignInClient = null;
+    private static final int RC_SIGN_IN = 9001;
+    GoogleSignInAccount mSignedInAccount = null;
+    private String mPlayerId;
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -217,6 +313,8 @@ public class QuizActivity extends AppCompatActivity implements
 
     @Override
     protected void onResume() {
+        if (isMatchOnline())
+            signInSilently();
         //        Handler to control the time for answer a quiz
         if (mHandlerPlayGame == null)
             mHandlerPlayGame = new Handler();
@@ -234,18 +332,34 @@ public class QuizActivity extends AppCompatActivity implements
                 mQuizFab.hide();
                 mIcon.setVisibility(View.GONE);
             }
-            if (mCategory.getId().equals(ARG_ONE_PLAYER)) {
+            if (mCategory.getId().equals(ARG_ONE_PLAYER) || isMatchTurnBased()) {
                 postDelayHandlerPlayGame();
             }
         } else {
             //JVG.S
-            if (!mCategory.getId().equals(ARG_ONLINE)) {
+            if (!mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
                 initQuizFragment();
             }
             //JVG.E
         }
 
         super.onResume();
+    }
+
+    private void signInSilently() {
+        mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
+                new OnCompleteListener<GoogleSignInAccount>() {
+                    @Override
+                    public void onComplete(
+                            @NonNull Task<GoogleSignInAccount> task) {
+                        if (task.isSuccessful()) {
+                            onConnected(task.getResult());
+                        } else {
+                            onDisconnected();
+                        }
+                    }
+                });
+
     }
 
     @Override
@@ -258,6 +372,13 @@ public class QuizActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         leaveRoom();
+
+        if (isMatchTurnBased()) {
+            if (!mCategory.isSolved()) {
+                showMessageAcceptCancelTurn();
+                return;
+            }
+        }
         if (mIcon == null || mQuizFab == null) {
             // Skip the animation if icon or fab are not initialized.
             super.onBackPressed();
@@ -359,7 +480,7 @@ public class QuizActivity extends AppCompatActivity implements
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void prepareCircularReveal(View startView, FrameLayout targetView) {
         int centerX = (startView.getLeft() + startView.getRight()) / 2;
-        // Subtract the start view's height to adjust for relative coordinates on screen.
+        // Subtract the roulette_rotate view's height to adjust for relative coordinates on screen.
         int centerY = (startView.getTop() + startView.getBottom()) / 2 - startView.getHeight();
         float endRadius = (float) Math.hypot(centerX, centerY);
         mCircularReveal = ViewAnimationUtils.createCircularReveal(
@@ -483,11 +604,11 @@ public class QuizActivity extends AppCompatActivity implements
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
         if (categoryId.equals(ARG_ONE_PLAYER)) {
-            mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryPlayGameOffLine();
-        } else if (categoryId.equals(ARG_ONLINE)) {
+            mCategory = TrivialJSonHelper.getInstance(getBaseContext(), false).getCategoryPlayGameOffLine();
+        } else if (isMatchOnline() || isMatchTurnBased()) {
             mCategory = Game.category;
         } else {
-            mCategory = TopekaJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
+            mCategory = TrivialJSonHelper.getInstance(getBaseContext(), false).getCategoryWith(categoryId);
         }
         // JVG.E
 
@@ -605,53 +726,23 @@ public class QuizActivity extends AppCompatActivity implements
 //        mIcon.setImageResource(resId);
 
         mIcon.setFitsSystemWindows(true);
-        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(
-
-                getBaseContext()).
-
-                getImageLoader());
+        mIcon.setImageUrl(mCategory.getImg(), VolleySingleton.getInstance(getBaseContext()).getImageLoader());
 
         //JVG.E
-        ViewCompat.animate(mIcon)
-                .
-
-                        scaleX(1)
-                .
-
-                        scaleY(1)
-                .
-
-                        alpha(1)
-                .
-
-                        setInterpolator(mInterpolator)
-                .
-
-                        setStartDelay(300)
-                .
-
-                        start();
+        ViewCompat.animate(mIcon).scaleX(1).scaleY(1).alpha(1).setInterpolator(mInterpolator).setStartDelay(300).start();
 
         mQuizFab = (FloatingActionButton)
 
                 findViewById(R.id.fab_quiz);
         mQuizFab.setImageResource(R.drawable.ic_play);
         if (mSavedStateIsPlaying)
-
-        {
             mQuizFab.hide();
-        } else
-
-        {
+        else
             mQuizFab.show();
-        }
         mQuizFab.setOnClickListener(mOnClickListener);
-
         // JVG.S
         // mCategory = TopekaDatabaseHelper.getCategoryWith(this, categoryId);
-        if (categoryId.equals(ARG_ONLINE) || mCategory.getQuizzes()==null)
-
-        {
+        if (isMatchOnline() || mCategory.getQuizzes() == null) {
             mQuizFab.hide();
         }
         // JVG.E
@@ -690,7 +781,7 @@ public class QuizActivity extends AppCompatActivity implements
 
 
     public boolean hasInitialicedAllPlayers() {
-        Log.d("TRAZAGPG", "nº participantes" + Game.numParticipantsOK() + " finishedParticipants:" + Game.mFinishedParticipants.size());
+//        Log.d("TRAZAGPG", "nº participantes" + Game.numParticipantsOK() + " finishedParticipants:" + Game.mFinishedParticipants.size());
         return (Game.numParticipantsOK() == Game.mFinishedParticipants.size());
     }
 
@@ -705,6 +796,7 @@ public class QuizActivity extends AppCompatActivity implements
 //                }
 //                else {
                 // Finish;
+                getQuizFragment().markCategorySolved();
                 getQuizFragment().showSummary();
 //                }
             } else {
@@ -742,7 +834,7 @@ public class QuizActivity extends AppCompatActivity implements
             mHandlerPlayGame = null;
         }
 
-        Log.d(TAG, "**** got onStop");
+//        Log.d(TAG, "**** got onStop");
 
         // if we're in a room, leave it.
         leaveRoom();
@@ -767,9 +859,16 @@ public class QuizActivity extends AppCompatActivity implements
 
     /****** GOOGLE PLAY GAMES**********************/
 //JVG.S
+    public RealTimeMultiplayerClient mRealTimeMultiplayerClient = null;
+    RoomConfig mRoomConfig;
+
+
     private void iniciarPartidaEnTiempoReal() {
 // Create room waiting for a invitee
 //        timeToNextItem = Game.totalTime;
+
+        mRealTimeMultiplayerClient = Games.getRealTimeMultiplayerClient(this,
+                GoogleSignIn.getLastSignedInAccount(this));
 
         final int NUMERO_MINIMO_OPONENTES = Game.minAutoMatchPlayers, NUMERO_MAXIMO_OPONENTES = Game.maxAutoMatchPlayers;
         Bundle autoMatchCriteria;
@@ -778,16 +877,17 @@ public class QuizActivity extends AppCompatActivity implements
         // Join to an invitation
         if (Game.mIncomingInvitationId != null) {
             // Accept the given invitation.
-            Log.d(TAG, "Accepting invitation: " + Game.mIncomingInvitationId);
-            RoomConfig.Builder roomConfigBuilder = RoomConfig.builder(this);
-            roomConfigBuilder.setInvitationIdToAccept(Game.mIncomingInvitationId)
-                    .setMessageReceivedListener(this)
-                    .setRoomStatusUpdateListener(this);
+//            Log.d(TAG, "Accepting invitation: " + Game.mIncomingInvitationId);
+            mRoomConfig = RoomConfig.builder(mRoomUpdateCallback)
+                    .setInvitationIdToAccept(Game.mIncomingInvitationId)
+                    .setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener)
+                    .setRoomStatusUpdateCallback(mRoomStatusUpdateCallback)
+                    .build();
 
             keepScreenOn();
             Game.resetGameVars();
             Game.timeStamp = System.currentTimeMillis();
-            Games.RealTimeMultiplayer.join(Game.mGoogleApiClient, roomConfigBuilder.build());
+            mRealTimeMultiplayerClient.join(mRoomConfig);
             Game.mIncomingInvitationId = null;
             return;
         }
@@ -802,7 +902,7 @@ public class QuizActivity extends AppCompatActivity implements
             if (Game.minAutoMatchPlayers > 0 || Game.maxAutoMatchPlayers > 0) {
                 autoMatchCriteria = RoomConfig.createAutoMatchCriteria(
                         Game.minAutoMatchPlayers, Game.maxAutoMatchPlayers, 0);
-                Log.d(TAG, "Automatch criteria: " + autoMatchCriteria);
+//                Log.d(TAG, "Automatch criteria: " + autoMatchCriteria);
             }
         } else {
             // Create room for a quick match (automatchcriteria)
@@ -810,21 +910,22 @@ public class QuizActivity extends AppCompatActivity implements
         }
 
         // create the room
-        Log.d(TAG, "Creating room...");
-        RoomConfig.Builder rtmConfigBuilder = RoomConfig.builder(this);
+//        Log.d(TAG, "Creating room...");
+        RoomConfig.Builder rtmConfigBuilder = RoomConfig.builder(mRoomUpdateCallback);
         if (Game.invitees != null && Game.invitees.size() > 0)
             rtmConfigBuilder.addPlayersToInvite(Game.invitees);
-        rtmConfigBuilder.setMessageReceivedListener(this);
-        rtmConfigBuilder.setRoomStatusUpdateListener(this);
+        rtmConfigBuilder.setOnMessageReceivedListener(mOnRealTimeMessageReceivedListener);
+        rtmConfigBuilder.setRoomStatusUpdateCallback(mRoomStatusUpdateCallback);
         if (autoMatchCriteria != null) {
             rtmConfigBuilder.setAutoMatchCriteria(autoMatchCriteria);
-            rtmConfigBuilder.setVariant((int)Game.level);
+            rtmConfigBuilder.setVariant((int) Game.level);
         }
         keepScreenOn();
         Game.resetGameVars();
         Game.timeStamp = System.currentTimeMillis();
-        Games.RealTimeMultiplayer.create(Game.mGoogleApiClient, rtmConfigBuilder.build());
-        Log.d(TAG, "Room created, waiting for it to be ready...");
+        mRoomConfig = rtmConfigBuilder.build();
+        mRealTimeMultiplayerClient.create(mRoomConfig);
+//        Log.d(TAG, "Room created, waiting for it to be ready...");
     }
 
     final static int RC_WAITING_ROOM = 10002;
@@ -832,308 +933,327 @@ public class QuizActivity extends AppCompatActivity implements
 
     StringBuilder sbMessageData = null;
 
-    @Override
-    public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
-        synchronized (this) {
-            Log.d("TRAZAGPG", "RECEIVE: " + realTimeMessage.getMessageData().toString());
-            byte[] messageData = realTimeMessage.getMessageData();
-            try {
-                String tmpDataMsg = new String(messageData, "UTF-8");
-                Log.d("TRAZAGPG", "RECEIVE: " + tmpDataMsg);
-                switch (tmpDataMsg.charAt(0)) {
-                    case 'P':
+    OnRealTimeMessageReceivedListener mOnRealTimeMessageReceivedListener =
+            new OnRealTimeMessageReceivedListener() {
+                @Override
+                public void onRealTimeMessageReceived(RealTimeMessage realTimeMessage) {
+                    synchronized (this) {
+//                        Log.d("TRAZAGPG", "RECEIVE: " + realTimeMessage.getMessageData().toString());
+                        byte[] messageData = realTimeMessage.getMessageData();
+                        try {
+                            String tmpDataMsg = new String(messageData, "UTF-8");
+//                            Log.d("TRAZAGPG", "RECEIVE: " + tmpDataMsg);
+                            switch (tmpDataMsg.charAt(0)) {
+                                case 'P':
 //                        Toast.makeText(this, "Your oppenent do " + (int) messageData[1] + " PTS", Toast.LENGTH_LONG).show();
 //                        initQuizFragment();
-                        byte[] auxData = new byte[messageData.length - 1];
-                        for (int i = 1; i < messageData.length; i++) {
-                            auxData[i - 1] = messageData[i];
-                        }
-
-                        String tmpScore = new String(auxData, "UTF-8");
-                        String[] splitScore = tmpScore.split("\\|");
-
-                        getQuizFragment().generateScoreOnline(realTimeMessage.getSenderParticipantId(), Integer.parseInt(splitScore[0]), Integer.parseInt(splitScore[1]));
-
-                        break;
-
-                    case 'S':
-                        sbMessageData = new StringBuilder();
-                    case 'C':
-                        byte[] tmpBytes = messageData;
-                        byte[] tmpBytes2 = new byte[tmpBytes.length - 1];
-
-                        for (int j = 1; j < tmpBytes.length; j++) {
-                            tmpBytes2[j - 1] = tmpBytes[j];
-                        }
-
-                        sbMessageData.append(new String(tmpBytes2, "UTF-8"));
-
-                        break;
-
-
-                    case 'E':
-                        if (Game.category != null)
-                            Game.category.getQuizzes().clear();
-
-                        Type type = new TypeToken<Category>() {
-                        }.getType();
-
-                        GsonBuilder builder = new GsonBuilder();
-                        builder.registerTypeAdapter(Quiz.class, new TopekaJSonHelper.QuizDeserializer());
-                        Gson gson = builder.create();
-
-                        Log.d("TRAZAGPGE", sbMessageData.toString());
-                        Game.category = gson.fromJson(sbMessageData.toString(), type);
-                        mCategory = Game.category;
-
-
-                        // END MESSAGE
-                        byte[] tmpTime = new byte[messageData.length - 1];
-                        for (int i = 1; i < messageData.length; i++) {
-                            tmpTime[i - 1] = messageData[i];
-                        }
-
-                        String[] data = new String(tmpTime, "UTF-8").split("\\|");
-                        Game.totalTime = Integer.parseInt(data[0]);
-                        Game.master = data[1];
-
-                        check.add(tmpTime);
-
-                        for (Participant p : Game.mParticipants) {
-                            if (p.getParticipantId().equals(Game.master)) {
-                                retryMessage(new byte[]{'T'}, p.getParticipantId(), 1, "Why: Sending Data to Opponent", new CallBackRetry() {
-                                    @Override
-                                    public void sendActions() {
-                                        initQuizFragment();
+                                    byte[] auxData = new byte[messageData.length - 1];
+                                    for (int i = 1; i < messageData.length; i++) {
+                                        auxData[i - 1] = messageData[i];
                                     }
-                                });
-                            }
-                        }
-                        break;
 
-                    case 'T':
-                        if (hasInitialicedAllPlayers()) {
-                            for (Participant p : Game.mParticipants) {
-                                if (!p.getParticipantId().equals(Game.mMyId) && p.isConnectedToRoom() && p.getStatus() == Participant.STATUS_JOINED) {
-                                    retryMessage(new byte[]{'U'}, p.getParticipantId(), 1, "Why: Sending Start Message", null);
-                                }
-                            }
-                            hideWaitingProgress();
-                            mQuizFab.show();
-                            startQuizFromClickOn(mQuizFab);
-                        }
-                        break;
-                    case 'U':
-                        hideWaitingProgress();
-                        mQuizFab.show();
-                        startQuizFromClickOn(mQuizFab);
-                        break;
+                                    String tmpScore = new String(auxData, "UTF-8");
+                                    String[] splitScore = tmpScore.split("\\|");
 
-                    case 'D':
-                        byte[] tmpTimeStamp = new byte[messageData.length - 1];
+                                    getQuizFragment().generateScoreOnline(realTimeMessage.getSenderParticipantId(), Integer.parseInt(splitScore[0]), Integer.parseInt(splitScore[1]));
 
-                        for (int j = 1; j < messageData.length; j++) {
-                            tmpTimeStamp[j - 1] = messageData[j];
-                        }
-                        Game.mFinishedParticipants.put(realTimeMessage.getSenderParticipantId(), new Long(new String(tmpTimeStamp)));
+                                    break;
 
-                        Log.d("TRAZAGPG", Game.numParticipantsOK() + " " + Game.mFinishedParticipants.size());
-                        for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
-                            Log.d("TRAZAGPG", key.getKey() + " " + key.getValue());
+                                case 'S':
+                                    sbMessageData = new StringBuilder();
+                                case 'C':
+                                    byte[] tmpBytes = messageData;
+                                    byte[] tmpBytes2 = new byte[tmpBytes.length - 1];
 
-                        }
-                        if (Game.numParticipantsOK() == Game.mFinishedParticipants.size()) {
+                                    for (int j = 1; j < tmpBytes.length; j++) {
+                                        tmpBytes2[j - 1] = tmpBytes[j];
+                                    }
 
-                            long minValue = Long.MAX_VALUE;
-                            for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
-                                if (key.getValue() < minValue) {
-                                    minValue = key.getValue();
-                                }
-                            }
+                                    sbMessageData.append(new String(tmpBytes2, "UTF-8"));
 
-                            if (Game.timeStamp <= minValue) {
+                                    break;
 
-                                minValue = Game.timeStamp;
+
+                                case 'E':
+                                    if (Game.category != null)
+                                        Game.category.getQuizzes().clear();
+
+                                    Type type = new TypeToken<Category>() {
+                                    }.getType();
+
+                                    GsonBuilder builder = new GsonBuilder();
+                                    builder.registerTypeAdapter(Quiz.class, new TrivialJSonHelper.QuizDeserializer());
+                                    Gson gson = builder.create();
+
+//                                    Log.d("TRAZAGPGE", sbMessageData.toString());
+                                    Game.category = gson.fromJson(sbMessageData.toString(), type);
+                                    mCategory = Game.category;
+
+
+                                    // END MESSAGE
+                                    byte[] tmpTime = new byte[messageData.length - 1];
+                                    for (int i = 1; i < messageData.length; i++) {
+                                        tmpTime[i - 1] = messageData[i];
+                                    }
+
+                                    String[] data = new String(tmpTime, "UTF-8").split("\\|");
+                                    Game.totalTime = Integer.parseInt(data[0]);
+                                    Game.master = data[1];
+
+                                    check.add(tmpTime);
+
+                                    for (Participant p : Game.mParticipants) {
+                                        if (p.getParticipantId().equals(Game.master)) {
+                                            retryMessage(new byte[]{'T'}, p.getParticipantId(), 1, "Why: Sending Data to Opponent", new CallBackRetry() {
+                                                @Override
+                                                public void sendActions() {
+                                                    initQuizFragment();
+                                                }
+                                            });
+                                        }
+                                    }
+                                    break;
+
+                                case 'T':
+                                    if (hasInitialicedAllPlayers()) {
+                                        for (Participant p : Game.mParticipants) {
+                                            if (!p.getParticipantId().equals(Game.mMyId) && p.isConnectedToRoom() && p.getStatus() == Participant.STATUS_JOINED) {
+                                                retryMessage(new byte[]{'U'}, p.getParticipantId(), 1, "Why: Sending Start Message", null);
+                                            }
+                                        }
+                                        hideWaitingProgress();
+                                        mQuizFab.show();
+                                        startQuizFromClickOn(mQuizFab);
+                                    }
+                                    break;
+                                case 'U':
+                                    hideWaitingProgress();
+                                    mQuizFab.show();
+                                    startQuizFromClickOn(mQuizFab);
+                                    break;
+
+                                case 'D':
+                                    byte[] tmpTimeStamp = new byte[messageData.length - 1];
+
+                                    for (int j = 1; j < messageData.length; j++) {
+                                        tmpTimeStamp[j - 1] = messageData[j];
+                                    }
+                                    Game.mFinishedParticipants.put(realTimeMessage.getSenderParticipantId(), new Long(new String(tmpTimeStamp)));
+
+//                                    Log.d("TRAZAGPG", Game.numParticipantsOK() + " " + Game.mFinishedParticipants.size());
+//                                    for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
+//                                        Log.d("TRAZAGPG", key.getKey() + " " + key.getValue());
+//
+//                                    }
+                                    if (Game.numParticipantsOK() == Game.mFinishedParticipants.size()) {
+
+                                        long minValue = Long.MAX_VALUE;
+                                        for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
+                                            if (key.getValue() < minValue) {
+                                                minValue = key.getValue();
+                                            }
+                                        }
+
+                                        if (Game.timeStamp <= minValue) {
+
+                                            minValue = Game.timeStamp;
 
 //                                Game.mFinishedParticipants.put(Game.mMyId, Game.timeStamp);
 
-                                // Calcula si hay 2 con el tiempo ==
-                                ArrayList<String> sameTimestamp = new ArrayList();
+                                            // Calcula si hay 2 con el tiempo ==
+                                            ArrayList<String> sameTimestamp = new ArrayList();
 
-                                sameTimestamp.add(Game.mMyId);
+                                            sameTimestamp.add(Game.mMyId);
 
-                                for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
-                                    if (key.getValue() == minValue) {
-                                        sameTimestamp.add(key.getKey());
-                                    }
-                                }
-
-                                if (sameTimestamp.size() == 1) {
-                                    Game.jugadorLocal = 1;
-                                    enviarQuizzesToOpponent();
-                                    Log.d("CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
-                                } else {
-                                    // Obtiene menor id
-                                    String tmpIdParticipant = null;
-                                    for (Participant p : Game.mParticipants) {
-                                        for (String id : sameTimestamp) {
-                                            if (p.getParticipantId().equals(id)) {
-                                                if (tmpIdParticipant == null) {
-                                                    tmpIdParticipant = id;
-                                                } else {
-                                                    if (p.getParticipantId().compareTo(tmpIdParticipant) < 0) {
-                                                        tmpIdParticipant = id;
-                                                    }
+                                            for (Map.Entry<String, Long> key : Game.mFinishedParticipants.entrySet()) {
+                                                if (key.getValue() == minValue) {
+                                                    sameTimestamp.add(key.getKey());
                                                 }
                                             }
+
+                                            if (sameTimestamp.size() == 1) {
+                                                Game.jugadorLocal = 1;
+                                                enviarQuizzesToOpponent();
+//                                                Log.d("CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+                                            } else {
+                                                // Obtiene menor id
+                                                String tmpIdParticipant = null;
+                                                for (Participant p : Game.mParticipants) {
+                                                    for (String id : sameTimestamp) {
+                                                        if (p.getParticipantId().equals(id)) {
+                                                            if (tmpIdParticipant == null) {
+                                                                tmpIdParticipant = id;
+                                                            } else {
+                                                                if (p.getParticipantId().compareTo(tmpIdParticipant) < 0) {
+                                                                    tmpIdParticipant = id;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                if (tmpIdParticipant.equals(Game.mMyId)) {
+                                                    Game.jugadorLocal = 1;
+                                                    enviarQuizzesToOpponent();
+//                                                    Log.d("CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+                                                } else {
+                                                    Game.jugadorLocal = 2;
+//                                        enviarQuizzesToOpponent();
+//                                                    Log.d("NO_CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+                                                }
+                                            }
+                                        } else {
+//                                            Log.d("NO_CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
+                                            Game.jugadorLocal = 2;
                                         }
                                     }
+                                    break;
 
-                                    if (tmpIdParticipant.equals(Game.mMyId)) {
-                                        Game.jugadorLocal = 1;
-                                        enviarQuizzesToOpponent();
-                                        Log.d("CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
-                                    } else {
-                                        Game.jugadorLocal = 2;
-//                                        enviarQuizzesToOpponent();
-                                        Log.d("NO_CREADOR1", minValue + " " + Game.timeStamp + " " + Game.mMyId);
-                                    }
-                                }
-                            } else {
-                                Log.d("NO_CREADOR2", minValue + " " + Game.timeStamp + " " + Game.mMyId);
-                                Game.jugadorLocal = 2;
+                                default:
                             }
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                            Log.d("TRAZAGPG", "Code UTF-8 not supported");
                         }
-                        break;
-
-                    default:
+                    }
                 }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-                Log.d("TRAZAGPG", "Code UTF-8 not supported");
-            }
-        }
-    }
+            };
 
-    @Override
-    public void onPeerDeclined(Room room, List<String> arg1) {
-        actualizaRoom(room);
-    }
+    //RoomStatusUpdateCallback
+    private RoomStatusUpdateCallback mRoomStatusUpdateCallback =
+            new RoomStatusUpdateCallback() {
 
-    @Override
-    public void onP2PDisconnected(String participant) {
-    }
+                @Override
+                public void onConnectedToRoom(Room room) {
+//                    Log.d(TAG, "onConnectedToRoom.");
+                    Game.mParticipants = room.getParticipants();
+                    Game.mMyId = room.getParticipantId(mPlayerId);
 
-    @Override
-    public void onPeerJoined(Room room, List<String> arg1) {
-        actualizaRoom(room);
-    }
+                    Game.myName = room.getParticipant(Game.mMyId).getDisplayName();
 
-    @Override
-    public void onRoomAutoMatching(Room room) {
-        actualizaRoom(room);
-    }
+                    if (Game.mRoomId == null) {
+                        Game.mRoomId = room.getRoomId();
+                    }
 
-    @Override
-    public void onPeersConnected(Room room, List<String> peers) {
-        actualizaRoom(room);
-    }
+                    // print out the list of participantsTurnBased (for debug purposes)
+//                    Log.d(TAG, "Room ID: " + Game.mRoomId);
+//                    Log.d(TAG, "My ID " + Game.mMyId);
+//                    Log.d(TAG, "<< CONNECTED TO ROOM>>");
+                }
 
-    @Override
-    public void onRoomConnecting(Room room) {
-        actualizaRoom(room);
-    }
+                @Override
+                public void onDisconnectedFromRoom(Room room) {
+                    Game.mRoomId = null;
+                    if (!mCategory.isSolved())
+                        showGameError(getString(R.string.disconnect_room_error), true);
+                }
 
-    @Override
-    public void onPeerLeft(Room room, List<String> peersWhoLeft) {
-        actualizaRoom(room);
-    }
+                @Override
+                public void onPeerDeclined(Room room, List<String> arg1) {
+                    actualizaRoom(room);
+                }
 
-    @Override
-    public void onDisconnectedFromRoom(Room room) {
-        Game.mRoomId = null;
-        if (!mCategory.isSolved())
-            showGameError(getString(R.string.disconnect_room_error), true);
-    }
 
-    @Override
-    public void onPeersDisconnected(Room room, List<String> peers) {
-        actualizaRoom(room);
-    }
+                @Override
+                public void onPeerInvitedToRoom(Room room, List<String> arg1) {
+                    actualizaRoom(room);
+                }
 
-    @Override
-    public void onConnectedToRoom(Room room) {
-        Log.d(TAG, "onConnectedToRoom.");
-        Game.mParticipants = room.getParticipants();
-        Game.mMyId = room.getParticipantId(Games.Players.getCurrentPlayerId(Game.mGoogleApiClient));
 
-        Game.myName = Games.Players.getCurrentPlayer(Game.mGoogleApiClient).getDisplayName();
+                @Override
+                public void onP2PDisconnected(String participant) {
+                }
 
-        if (Game.mRoomId == null) {
-            Game.mRoomId = room.getRoomId();
-        }
 
-        // print out the list of participants (for debug purposes)
-        Log.d(TAG, "Room ID: " + Game.mRoomId);
-        Log.d(TAG, "My ID " + Game.mMyId);
-        Log.d(TAG, "<< CONNECTED TO ROOM>>");
-    }
+                @Override
+                public void onP2PConnected(String participant) {
+                }
 
-    @Override
-    public void onPeerInvitedToRoom(Room room, List<String> arg1) {
-        actualizaRoom(room);
-    }
 
-    @Override
-    public void onP2PConnected(String participant) {
-    }
+                @Override
+                public void onPeerJoined(Room room, List<String> arg1) {
+                    actualizaRoom(room);
+                }
 
-    @Override
-    public void onRoomCreated(int statusCode, Room room) {
-        Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
+                @Override
+                public void onPeerLeft(Room room, List<String> peersWhoLeft) {
+                    actualizaRoom(room);
+                }
 
-        if (statusCode != GamesStatusCodes.STATUS_OK) {
-            Log.e(TAG, "*** Error: onRoomCreated, status " + statusCode);
-            showGameError(getString(R.string.room_created_error), true);
-            return;
-        }
 
-        Game.mRoomId = room.getRoomId();
+                @Override
+                public void onRoomAutoMatching(Room room) {
+                    actualizaRoom(room);
+                }
 
-        // show the waiting room UI
-        showWaitingRoom(room);
 
-    }
+                @Override
+                public void onRoomConnecting(Room room) {
+                    actualizaRoom(room);
+                }
 
-    @Override
-    public void onLeftRoom(int statusCode, String roomId) {
-        // we have left the room; return to main screen.
-        Log.d(TAG, "onLeftRoom, code " + statusCode);
-        switchToMainScreen();
-    }
+                @Override
+                public void onPeersConnected(Room room, List<String> peers) {
+                    actualizaRoom(room);
+                }
+
+
+                @Override
+                public void onPeersDisconnected(Room room, List<String> peers) {
+                    actualizaRoom(room);
+                }
+            };
+    ////////////////////////// RoomUpdateCallback
+    private RoomUpdateCallback mRoomUpdateCallback =
+            new RoomUpdateCallback() {
+                @Override
+                public void onRoomCreated(int statusCode, Room room) {
+//                    Log.d(TAG, "onRoomCreated(" + statusCode + ", " + room + ")");
+
+                    if (statusCode != STATUS_OK) {
+                        Log.e(TAG, "*** Error: onRoomCreated, status " + statusCode);
+                        showGameError(getString(R.string.room_created_error), true);
+                        return;
+                    }
+
+                    Game.mRoomId = room.getRoomId();
+
+                    // show the waiting room UI
+                    showWaitingRoom(room);
+                }
+
+                @Override
+                public void onRoomConnected(int statusCode, Room room) {
+                    if (statusCode != STATUS_OK) {
+                        showGameError(getString(R.string.connected_error), true);
+                        return;
+                    }
+                    actualizaRoom(room);
+                }
+
+                @Override
+                public void onJoinedRoom(int statusCode, Room room) {
+                    if (statusCode != STATUS_OK) {
+                        showGameError(getString(R.string.join_error), true);
+                        return;
+                    }
+                    showWaitingRoom(room);
+                }
+
+
+                @Override
+                public void onLeftRoom(int statusCode, String roomId) {
+                    // we have left the room; return to main screen.
+//                    Log.d(TAG, "onLeftRoom, code " + statusCode);
+                    switchToMainScreen();
+                }
+
+            };
 
     private void switchToMainScreen() {
         finish();
     }
 
-
-    @Override
-    public void onJoinedRoom(int statusCode, Room room) {
-        if (statusCode != STATUS_OK) {
-            showGameError(getString(R.string.join_error), true);
-            return;
-        }
-        showWaitingRoom(room);
-    }
-
-    @Override
-    public void onRoomConnected(int statusCode, Room room) {
-        if (statusCode != STATUS_OK) {
-            showGameError(getString(R.string.connected_error), true);
-            return;
-        }
-        actualizaRoom(room);
-    }
 
     void actualizaRoom(Room room) {
 
@@ -1158,7 +1278,7 @@ public class QuizActivity extends AppCompatActivity implements
 //        switchToMainScreen();
         cancelPostDelayHandlerPlayGame();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + getString(R.string.oops)  + "\n" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setMessage(Html.fromHtml("<font color='#AAAAAA'>" + getString(R.string.oops) + "\n" + msg + "</font>")).setTitle("Information").setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
                 if (exit)
@@ -1177,33 +1297,51 @@ public class QuizActivity extends AppCompatActivity implements
 
     void showWaitingRoom(Room room) {
         // minimum number of players required for our game
-        // For simplicity, we require everyone to join the game before we start it
+        // For simplicity, we require everyone to join the game before we roulette_rotate it
         // (this is signaled by Integer.MAX_VALUE).
         final int MIN_PLAYERS = Game.numPlayers;
-        Intent i = Games.RealTimeMultiplayer.getWaitingRoomIntent(Game.mGoogleApiClient, room, MIN_PLAYERS);
 
-        // show waiting room UI
-        startActivityForResult(i, RC_WAITING_ROOM);
+        mRealTimeMultiplayerClient.getWaitingRoomIntent(room, MIN_PLAYERS)
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        // show waiting room UI
+                        startActivityForResult(intent, RC_WAITING_ROOM);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        showGameError("Hay un problema con la partida!", true);
+                    }
+                });
     }
-//JVG.E
 
+    //JVG.E
 
     @Override
     public void onActivityResult(int requestCode, int responseCode, Intent intent) {
         super.onActivityResult(requestCode, responseCode, intent);
         switch (requestCode) {
-//            case RC_SIGN_IN:
-//                mSignInClicked = false;
-//                mResolvingConnectionFailure = false;
-//                if (responseCode == RESULT_OK) {
-//                    Game.mGoogleApiClient.connect();
-//                    SharedPreferences.Editor editor = getSharedPreferences(NAME_PREFERENCES, MODE_PRIVATE).edit();
-//                    editor.putInt(NAME_PREFERENCES_CONNECTED, 1);
-//                    editor.commit();
-//                } else {
-//                    BaseGameUtils.showActivityResultError(this, requestCode, responseCode, R.string.unknown_error);
-//                }
-//                break;
+            case RC_SIGN_IN:
+                Task<GoogleSignInAccount> task =
+                        GoogleSignIn.getSignedInAccountFromIntent(intent);
+                try {
+                    GoogleSignInAccount account =
+                            task.getResult(ApiException.class);
+                    onConnected(account);
+                } catch (ApiException apiException) {
+                    String message = apiException.getMessage();
+                    if (message == null || message.isEmpty()) {
+                        message = "Error al conectar el cliente.";
+                    }
+                    onDisconnected();
+                    new AlertDialog.Builder(this)
+                            .setMessage(message)
+                            .setNeutralButton(android.R.string.ok, null)
+                            .show();
+                }
+                break;
 //            case RC_SELECT_PLAYERS:
 //                if (responseCode != Activity.RESULT_OK) {
 //                    return;
@@ -1224,8 +1362,8 @@ public class QuizActivity extends AppCompatActivity implements
             case RC_WAITING_ROOM:
                 // we got the result from the "waiting room" UI.
                 if (responseCode == AppCompatActivity.RESULT_OK) {
-                    // ready to start playing
-                    Log.d(TAG, "Starting game (waiting room returned OK).");
+                    // ready to roulette_rotate playing
+//                    Log.d(TAG, "Starting game (waiting room returned OK).");
                     // JVG.S
 
                     showWaitingProgress();
@@ -1248,7 +1386,7 @@ public class QuizActivity extends AppCompatActivity implements
 
 
     public void showWaitingProgress() {
-        if (mCategory.getId().equals(QuizActivity.ARG_ONLINE)) {
+        if (mCategory.getId().equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
             pWaitingProgress = new ProgressDialog(this);
             pWaitingProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
@@ -1272,16 +1410,40 @@ public class QuizActivity extends AppCompatActivity implements
 
     // Leave the room.
     void leaveRoom() {
-        if (mCategory.getId().equals(ARG_ONLINE)) {
-            Log.d(TAG, "Leaving room.");
+        if (mCategory.getId().equals(ARG_REAL_TIME_ONLINE)) {
+//            Log.d(TAG, "Leaving room.");
 //        mSecondsLeft = 0;
             stopKeepingScreenOn();
             if (Game.mRoomId != null) {
-                Games.RealTimeMultiplayer.leave(Game.mGoogleApiClient, this, Game.mRoomId);
+//                Games.RealTimeMultiplayer.leave(Game.mGoogleApiClient, mRoomUpdateCallback, Game.mRoomId);
+                mRealTimeMultiplayerClient.leave(mRoomConfig, Game.mRoomId);
                 Game.mRoomId = null;
             }
-
         }
+    }
+
+    private void showMessageAcceptCancelTurn() {
+
+        android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'>" +  "Do you want tu pass your Turn?"));
+
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("Yes!",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                QuizActivity.super.onBackPressed();
+                            }
+                        })
+                .setNegativeButton("No.",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+//                                continueOnUpdateMatch(match);
+                            }
+                        });
+        alertDialogBuilder.show();
     }
 
     private void numeroJugadorLocal() {
@@ -1300,7 +1462,7 @@ public class QuizActivity extends AppCompatActivity implements
         }
 
         timeStamp[0] = (byte) 'D';
-        Log.d("IDENTIFICACION", Game.timeStamp + " " + timeStamp);
+//        Log.d("IDENTIFICACION", Game.timeStamp + " " + timeStamp);
 
         for (Participant p : Game.mParticipants) {
             if (!p.getParticipantId().equals(Game.mMyId)) {
@@ -1315,7 +1477,7 @@ public class QuizActivity extends AppCompatActivity implements
 
     private void enviarQuizzesToOpponent() {
 //        if (Game.jugadorLocal == 1) {
-        Log.d("TRAZAGPG", "Envindo quizzes");
+//        Log.d("TRAZAGPG", "Envindo quizzes");
         Type type = new TypeToken<Category>() {
         }.getType();
 
@@ -1323,7 +1485,7 @@ public class QuizActivity extends AppCompatActivity implements
         Gson gson = builder.create();
 
         String json = gson.toJson(Game.category, type);
-        Log.d("TRAZAGPG", "Conversión original:" + json);
+//        Log.d("TRAZAGPG", "Conversión original:" + json);
 
         byte[] categoryByte = json.getBytes(Charset.forName("UTF-8"));
 
@@ -1348,16 +1510,16 @@ public class QuizActivity extends AppCompatActivity implements
             else
                 tmpMsg[0] = 'C';
 
-            Log.d("TRAZAGPG", "bloque: " + numBlock + "; " + "bytesTransfered:" + bytesTransfered + " ; TotalBytes: " + lengthMsg + " bloque length: " + tmpMsg.length);
+//            Log.d("TRAZAGPG", "bloque: " + numBlock + "; " + "bytesTransfered:" + bytesTransfered + " ; TotalBytes: " + lengthMsg + " bloque length: " + tmpMsg.length);
             for (int i = 1; i < tmpMsg.length; i++) {
                 tmpMsg[i] = categoryByte[bytesTransfered];
                 bytesTransfered++;
             }
-            try {
-                Log.d("TRAZAGPG", "bloque: " + new String(tmpMsg, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Log.d("TRAZAGPG", "bloque: " + new String(tmpMsg, "UTF-8"));
+//            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+//            }
 
             numBlock++;
 
@@ -1383,7 +1545,7 @@ public class QuizActivity extends AppCompatActivity implements
 //            }
 
 //            if (sb.toString().equals(json)) {
-        Log.d("TRAZAGPG", "Iniciando transferencia");
+//        Log.d("TRAZAGPG", "Iniciando transferencia");
 
         // END MESSAGE
         byte[] time = String.valueOf(Game.totalTime + "|" + Game.mMyId).getBytes();
@@ -1411,16 +1573,16 @@ public class QuizActivity extends AppCompatActivity implements
 
     private void retryMessage(final byte[] tmpMessage, final String participantId, final int numTimesSended, final String msgError, final CallBackRetry callback) {
         if (Game.mRoomId != null) {
-            Games.RealTimeMultiplayer.sendReliableMessage(Game.mGoogleApiClient, new RealTimeMultiplayer.ReliableMessageSentCallback() {
+            mRealTimeMultiplayerClient.sendReliableMessage(tmpMessage, Game.mRoomId, participantId, new RealTimeMultiplayerClient.ReliableMessageSentCallback() {
                 @Override
                 public void onRealTimeMessageSent(int statusCode, int tokenId, String recipientParticipantId) {
                     if (statusCode == STATUS_OK) {
-                        Log.d("GPG", "Mensaje Enviado" + (char) tmpMessage[0]);
+//                        Log.d("GPG", "Mensaje Enviado" + (char) tmpMessage[0]);
                         if (callback != null) {
                             callback.sendActions();
                         }
                     } else {
-                        Log.d("GPG", "Error enviando mensaje: " + numTimesSended + " " + (char) tmpMessage[0]);
+//                        Log.d("GPG", "Error enviando mensaje: " + numTimesSended + " " + (char) tmpMessage[0]);
                         if (numTimesSended <= MAX_RETRY_TIMES) {
                             retryMessage(tmpMessage, participantId, numTimesSended + 1, msgError, callback);
                         } else {
@@ -1428,7 +1590,7 @@ public class QuizActivity extends AppCompatActivity implements
                         }
                     }
                 }
-            }, tmpMessage, Game.mRoomId, participantId);
+            });
         }
     }
 
@@ -1443,14 +1605,14 @@ public class QuizActivity extends AppCompatActivity implements
         }
     }
 
-       /*
+    /*
      * MISC SECTION. Miscellaneous methods.
      */
 
 
     // Sets the flag to keep this screen on. It's recommended to do that during
     // the
-    // handshake when setting up a game, because if the screen turns off, the
+    // handshake when setting roulette_up a game, because if the screen turns off, the
     // game will be
     // cancelled.
     void keepScreenOn() {

@@ -198,7 +198,7 @@ public class Category implements Parcelable {
      */
     public void setScore(Quiz which, boolean correctlySolved) {
         int index = mQuizzes.indexOf(which);
-        Log.d(TAG, "Setting score for " + which + " with index " + index);
+//        Log.d(TAG, "Setting score for " + which + " with index " + index);
         if (-1 == index) {
             return;
         }

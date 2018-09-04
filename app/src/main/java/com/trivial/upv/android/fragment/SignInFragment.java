@@ -164,7 +164,7 @@ public class SignInFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                // showing the floating action button if avatar is selected and input data is valid
+                // showing the floating action button if avatar is roulette_selection and input data is valid
                 if (isAvatarSelected() && isInputDataValid()) {
                     mDoneFab.show();
                 }
@@ -271,7 +271,11 @@ public class SignInFragment extends Fragment {
 
     private void assurePlayerInit() {
         if (mPlayer == null) {
+            // JVG.S
             mPlayer = PreferencesHelper.getPlayer(getActivity());
+            if (mPlayer == null)
+                mPlayer = PreferencesHelper.getDummyPlayer(getActivity());
+            // JVG.E
         }
     }
 

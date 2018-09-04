@@ -21,12 +21,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -41,7 +39,8 @@ import com.trivial.upv.android.adapter.CategoryAdapterJSON;
 import com.trivial.upv.android.helper.TransitionHelper;
 import com.trivial.upv.android.model.Category;
 import com.trivial.upv.android.model.JsonAttributes;
-import com.trivial.upv.android.persistence.TopekaJSonHelper;
+import com.trivial.upv.android.model.gpg.Game;
+import com.trivial.upv.android.persistence.TrivialJSonHelper;
 import com.trivial.upv.android.widget.OffsetDecoration;
 
 public class CategorySelectionFragment extends Fragment {
@@ -92,21 +91,30 @@ public class CategorySelectionFragment extends Fragment {
         mAdapter.setOnItemClickListener(
                 new CategoryAdapterJSON.OnItemClickListener() {
                     @Override
-                    public void onClick(View v, int position) {
-                        if (TopekaJSonHelper.getInstance(getContext(), false).getCategoriesCurrent().get(position).getSubcategories() == null) {
-                            // Mostrar Quizzes
-                            Activity activity = getActivity();
-                            startQuizActivityWithTransition(activity,
-                                    v.findViewById(R.id.category_title),
-                                    mAdapter.getItem(position));
-                        } else {
-                            // Mostrar Subcategorias
-                            TopekaJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
-                            animateTransitionSubcategories(v);
+                    public void onClick(View v, final int position) {
+                        if (position != -1) {
+                            if (TrivialJSonHelper.getInstance(getContext(), false).getCategoriesCurrent().get(position).getSubcategories() == null) {
+                                // Mostrar Quizzes
+                                Game.mode = null;
+                                Activity activity = getActivity();
+                                startQuizActivityWithTransition(activity,
+                                        v.findViewById(R.id.category_title),
+                                        mAdapter.getItem(position));
+                            } else {
+                                // Mostrar Subcategorias
 
-                            TextView textViewSubcategory = (TextView) getActivity().findViewById(R.id.sub_category_title);
-                            textViewSubcategory.setText(mAdapter.getItem(position).getId());
-                            ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(true);
+                                animateTransitionSubcategories(v, new CategorySelectionActivity.ActionOnFinishAnimation() {
+                                    @Override
+                                    public void onFinishedAnimation() {
+                                        TrivialJSonHelper.getInstance(getContext(), false).navigateNextCategory(position);
+                                        TextView textViewSubcategory = (TextView) getActivity().findViewById(R.id.sub_category_title);
+                                        textViewSubcategory.setText(mAdapter.getItem(position).getId());
+                                        ((CategorySelectionActivity) getActivity()).animateToolbarNavigateToSubcategories(true);
+                                    }
+                                });
+
+
+                            }
                         }
                         // JVG.S
                         /*
@@ -128,24 +136,29 @@ public class CategorySelectionFragment extends Fragment {
         //JVG.E
         categoriesView.setAdapter(mAdapter);
         //JVG.S
-        categoriesView.getViewTreeObserver()               .
+        categoriesView.getViewTreeObserver().
 
-                        addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                            @Override
-                            public boolean onPreDraw() {
-                                categoriesView.getViewTreeObserver().removeOnPreDrawListener(this);
-                                //        JVG.S
+                addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        categoriesView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        //        JVG.S
 //                                getActivity().supportStartPostponedEnterTransition();
-                                if (TopekaJSonHelper.getInstance(getActivity().getApplicationContext(), false).isLoaded()) {
-                                    Log.d("TRAZA", "" + mAdapter.getItemCount());
+                        if (TrivialJSonHelper.getInstance(getActivity().getApplicationContext(), false).isLoaded()) {
+//                                    Log.d("TRAZA", "" + mAdapter.getItemCount());
 
-                                    animateTransitionSubcategories(null);
+                            animateTransitionSubcategories(null, new CategorySelectionActivity.ActionOnFinishAnimation() {
+                                @Override
+                                public void onFinishedAnimation() {
                                     ((CategorySelectionActivity) getActivity()).showToolbarSubcategories();
                                 }
-                                //        JVG.E
-                                return true;
-                            }
-                        });
+                            });
+
+                        }
+                        //        JVG.E
+                        return true;
+                    }
+                });
 
     }
 
@@ -171,10 +184,10 @@ public class CategorySelectionFragment extends Fragment {
         ActivityOptionsCompat sceneTransitionAnimation = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(activity, pairs);
 
-        // Start the activity with the participants, animating from one to the other.
+        // Start the activity with the participantsTurnBased, animating from one to the other.
         final Bundle transitionBundle = sceneTransitionAnimation.toBundle();
         Intent startIntent = QuizActivity.getStartIntent(activity, category);
-        ActivityCompat.startActivityForResult(activity,
+        startActivityForResult(
                 startIntent,
                 REQUEST_CATEGORY,
                 transitionBundle);
@@ -214,8 +227,8 @@ public class CategorySelectionFragment extends Fragment {
     }
 
     // To hide a previously visible view using this effect:
-    public void animateTransitionSubcategories(final View viewSelectedRecyclerView) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP && !((CategorySelectionActivity) getActivity()).getInitBlockAnimation()) {
+    public void animateTransitionSubcategories(final View viewSelectedRecyclerView, final CategorySelectionActivity.ActionOnFinishAnimation actionOnFinishAnimation) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP && (!((CategorySelectionActivity) getActivity()).getInitBlockAnimation())) {
             ((CategorySelectionActivity) getActivity()).setInitBlockAnimation(true);
             final View view = categoriesView;
             // get the center for the clipping circle
@@ -245,6 +258,8 @@ public class CategorySelectionFragment extends Fragment {
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     view.setVisibility(View.INVISIBLE);
+                    if (actionOnFinishAnimation != null)
+                        actionOnFinishAnimation.onFinishedAnimation();
                     mAdapter.updateCategories();
                     mAdapter.notifyDataSetChanged();
                     showRecyclerView();
