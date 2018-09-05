@@ -861,7 +861,7 @@ public class PlayRealTimeFragment extends Fragment
     // Generic warning/info dialog
     public void showWarningConnection(final ActionOnClickButton actionOnClickButton) {
         String title = "Google Play Games";
-        String message = "You aren't not log in! ";
+        String message = getString(R.string.no_login);
         if (actionOnClickButton!=null)
             message+="OK to try it";
 

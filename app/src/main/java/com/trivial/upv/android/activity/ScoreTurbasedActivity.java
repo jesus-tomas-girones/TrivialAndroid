@@ -50,7 +50,7 @@ public class ScoreTurbasedActivity extends AppCompatActivity {
     private void setupView() {
         category_title = (TextView) findViewById(R.id.category_title);
 //        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
-        category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
+        category_title.setText(String.format(Locale.getDefault(), getString(R.string.categories_d_d), Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
 //        else
 //            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
         btnBack = (ImageButton) findViewById(R.id.back);

@@ -567,7 +567,7 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
     public void tryLogInGPG() {
-        showWarning(true, "Google Play Games", "You aren't not log in! OK to try it", new ActionOnClickButton() {
+        showWarning(true, "Google Play Games", getString(R.string.no_login_ok_to_try), new ActionOnClickButton() {
             @Override
             public void onClick() {
                 startSignInIntent();
@@ -633,7 +633,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
     public void showWarningConnection() {
         String title = "Google Play Games";
-        String message = "You aren't not log in! OK to try it";
+        String message = getString(R.string.no_login_ok_to_try);
 
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
         // set title

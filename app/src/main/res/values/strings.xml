@@ -34,6 +34,9 @@
     <string name="app_misconfigured">The application is incorrectly configured. Check that the package name and signing certificate match the client ID created in Developer Console. Also, if the application is not yet published, check that the account you are trying to sign in with is listed as a tester account. See logs for more information.</string>
     <string name="license_failed">License check failed.</string>
     <string name="unknown_error">Unknown error.</string>
+    <string name="no_login_ok_to_try">You aren\'t not log in! OK to try it</string>
+    <string name="no_login">You aren\'t not log in!</string>
+
     <!--GOOGLE PLAY END-->
     <!--<string name="app_name">Button Clicker</string>-->
     <string name="game_title">Trivial Android</string>
@@ -114,6 +117,22 @@
     <string name="match_error_inactive_match">This match is inactive.</string>
     <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
     <string name='match_error_locally_modified'>This match has locally-modified data.  This operation cannot be performed until the match is sent to the server.</string>
+
+    <string name="game_canceled">This game was canceled!</string>
+    <string name="game_expired">This game is expired.  So sad!</string>
+    <string name="waiting_automatch">Waiting for an automatch partner...</string>
+    <string name="complete">Complete!</string>
+    <string name="your_turn">It\'s your turn!</string>
+    <string name="match_finish">Finalized Game</string>
+    <string name="canceled">Canceled!</string>
+    <string name="expired">Expired!</string>
+    <string name="next_player">Next player</string>
+    <string name="still_waiting_invitations">Still waiting for invitations!</string>
+    <string name="problem_finish">There is a problem ending the game</string>
+    <string name="game_corrupt">The game is corrupt</string>
+    <string name="categories_d_d">Categories (%d/%d)</string>
+
+
     <!--Preferencias-->
     <string name="pref_review_mode">Review Mode</string>
     <string name="pref_url_summary">Choose a valid Url for loading Categories</string>
@@ -136,5 +155,16 @@
     <string name="num_quizzes">Num Quizzes</string>
     <string name="leave_game">Leave Game </string>
     <string name="score">Statistics</string>
+
+
+    <!--QuizActivity-->
+    <string name="quiz_problem">¡Hay un problema con la partida!</string>
+    <string name="quiz_error_connect">Error al conectar el cliente.</string>
+    <string name="quiz_waiting_player">Waiting Player to be Ready...</string>
+    <string name="quiz_yes">Yes!</string>
+    <string name="quiz_error_disconnect">Error al desconectar el cliente.</string>
+    <string name="quiz_no_disconnect">No ha sido posible desconectar</string>
+    <string name="quiz_no_id_player">Hay un problema para obtener el id del jugador!</string>
+    <string name="do_you_want_tu_pass">Do you want tu pass your Turn?</string>
     <!--JTG.E-->
 </resources>

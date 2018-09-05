@@ -1,8 +1,7 @@
 ﻿TodoList
 
-Pendiente
-        Traducciones de Inglés y Español. (Jesús)
-		Pregunta con múltiples opciones no se ve correctamente.
+05/09/2018 Se añaden sonidos a la partida multijugador: cambio de turno, partida finalizada (para el perdedor y para el ganador).
+		   Se hace el merge con las traducciones.
 02/08/2018 Se añade la opción rematch si un jugador hace todas las categorías del tirón (en un único turno)
 		Corrección de errores mínimos.
 		Se elimina la comprobación del json ya que daba errores mientras se actualizaban los datos de las categorias en modo repaso.
