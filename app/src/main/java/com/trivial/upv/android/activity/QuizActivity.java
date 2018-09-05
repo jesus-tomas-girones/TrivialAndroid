@@ -258,14 +258,14 @@ public class QuizActivity extends AppCompatActivity {
                             onDisconnected();
                         } else {
                             Toast.makeText(getApplicationContext(),
-                                    "Error al desconectar el cliente.", Toast.LENGTH_LONG);
+                                    R.string.quiz_error_disconnect, Toast.LENGTH_LONG);
                         }
                     }
                 });
     }
 
     public void onDisconnected() {
-        showGameError("No ha sido posible desconectar", true);
+        showGameError(getString(R.string.quiz_no_disconnect), true);
     }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
@@ -288,7 +288,7 @@ public class QuizActivity extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(getApplicationContext(),
-                                    "Hay un problema para obtener el id del jugador!"
+                                    R.string.quiz_no_id_player
                                     , Toast.LENGTH_LONG).show();
                         }
                     });
@@ -1312,7 +1312,7 @@ public class QuizActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        showGameError("Hay un problema con la partida!", true);
+                        showGameError(getString(R.string.quiz_problem), true);
                     }
                 });
     }
@@ -1333,7 +1333,7 @@ public class QuizActivity extends AppCompatActivity {
                 } catch (ApiException apiException) {
                     String message = apiException.getMessage();
                     if (message == null || message.isEmpty()) {
-                        message = "Error al conectar el cliente.";
+                        message = getString(R.string.quiz_error_connect);
                     }
                     onDisconnected();
                     new AlertDialog.Builder(this)
@@ -1395,7 +1395,7 @@ public class QuizActivity extends AppCompatActivity {
                     finish();
                 }
             });
-            pWaitingProgress.setTitle("Waiting Player to be Ready...");
+            pWaitingProgress.setTitle(getString(R.string.quiz_waiting_player));
             pWaitingProgress.show();
         }
     }
@@ -1425,11 +1425,11 @@ public class QuizActivity extends AppCompatActivity {
     private void showMessageAcceptCancelTurn() {
 
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'>" +  "Do you want tu pass your Turn?"));
+        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'>" +  getString(R.string.do_you_want_tu_pass)));
 
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("Yes!",
+                .setPositiveButton(R.string.quiz_yes,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {

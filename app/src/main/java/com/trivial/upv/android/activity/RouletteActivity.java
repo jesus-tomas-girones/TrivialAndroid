@@ -138,7 +138,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             }
             txtMatchResultPlayer = checkPlayerMatchResult(participant);
 
-            showWarning("Partida Finalizada", txtMatchResultPlayer, null);
+            showWarning(getString(R.string.match_finish), txtMatchResultPlayer, null);
             setupView(false);
         }
     }
@@ -153,19 +153,19 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 
             switch (status) {
                 case TurnBasedMatch.MATCH_STATUS_CANCELED:
-                    showWarning("Canceled!", "This game was canceled!", finishActivity);
+                    showWarning(getString(R.string.canceled), getString(R.string.game_canceled), finishActivity);
                     return;
                 case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-                    showWarning("Expired!", "This game is expired.  So sad!", finishActivity);
+                    showWarning(getString(R.string.expired), getString(R.string.game_expired), finishActivity);
                     return;
                 case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                     if (!Game.mTurnData.isFinishedMatch()) {
-                        rouletteView.setLine1("Waiting for\nan automatch partner...");
+                        rouletteView.setLine1(getString(R.string.waiting_automatch));
 //                        showWarning("Waiting for auto-match...",
 //                                "We're still waiting for an automatch partner.", null);
 
                     } else {
-                        rouletteView.setLine1("Complete!");
+                        rouletteView.setLine1(getString(R.string.complete));
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
@@ -174,7 +174,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     return;
                 case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                     if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                        rouletteView.setLine1("Complete!");
+                        rouletteView.setLine1(getString(R.string.complete));
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
@@ -197,7 +197,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     if (playSound)
                         rouletteView.playSoundIsYourTurn();
                     playable = true;
-                    rouletteView.setLine1("\nIt's your turn!\n ");
+                    rouletteView.setLine1(getString(R.string.your_turn));
                     setupView(false);
                     break;
                 case TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN:
@@ -206,7 +206,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     if (!Game.mTurnData.isFinishedMatch()) {
                         String textNextPlayer = "";
                         try {
-                            textNextPlayer = "Next player\n\n" + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
+                            textNextPlayer = getString(R.string.next_player) + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
                             rouletteView.setLine1(textNextPlayer);
                         } catch (Exception ex) {
                         }
@@ -216,12 +216,12 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
-                        rouletteView.setLine1("Complete!");
+                        rouletteView.setLine1(getString(R.string.complete));
                         showMessageFinishMatch(Game.mMatch);
                     }
                     break;
                 case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
-                    rouletteView.setLine1("Still waiting for\ninvitations!");
+                    rouletteView.setLine1(getString(R.string.still_waiting_invitations));
 //                    showWarning("Good inititative!",
 //                            "Still waiting for invitations.\n\nBe patient!", null);
                     break;
@@ -235,7 +235,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                         new OnSuccessListener<TurnBasedMatch>() {
                             @Override
                             public void onSuccess(TurnBasedMatch turnBasedMatch) {
-                                rouletteView.setLine1("Complete!");
+                                rouletteView.setLine1(getString(R.string.complete));
 //                                showWarning("Complete!",
 //                                        "This game is over; someone finished it, and so did you!  " +
 //                                                "There is nothing to be done.", null);
@@ -246,7 +246,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(RouletteActivity.this,
-                                "Hay un problema finalizando la partida", Toast.LENGTH_SHORT).show();
+                                R.string.problem_finish, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -431,7 +431,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     category = categories.get(indexCategory);
                 } else {
                     // The game is corrupt
-                    Log.w(TAG, "The game is corrupt");
+                    Log.w(TAG, getString(R.string.game_corrupt));
                     finish();
                 }
 
@@ -466,7 +466,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         category_title = (TextView) findViewById(R.id.category_title);
         txtPoints = (TextView) findViewById(R.id.txtPoints);
 //        if (!Game.mTurnData.isFinishedMatch()) //Game.mTurnData.numPreguntasContestadas < Game.mTurnData.numPreguntas)
-        category_title.setText(String.format(Locale.getDefault(), "Categories (%d/%d)", Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
+        category_title.setText(String.format(Locale.getDefault(), getString(R.string.categories_d_d), Game.mTurnData.getNunCategoriesOKFromPlayer(Game.mPlayerId), Game.mTurnData.categories.size()));
 //        else
 //            category_title.setText(String.format(Locale.getDefault(), "Finished Match"));
 

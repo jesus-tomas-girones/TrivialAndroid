@@ -28,6 +28,9 @@
     <string name="app_misconfigured">La aplicación está configurada incorrectamente. Compruebe que el nombre del paquete y el certificado de firma coinciden con la ID del cliente creada en Developer Console. Además, si la aplicación aún no se ha publicado, verifique que la cuenta con la que intenta iniciar sesión aparezca como cuenta de prueba. Ver registros para más información.</string>
     <string name="license_failed">Verificación de licencia fallida.</string>
     <string name="unknown_error">Error desconocido.</string>
+    <string name="no_login_ok_to_try">¡No has iniciado sesión! OK para intentarlo</string>
+    <string name="no_login">¡No has iniciado sesión!</string>
+
     <!--GOOGLE PLAY END-->
     <string name="game_title">Botón Clicker 2000!</string>
     <string name="game_blurb">Un juego de muestra que prueba tu habilidad para hacer clic en un botón. ¿Puedes hacer clic más rápido que tus amigos? ¡Sólo hay una forma de averiguarlo! Para jugar este juego con amigos, debes iniciar sesión con Google.</string>
@@ -81,6 +84,36 @@
     <string name="room_created_error">Motivo: Room Creada con errores</string>
     <!-- Turn based-->
     <string name="choose_category_turnbased">Elige Categorias para Jugar por Turnos</string>
+    <string name="error_get_inbox_intent">Hay un problema con intent inbox</string>
+    <string name="error_get_select_opponents">Hay un problema seleccionando el oponente</string>
+    <string name="turn_label">Turno %1$d</string>
+    <string name="done">Hecho</string>
+    <string name="leave">Salir</string>
+    <string name="cancel">Cancelar</string>
+    <string name="finish">Finalizar</string>
+    <string name="status_multiplayer_error_not_trusted_tester">Los invitados han de ser testers validados</string>
+    <string name="match_error_already_rematched">¡Esta revancha ya ha comenzado!</string>
+    <string name="client_reconnect_required">Se requiere la reconexión del cliente de juegos</string>
+    <string name="network_error_operation_failed">Error de red: operación fallida</string>
+    <string name="internal_error">Error interno</string>
+    <string name="unexpected_status">Estado inesperado</string>
+    <string name="match_error_inactive_match">Este juego está inactivo.</string>
+    <string name="status_exception_error">%1$s (estado %2$d). %3$s.</string>
+    <string name='match_error_locally_modified'>Este juego tiene datos modificados localmente. La operación no se puede realizar hasta que se envíe al servidor.</string>
+
+    <string name="game_canceled">¡La partida está cancelada!</string>
+    <string name="waiting_automatch">Esperando un rival de automatch ...</string>
+    <string name="complete">Completado</string>
+    <string name="your_turn">¡Es tu turno!</string>
+    <string name="match_finish">Partida Finalizada</string>
+    <string name="canceled">¡Cancelado!</string>
+    <string name="expired">¡Expirado!</string>
+    <string name="next_player">Siguiente jugador</string>
+    <string name="still_waiting_invitations">¡Esperando invitaciones!</string>
+    <string name="problem_finish">Hay un problema finalizando la partida</string>
+    <string name="game_corrupt">La partida está corrupta</string>
+    <string name="categories_d_d">Categorías (%d/%d)</string>
+
     <!--Preferencias-->
     <string name="pref_review_mode">Modo Repaso</string>
     <string name="pref_url_summary">Introduce una URL válida para cargar las Categorías</string>
@@ -102,5 +135,16 @@
     <string name="num_quizzes">Num Preguntas</string>
     <string name="leave_game">Dejar Juego </string>
     <string name="score">Estadísticas</string>
+
+
+    <!--QuizActivity-->
+    <string name="quiz_problem">¡Hay un problema con la partida!</string>
+    <string name="quiz_error_connect">Error al conectar el cliente.</string>
+    <string name="quiz_waiting_player">Esperando que el jugador esté preparado...</string>
+    <string name="quiz_yes">¡Si!</string>
+    <string name="quiz_error_disconnect">Error al desconectar el cliente.</string>
+    <string name="quiz_no_disconnect">No ha sido posible desconectar</string>
+    <string name="quiz_no_id_player">Hay un problema para obtener el id del jugador!</string>
+    <string name="do_you_want_tu_pass">¿Quieres pasar tu turno?</string>
     <!--JTG.E-->
 </resources>
