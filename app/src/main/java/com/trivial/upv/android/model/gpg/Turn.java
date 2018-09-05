@@ -1,5 +1,6 @@
 package com.trivial.upv.android.model.gpg;
 
+import com.google.android.gms.games.multiplayer.ParticipantResult;
 import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 
 import org.json.JSONArray;
@@ -167,6 +168,10 @@ public class Turn {
         }
         return auxNumCategoriesAnsweredOK;
 
+    }
+
+    public boolean isTheWinner(String playerId) {
+        return getNunCategoriesOKFromPlayer(playerId)==categories.size();
     }
 //    public int getNumQuizz() {
 //        int pos = 0;

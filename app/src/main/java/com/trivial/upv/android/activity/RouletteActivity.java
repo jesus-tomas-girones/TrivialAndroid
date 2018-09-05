@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -66,6 +68,10 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     private boolean playSound = false;
 
     private boolean playFinished = false;
+    private int idSoundYourTurn;
+    private int idSoundLostMatch;
+    private int idSoundWinMatch;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +79,17 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //        requestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState);
         setContentView(R.layout.roulette_activity);
-        playable = getIntent().getBooleanExtra("playable", false);
-        setupView(true);
 
+        playable = getIntent().getBooleanExtra("playable", false);
+
+        if (Game.mTurnBasedMultiplayerClient != null)
+            Game.mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
+        setupSounds();
+        setupView(true);
+    }
+
+    private void setupSounds() {
+        soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
     }
 
     private String TAG = RouletteActivity.class.getSimpleName();
@@ -124,22 +138,32 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         }
     };
 
-    public void showMessageFinishMatch(final TurnBasedMatch turnBasedMatch) {
+    public void showMessageFinishMatch() {
+        setupView(false);
         if (!playFinished) {
             playFinished = true;
             String txtMatchResultPlayer = "";
+
             Participant participant = null;
             try {
                 String participantId = null;
-                participantId = turnBasedMatch.getParticipantId(Game.mPlayerId);
-                participant = turnBasedMatch.getParticipant(participantId);
-
+                participantId = Game.mMatch.getParticipantId(Game.mPlayerId);
+                participant = Game.mMatch.getParticipant(participantId);
             } catch (IllegalStateException ex) {
             }
+
             txtMatchResultPlayer = checkPlayerMatchResult(participant);
 
             showWarning("Partida Finalizada", txtMatchResultPlayer, null);
-            setupView(false);
+
+            if (Game.mTurnData.isFinishedMatch()) {
+                if (Game.mTurnData.isTheWinner(Game.mPlayerId)) {
+                    //WIN
+                    playSoundYouWin();
+                } else {
+                    playSoundYouLost();
+                }
+            }
         }
     }
 
@@ -149,7 +173,6 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             Game.mTurnData = Turn.unpersist(match.getData());
             int status = match.getStatus();
             int turnStatus = match.getTurnStatus();
-
 
             switch (status) {
                 case TurnBasedMatch.MATCH_STATUS_CANCELED:
@@ -169,7 +192,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
-                        showMessageFinishMatch(match);
+                        showMessageFinishMatch();
                     }
                     return;
                 case TurnBasedMatch.MATCH_STATUS_COMPLETE:
@@ -178,7 +201,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                        showWarning("Complete!",
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
-                        showMessageFinishMatch(match);
+                        showMessageFinishMatch();
                         setupView(false);
                         break;
                     }
@@ -187,7 +210,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                    rouletteView.setLine1("Complete!");
 //                showWarning("Complete!",
 //                        "This game is over; someone finished it!  You can only finish it now.", actionButtonDone);
-                    finishFinishedMatch();
+                    finishFinishedMatch(playSound);
                     return;
             }
 
@@ -195,7 +218,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
             switch (turnStatus) {
                 case TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN:
                     if (playSound)
-                        rouletteView.playSoundIsYourTurn();
+                        playSoundIsYourTurn();
                     playable = true;
                     rouletteView.setLine1("\nIt's your turn!\n ");
                     setupView(false);
@@ -217,7 +240,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                                "This game is over; someone finished it, and so did you!  " +
 //                                        "There is nothing to be done.", null);
                         rouletteView.setLine1("Complete!");
-                        showMessageFinishMatch(Game.mMatch);
+                        showMessageFinishMatch();
                     }
                     break;
                 case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
@@ -229,7 +252,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         }
     }
 
-    public void finishFinishedMatch() {
+    public void finishFinishedMatch(boolean playSound) {
         Game.mTurnBasedMultiplayerClient.finishMatch(Game.mMatch.getMatchId())
                 .addOnSuccessListener(
                         new OnSuccessListener<TurnBasedMatch>() {
@@ -239,7 +262,9 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
 //                                showWarning("Complete!",
 //                                        "This game is over; someone finished it, and so did you!  " +
 //                                                "There is nothing to be done.", null);
-                                showMessageFinishMatch(Game.mMatch);
+                                Game.mMatch = turnBasedMatch;
+                                Game.mTurnData = Turn.unpersist(Game.mMatch.getData());
+                                showMessageFinishMatch();
                             }
                         })
                 .addOnFailureListener(new OnFailureListener() {
@@ -251,9 +276,94 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                 });
     }
 
+    public enum SOUND {
+        YOUR_TURN, WIN, LOST
+    }
+
+    ;
+
+
+    public void playSoundIsYourTurn() {
+        playSound(SOUND.YOUR_TURN);
+    }
+
+    public void playSoundYouLost() {
+        Log.d("SOUND", "playSoundYouLost");
+        playSound(SOUND.LOST);
+    }
+
+    public void playSoundYouWin() {
+        Log.d("SOUND", "playSoundYouWin");
+        playSound(SOUND.WIN);
+    }
+
+    private SoundPool soundPool = null;
+
+    public void playSound(final SOUND sound) {
+        if (soundPool != null) {
+            switch (sound) {
+                case YOUR_TURN:
+                    if (idSoundYourTurn != 0) {
+                        playSoundId(idSoundYourTurn);
+                    } else {
+                        new Thread(new Runnable() {
+                            public void run() {
+                                idSoundYourTurn = soundPool.load(RouletteActivity.this, R.raw.yourturn, 1);
+                                soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+                                    @Override
+                                    public void onLoadComplete(SoundPool soundPool, int idSound, int i1) {
+                                        playSoundId(idSound);
+                                    }
+                                });
+                            }
+                        }).start();
+                    }
+                    break;
+                case WIN:
+                    if (idSoundWinMatch != 0) {
+                        playSoundId(idSoundWinMatch);
+                    } else {
+                        new Thread(new Runnable() {
+                            public void run() {
+                                idSoundWinMatch = soundPool.load(RouletteActivity.this, R.raw.win, 1);
+                                soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+                                    @Override
+                                    public void onLoadComplete(SoundPool soundPool, int idSound, int i1) {
+                                        playSoundId(idSound);
+                                    }
+                                });
+                            }
+                        }).start();
+                    }
+                    break;
+                case LOST:
+                    if (idSoundLostMatch != 0) {
+                        playSoundId(idSoundLostMatch);
+                    } else {
+                        new Thread(new Runnable() {
+                            public void run() {
+                                idSoundLostMatch = soundPool.load(RouletteActivity.this, R.raw.lost, 1);
+                                soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+                                    @Override
+                                    public void onLoadComplete(SoundPool soundPool, int idSound, int i1) {
+                                        playSoundId(idSound);
+                                    }
+                                });
+                            }
+                        }).start();
+                    }
+                    break;
+
+            }
+        }
+    }
+
+    public void playSoundId(int sound) {
+        soundPool.play(sound, 1f, 1f, 1, 0, 1f);
+    }
+
 
     private void setupView(boolean updateRoulete) {
-
 //        btnRotate = (Button) findViewById(R.id.buttonStart);
         btnBack = (ImageButton) findViewById(R.id.back);
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -508,15 +618,21 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         }
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        resumeSounds();
+        if (rouletteView != null)
+            rouletteView.resumeSound();
+
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         if (shakeListener != null)
             shakeListener.resume();
-        rouletteView.resumeSound();
-        if (Game.mTurnBasedMultiplayerClient != null)
-            Game.mTurnBasedMultiplayerClient.registerTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
-
     }
 
     @Override
@@ -524,9 +640,17 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
         super.onPause();
         if (shakeListener != null)
             shakeListener.pause();
-        rouletteView.pauseSound();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (rouletteView != null)
+            rouletteView.pauseSound();
+        pauseSounds();
 
     }
+
 
     public interface FinishCounterEvent {
         void onFinishedCount();
@@ -569,15 +693,48 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        rouletteView.destroySound();
+        if (rouletteView != null)
+            rouletteView.destroySound();
         if (Game.mTurnBasedMultiplayerClient != null)
             Game.mTurnBasedMultiplayerClient.unregisterTurnBasedMatchUpdateCallback(mMatchUpdateCallback);
+        destroySounds();
     }
+
+    public void resumeSounds() {
+
+        if (soundPool != null) {
+            Log.d("SOUND", "resumeSounds");
+            soundPool.resume(idSoundYourTurn);
+            soundPool.resume(idSoundLostMatch);
+            soundPool.resume(idSoundWinMatch);
+        }
+    }
+
+    public void destroySounds() {
+        if (soundPool != null) {
+            Log.d("SOUND", "destroySounds");
+            soundPool.stop(idSoundYourTurn);
+            soundPool.stop(idSoundLostMatch);
+            soundPool.stop(idSoundWinMatch);
+            soundPool.release();
+        }
+    }
+
+    public void pauseSounds() {
+        if (soundPool != null) {
+            Log.d("SOUND", "pauseSounds");
+            soundPool.pause(idSoundYourTurn);
+            soundPool.pause(idSoundLostMatch);
+            soundPool.pause(idSoundWinMatch);
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
         if (isRotationEnabled) {
-            rouletteView.destroySound();
+            if (rouletteView != null)
+                rouletteView.destroySound();
 
             Intent intent = new Intent();
             intent.putExtra("category", -1);

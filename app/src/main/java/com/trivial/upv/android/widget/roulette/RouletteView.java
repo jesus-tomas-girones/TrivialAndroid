@@ -36,8 +36,6 @@ import com.trivial.upv.android.model.Theme;
 
 import java.util.Random;
 
-import static java.lang.Thread.sleep;
-
 public class RouletteView extends View implements GestureDetector.OnGestureListener {
 
     private int SIZE_BORDER = 10;
@@ -59,7 +57,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     }
 
     private String line1;
-    private String line2;
     private boolean isRotating;
     private RotateEventLisstener rotationEventListener;
     private boolean playable = false;
@@ -77,7 +74,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
             public void run() {
                 soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
                 idSoundRoulette = soundPool.load(getContext(), R.raw.tick, 0);
-                idSoundYourTurn = soundPool.load(getContext(), R.raw.alleluia, 0);
 
             }
         }).start();
@@ -538,7 +534,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
 
     private SoundPool soundPool = null;
     private int idSoundRoulette = 0;
-    private int idSoundYourTurn = 0;
     long lastTime = 0;
     boolean parar = false;
 
@@ -571,15 +566,9 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
         animacion.start();
     }
 
-    public void playSoundIsYourTurn() {
-        if (soundPool != null)
-            soundPool.play(idSoundYourTurn, 0.5f, 0.5f, 1, 0, 1f);
-    }
-
     public void resumeSound() {
         if (soundPool != null) {
             soundPool.resume(idSoundRoulette);
-            soundPool.resume(idSoundYourTurn);
         }
 
     }
@@ -587,7 +576,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     public void destroySound() {
         if (soundPool != null) {
             soundPool.stop(idSoundRoulette);
-            soundPool.stop(idSoundYourTurn);
             soundPool.release();
         }
     }
@@ -595,7 +583,6 @@ public class RouletteView extends View implements GestureDetector.OnGestureListe
     public void pauseSound() {
         if (soundPool != null) {
             soundPool.pause(idSoundRoulette);
-            soundPool.pause(idSoundYourTurn);
         }
     }
 
