@@ -128,7 +128,7 @@
     <string name="game_expired">This game is expired.  So sad!</string>
     <string name="waiting_automatch">Waiting for \nan automatch partner...</string>
     <string name="complete">Complete!</string>
-    <string name="your_turn">\nIt\'s your turn!\n</string>
+    <string name="your_turn">\nIt\'s your turn!\n\t</string>
     <string name="match_finish">Finalized Game</string>
     <string name="canceled">Canceled!</string>
     <string name="expired">Expired!</string>

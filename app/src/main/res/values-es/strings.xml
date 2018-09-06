@@ -108,7 +108,7 @@
     <string name="game_canceled">¡La partida está cancelada!</string>
     <string name="waiting_automatch">Esperando un rival \nde automatch ...</string>
     <string name="complete">Completado</string>
-    <string name="your_turn">\n¡Es tu turno!\n</string>
+    <string name="your_turn">\n¡Es tu turno!\n\t</string>
     <string name="match_finish">Partida Finalizada</string>
     <string name="canceled">¡Cancelado!</string>
     <string name="expired">¡Expirado!</string>

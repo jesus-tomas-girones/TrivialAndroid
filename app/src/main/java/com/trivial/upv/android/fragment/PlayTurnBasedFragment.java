@@ -1165,12 +1165,12 @@ public class PlayTurnBasedFragment extends Fragment {
                     return;
 
                 else {
-                    boolean cancelMatch = intent.getBooleanExtra(getString(R.string.cancel), false);
+                    boolean cancelMatch = intent.getBooleanExtra("cancel", false);
                     if (cancelMatch) {
 //                        onLeaveClicked(null);
                         onCancelClicked(null);
                     } else {
-                        int categoryAux = intent.getIntExtra(getString(R.string.category), -1);
+                        int categoryAux = intent.getIntExtra("category", -1);
                         // If no play do nathing
                         if (categoryAux != -1)
                             startQuizzes(categoryAux);
