@@ -263,8 +263,7 @@ public class PlayTurnBasedFragment extends Fragment {
     private void onCancelMatch(String matchId) {
         isDoingTurn = false;
 
-        showWarning(true, "Match", "This match was canceled.  " +
-                "All other players will have their game ended.", null);
+        showWarning(true, getString(R.string.match), getString(R.string.canceled_players_end), null);
 //        showWarning(true, "Match", "This match (" + matchId + ") was canceled.  " +
 //                "All other players will have their game ended.", null);
     }
@@ -282,7 +281,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         onCancelMatch(matchId);
                     }
                 })
-                .addOnFailureListener(createFailureListener("There was a problem cancelling the match!"));
+                .addOnFailureListener(createFailureListener(getString(R.string.problem_cancelling)));
 
         isDoingTurn = false;
 //        setViewVisibility();
@@ -307,7 +306,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         onLeaveMatch();
                     }
                 })
-                .addOnFailureListener(createFailureListener("There was a problem leaving the match!"));
+                .addOnFailureListener(createFailureListener(getString(R.string.problem_leaving)));
 
 //        setViewVisibility();
     }
@@ -538,7 +537,7 @@ public class PlayTurnBasedFragment extends Fragment {
 
                         }
                         seekBar.setProgress(progress);
-                        txtNumQuizzes.setText("Num. Quizzes: " + progress + "/" + K_MAX_PREGUNTAS);
+                        txtNumQuizzes.setText(getString(R.string.num_quizzes)+": " + progress + "/" + K_MAX_PREGUNTAS);
                     }
 
                     @Override
@@ -548,7 +547,7 @@ public class PlayTurnBasedFragment extends Fragment {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         // Display the value in textview
-                        txtNumQuizzes.setText("Num. Quizzes: " + progress + "/" + K_MAX_PREGUNTAS);
+                        txtNumQuizzes.setText(getString(R.string.num_quizzes)+": " + progress + "/" + K_MAX_PREGUNTAS);
                     }
                 });
 
@@ -665,7 +664,7 @@ public class PlayTurnBasedFragment extends Fragment {
                             onDisconnected();
                         } else {
                             Toast.makeText(getActivity(),
-                                    "Error al desconectar el cliente.", Toast.LENGTH_LONG);
+                                    getString(R.string.quiz_error_disconnect) , Toast.LENGTH_LONG);
                         }
                     }
                 });
@@ -716,7 +715,7 @@ public class PlayTurnBasedFragment extends Fragment {
 //                                setViewVisibility();
                             }
                         })
-                .addOnFailureListener(createFailureListener("There was a problem getting the player!"));
+                .addOnFailureListener(createFailureListener(getString(R.string.problem_getting)));
 
 //        Log.d(TAG, "onConnected(): Connection successful");
 
@@ -731,7 +730,7 @@ public class PlayTurnBasedFragment extends Fragment {
                             final Invitation invitationAux = hint.getParcelable(Multiplayer.EXTRA_INVITATION);
                             if (invitationAux != null) {
                                 new android.app.AlertDialog.Builder(getActivity())
-                                        .setMessage("La invitación corresponde a una PARTIDA de TIEMPO REAL " + invitationAux.getInviter().getDisplayName())
+                                        .setMessage(getString(R.string.invitation_turn_based) + invitationAux.getInviter().getDisplayName())
                                         .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -764,8 +763,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         }
                     }
                 })
-                .addOnFailureListener(createFailureListener(
-                        "There was a problem getting the activation hint!"));
+                .addOnFailureListener(createFailureListener( getString(R.string.problem_activation_hint)));
 
 //        setViewVisibility();
 
@@ -796,26 +794,24 @@ public class PlayTurnBasedFragment extends Fragment {
 
         switch (status) {
             case TurnBasedMatch.MATCH_STATUS_CANCELED:
-                showWarning(true, "Canceled!", "This game was canceled!", null);
+                showWarning(true, getString(R.string.canceled), getString(R.string.game_canceled), null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_EXPIRED:
-                showWarning(true, "Expired!", "This game is expired.  So sad!", null);
+                showWarning(true, getString(R.string.expired), getString(R.string.game_expired), null);
                 return;
             case TurnBasedMatch.MATCH_STATUS_AUTO_MATCHING:
                 if (!Game.mTurnData.isFinishedMatch()) {
-                    showWarning(false, "Waiting for auto-match...",
-                            "We're still waiting for an automatch partner.", actionButtonDone);
+                    showWarning(false, getString(R.string.waiting_auto_match),
+                            getString(R.string.still_waiting_automatch), actionButtonDone);
 
-                } else showWarning(false, "Complete!",
-                        "This game is over; someone finished it, and so did you!  " +
-                                "There is nothing to be done.", actionButtonDone);
+                } else showWarning(false, getString(R.string.complete),
+                        getString(R.string.game_over), actionButtonDone);
 
                 return;
             case TurnBasedMatch.MATCH_STATUS_COMPLETE:
                 if (turnStatus == TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE) {
-                    showWarning(false, "Complete!",
-                            "This game is over; someone finished it, and so did you!  " +
-                                    "There is nothing to be done.", actionButtonDone);
+                    showWarning(false, getString(R.string.complete),
+                            getString(R.string.game_over), actionButtonDone);
                     break;
                 }
 
@@ -845,18 +841,17 @@ public class PlayTurnBasedFragment extends Fragment {
                 if (!Game.mTurnData.isFinishedMatch()) {
                     String textNextPlayer = "";
                     try {
-                        textNextPlayer = "Next player: " + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
+                        textNextPlayer = getString(R.string.next_player) + ": " +
+                                match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
                     } catch (Exception ex) {
                     }
-                    showWarning(false, "It's not your turn...", textNextPlayer, actionButtonDone);
-                } else showWarning(false, "Complete!",
-                        "This game is over; someone finished it, and so did you!  " +
-                                "There is nothing to be done.", actionButtonDone);
+                    showWarning(false, getString(R.string.not_your_turn), textNextPlayer, actionButtonDone);
+                } else showWarning(false, getString(R.string.complete),
+                        getString(R.string.game_over), actionButtonDone);
                 break;
             case TurnBasedMatch.MATCH_TURN_STATUS_INVITED:
-                showWarning(true, "Good inititative!",
-                        "Still waiting for invitations.\n\nBe patient!", actionButtonDone);
-
+                showWarning(true, getString(R.string.good_inititative),
+                        getString(R.string.waiting_invitations_be_patient), actionButtonDone);
         }
 
 //        mTurnData = null;
@@ -864,7 +859,6 @@ public class PlayTurnBasedFragment extends Fragment {
 //        setViewVisibility();
 
     }
-
 
     private ActionOnClickButton actionButtonDone = new ActionOnClickButton() {
         @Override
@@ -924,7 +918,7 @@ public class PlayTurnBasedFragment extends Fragment {
             }).addOnFailureListener(createFailureListener("Error getting de invitation."));
         } else if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_REAL_TIME) {
             new android.app.AlertDialog.Builder(getActivity())
-                    .setMessage("La invitación corresponde a una PARTIDA de TIEMPO REAL " + invitation.getInviter().getDisplayName())
+                    .setMessage(getString(R.string.invitation_real_time) + invitation.getInviter().getDisplayName())
                     .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -958,7 +952,7 @@ public class PlayTurnBasedFragment extends Fragment {
                     (TurnBasedMultiplayerClient.MatchOutOfDateApiException) exception;
 
             new android.app.AlertDialog.Builder(getActivity())
-                    .setMessage("Match was out of date, updating with latest match data...")
+                    .setMessage(R.string.out_of_date)
                     .setNeutralButton(android.R.string.ok, null)
                     .show();
 
@@ -1012,7 +1006,7 @@ public class PlayTurnBasedFragment extends Fragment {
                 break;
             default:
                 showErrorMessage(R.string.unexpected_status);
-                Log.d(TAG, "Did not have warning or string to deal with: "
+                Log.d(TAG, getString(R.string.error_string)
                         + statusCode);
         }
 
@@ -1053,7 +1047,7 @@ public class PlayTurnBasedFragment extends Fragment {
     }
 
     public void showErrorMessage(int stringId) {
-        showWarning(true, "Warning", getResources().getString(stringId), null);
+        showWarning(true, getString(R.string.warning), getResources().getString(stringId), null);
     }
 
 
@@ -1102,7 +1096,7 @@ public class PlayTurnBasedFragment extends Fragment {
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if ((info == null || !info.isConnected() || !info.isAvailable())) {
             Toast.makeText(getActivity(),
-                    "Oops! No tienes conexión a internet",
+                    R.string.oops_no_internet,
                     Toast.LENGTH_LONG).show();
             return false;
         }
@@ -1135,7 +1129,7 @@ public class PlayTurnBasedFragment extends Fragment {
 //                            .setMessage(message)
 //                            .setNeutralButton(android.R.string.ok, null)
 //                            .show();
-                    showWarning(true, "Google Play Games", "No ha sido posible conectar con Google Play Games", null);
+                    showWarning(true, "Google Play Games", getString(R.string.no_connectio_gpg), null);
                 }
                 break;
 
@@ -1153,7 +1147,7 @@ public class PlayTurnBasedFragment extends Fragment {
             case RC_LOOK_AT_MATCHES:
                 if (resultCode != Activity.RESULT_OK) {
                     logBadActivityResult(requestCode, resultCode,
-                            "User cancelled returning from the 'Select Match' dialog.");
+                            getString(R.string.user_cancelled));
                     return;
                 }
 
@@ -1171,12 +1165,12 @@ public class PlayTurnBasedFragment extends Fragment {
                     return;
 
                 else {
-                    boolean cancelMatch = intent.getBooleanExtra("cancel", false);
+                    boolean cancelMatch = intent.getBooleanExtra(getString(R.string.cancel), false);
                     if (cancelMatch) {
 //                        onLeaveClicked(null);
                         onCancelClicked(null);
                     } else {
-                        int categoryAux = intent.getIntExtra("category", -1);
+                        int categoryAux = intent.getIntExtra(getString(R.string.category), -1);
                         // If no play do nathing
                         if (categoryAux != -1)
                             startQuizzes(categoryAux);
@@ -1254,7 +1248,7 @@ public class PlayTurnBasedFragment extends Fragment {
         else {
             final Invitation invitationAux = data.getExtras().getParcelable(Multiplayer.EXTRA_INVITATION);
             new android.app.AlertDialog.Builder(getActivity())
-                    .setMessage("La invitación corresponde a una PARTIDA de TIEMPO REAL " + invitationAux.getInviter().getDisplayName())
+                    .setMessage(getString(R.string.invitation_real_time) + invitationAux.getInviter().getDisplayName())
                     .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -1396,8 +1390,7 @@ public class PlayTurnBasedFragment extends Fragment {
                             public void onSuccess(TurnBasedMatch turnBasedMatch) {
 
                                 showWarning(false, "Complete!",
-                                        "This game is over; someone finished it, and so did you!  " +
-                                                "There is nothing to be done.", actionButtonDone);
+                                        getString(R.string.game_over), actionButtonDone);
 //                                Toast.makeText(getActivity(),
 //                                        "Fin de la partida.",
 //                                        Toast.LENGTH_LONG).show();
@@ -1460,9 +1453,9 @@ public class PlayTurnBasedFragment extends Fragment {
 
         // The new player doesn't play any turn.
         if (Game.mTurnData.isFinishedMatch() && finishMatch && Game.mTurnData.numTurnos == 1) {
-            txtMatchResultPlayer = "You've joind at the end of the match. Indeed, " + txtMatchResultPlayer;
+            txtMatchResultPlayer = getString(R.string.finished_match_txt) + txtMatchResultPlayer;
 
-            showAlertMessage("Partida Finalizada", txtMatchResultPlayer, new ActionOnClickButton() {
+            showAlertMessage(getString(R.string.finished_match), txtMatchResultPlayer, new ActionOnClickButton() {
                 @Override
                 public void onClick() {
                     Game.mTurnData = null;
@@ -1528,10 +1521,10 @@ public class PlayTurnBasedFragment extends Fragment {
     // Rematch dialog
     public void askForRematch(final TurnBasedMatch match) {
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setMessage("Do you want a rematch?");
+        alertDialogBuilder.setMessage(R.string.want_rematch);
         alertDialogBuilder
                 .setCancelable(false)
-                .setPositiveButton("Sure, rematch!",
+                .setPositiveButton(R.string.sure_rematch,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int id) {
@@ -1560,10 +1553,10 @@ public class PlayTurnBasedFragment extends Fragment {
 
         if (showConfirmation) {
             android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(getActivity());
-            alertDialogBuilder.setMessage("Do you want tu play the Game with " + invitationFrom + "?");
+            alertDialogBuilder.setMessage(getString(R.string.want_play_whith) + invitationFrom + "?");
             alertDialogBuilder
                     .setCancelable(false)
-                    .setPositiveButton("Sure, accept!",
+                    .setPositiveButton(R.string.sure_accept,
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int id) {
@@ -1607,7 +1600,7 @@ public class PlayTurnBasedFragment extends Fragment {
                         onInitiateMatch(turnBasedMatch, true);
                     }
                 })
-                .addOnFailureListener(createFailureListener("There was a problem starting a rematch!"));
+                .addOnFailureListener(createFailureListener(getString(R.string.problem_rematch)));
         Game.mMatch = null;
         isDoingTurn = false;
     }
@@ -1670,7 +1663,7 @@ public class PlayTurnBasedFragment extends Fragment {
     private void showSeekbarsProgress() {
         txtPlayers.setText(getString(R.string.num_players) + sbPlayers.getProgress() + "/" + (sbPlayers.getMax() - 1));
 //        txtTotalTime.setText("Total Time: " + sbTotalTime.getProgress() + "/" + sbTotalTime.getMax());
-        txtNumQuizzes.setText("Num. Quizzes: " + sbNumQuizzes.getProgress() + "/" + K_MAX_PREGUNTAS);
+        txtNumQuizzes.setText(getString(R.string.num_quizzes) + ": " + sbNumQuizzes.getProgress() + "/" + K_MAX_PREGUNTAS);
     }
 
     //

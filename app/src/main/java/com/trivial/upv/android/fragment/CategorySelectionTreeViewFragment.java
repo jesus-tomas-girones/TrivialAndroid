@@ -169,7 +169,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
             getSelectedCategories();
             animateFloatButton();
         } else {
-            showWarning("Warning", "You must select at least 2 categories, and maximum of 31");
+            showWarning("Warning", getString(R.string.select_2_cat));
         }
     }
 
@@ -342,10 +342,10 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
 
         if (quizzes.size() < numQuizzes) {
-            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("You need select more categories. At least you need " + numQuizzes + " Quizzes.", "GO ON", false, null);
+            ((CategorySelectionActivity) getActivity()).showSnackbarMessage(getString(R.string.select_more_cat) + numQuizzes + " Quizzes.", "GO ON", false, null);
             return false;
         } else if (Game.listCategories.size() > 31) {
-            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("You need select less categories. Less than 31", "GO ON", false, null);
+            ((CategorySelectionActivity) getActivity()).showSnackbarMessage(getString(R.string.select_less_cat), "GO ON", false, null);
             return false;
         }
         List<Quiz> tmpQuizzes = getRandomizeQuizzes(quizzes, numQuizzes);
@@ -406,7 +406,7 @@ public class CategorySelectionTreeViewFragment extends Fragment {
 
 
         if (quizzes.size() < numQuizzes) {
-            ((CategorySelectionActivity) getActivity()).showSnackbarMessage("You need select more categories. At least you need " + numQuizzes + " Quizzes.", "GO ON", false, null);
+            ((CategorySelectionActivity) getActivity()).showSnackbarMessage(getString(R.string.select_more_cat) + numQuizzes + " Quizzes.", "GO ON", false, null);
             return false;
         }
         List<Quiz> tmpQuizzes = getRandomizeQuizzes(quizzes, numQuizzes);

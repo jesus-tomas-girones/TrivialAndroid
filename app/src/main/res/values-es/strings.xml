@@ -82,6 +82,10 @@
     <string name="connected_error">Motivo: Error de connexión</string>
     <string name="join_error">Motivo: Error al emparejar</string>
     <string name="room_created_error">Motivo: Room Creada con errores</string>
+    <!-- select_cat -->
+    <string name="select_2_cat">Debe seleccionar al menos 2 categorías y un máximo de 31</string>
+    <string name="select_more_cat">You need select more categories. At least you need</string>
+    <string name="select_less_cat">You need select less categories. Less than 31</string>
     <!-- Turn based-->
     <string name="choose_category_turnbased">Elige Categorias para Jugar por Turnos</string>
     <string name="error_get_inbox_intent">Hay un problema con intent inbox</string>
@@ -102,17 +106,47 @@
     <string name='match_error_locally_modified'>Este juego tiene datos modificados localmente. La operación no se puede realizar hasta que se envíe al servidor.</string>
 
     <string name="game_canceled">¡La partida está cancelada!</string>
-    <string name="waiting_automatch">Esperando un rival de automatch ...</string>
+    <string name="waiting_automatch">Esperando un rival \nde automatch ...</string>
     <string name="complete">Completado</string>
-    <string name="your_turn">¡Es tu turno!</string>
+    <string name="your_turn">\n¡Es tu turno!\n</string>
     <string name="match_finish">Partida Finalizada</string>
     <string name="canceled">¡Cancelado!</string>
     <string name="expired">¡Expirado!</string>
-    <string name="next_player">Siguiente jugador</string>
-    <string name="still_waiting_invitations">¡Esperando invitaciones!</string>
+    <string name="next_player">Siguiente jugador\n\n</string>
+    <string name="still_waiting_invitations">\n¡Esperando invitaciones!\n</string>
     <string name="problem_finish">Hay un problema finalizando la partida</string>
     <string name="game_corrupt">La partida está corrupta</string>
     <string name="categories_d_d">Categorías (%d/%d)</string>
+
+    <string name="invitation_turn_based">La invitación corresponde a una PARTIDA POR TURNOS de</string>
+    <string name="problem_activation_hint">¡Error al obtener activation hint!</string>
+    <string name="problem_getting">¡Error al obtener el jugador!</string>
+    <string name="game_over">Esta partida se ha acabado; alguien la terminó. No hay nada que hacer.</string>
+    <string name="match">Partida</string>
+    <string name="canceled_players_end">Esta partida se ha cancelado. Todos los jugadores terminaron su juego.</string>
+    <string name="problem_cancelling">¡Error cancelando la partida!</string>
+    <string name="problem_leaving">¡Error dejando la partida!</string>
+    <string name="waiting_auto_match">Esperando jugadores auto-match...</string>
+    <string name="still_waiting_automatch">Todavía estamos esperando un rival de automatch.</string>
+    <string name="not_your_turn">No es tu turno...</string>
+    <string name="good_inititative">¡Buena iniciativa!</string>
+    <string name="waiting_invitations_be_patient">Todavía esperando invitaciones. \\n\\n ¡Ten paciencia!</string>
+    <string name="invitation_real_time">La invitación corresponde a una PARTIDA de TIEMPO REAL</string>
+    <string name="out_of_date">La partida no esta actualizada, actualizando con los últimos datos...</string>
+    <string name="error_string">No hay advertencia o cadena para tratar:</string>
+    <string name="warning">Advertencia</string>
+    <string name="oops_no_internet">¡Oops! No tienes conexión a Internet</string>
+    <string name="no_connectio_gpg">No ha sido posible conectarse con Google Play Games</string>
+    <string name="user_cancelled">Usuario ha cancelado regresando del diálogo \' Seleccionar partida \'.</string>
+    <string name="finished_match_txt">Te unirás al final del partido. En efecto,</string>
+    <string name="finished_match">Partida Finalizada</string>
+    <string name="want_rematch">¿Quieres una revancha?</string>
+    <string name="sure_rematch">Si, ¡Revancha!</string>
+    <string name="want_play_whith">¿Quieres jugar el juego con </string>
+    <string name="sure_accept">Si, ¡Acepto!</string>
+    <string name="problem_rematch">¡Hubo un problema al comenzar la revancha!</string>
+    <string name="why_sending_score">Causa: Enviando puntuación</string>
+    <string name="waiting_players">Esperando jugadores ...</string>
 
     <!--Preferencias-->
     <string name="pref_review_mode">Modo Repaso</string>
@@ -130,12 +164,12 @@
     <string name="pref_time_online_title">Tiempo Total (seg.)</string>
     <string name="pref_warning_summary">Cualquier cambio en \'Modo Jugar en Red\' solo afecta en el dispositivo que propone la partida. Es decir, que el jugador que comienzan la partida pone las reglas, y el resto de jugadores aceptan su configuración.</string>
     <string name="pref_warning_title">Atención:</string>
+    <string name="play_turn_based">Jugar Por Turnos</string>
     <string name="select_partida">Selec. Partida…</string>
     <string name="new_match">Nueva Partida</string>
     <string name="num_quizzes">Num Preguntas</string>
     <string name="leave_game">Dejar Juego </string>
     <string name="score">Estadísticas</string>
-
 
     <!--QuizActivity-->
     <string name="quiz_problem">¡Hay un problema con la partida!</string>
@@ -146,5 +180,5 @@
     <string name="quiz_no_disconnect">No ha sido posible desconectar</string>
     <string name="quiz_no_id_player">Hay un problema para obtener el id del jugador!</string>
     <string name="do_you_want_tu_pass">¿Quieres pasar tu turno?</string>
-    <!--JTG.E-->
+
 </resources>

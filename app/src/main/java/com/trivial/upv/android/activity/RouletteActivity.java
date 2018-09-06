@@ -229,7 +229,7 @@ public class RouletteActivity extends AppCompatActivity implements ShakeListener
                     if (!Game.mTurnData.isFinishedMatch()) {
                         String textNextPlayer = "";
                         try {
-                            textNextPlayer = getString(R.string.next_player) + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
+                            textNextPlayer = getString(R.string.next_player) + "\n\n" + match.getParticipant(Game.mTurnData.idParticipantTurn).getDisplayName();
                             rouletteView.setLine1(textNextPlayer);
                         } catch (Exception ex) {
                         }

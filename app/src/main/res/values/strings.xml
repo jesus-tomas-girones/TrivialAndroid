@@ -91,8 +91,14 @@
     <string name="disconnect_room_error">Why: Disconnect From Room</string>
     <string name="connected_error">Why: Connected Error</string>
     <string name="join_error">Why: Join Error</string>
+
+    <!-- select_cat -->
+    <string name="select_2_cat">You must select at least 2 categories, and maximum of 31</string>
+    <string name="select_more_cat">Necesitas seleccionar más categorías. Al menos necesitas</string>
+    <string name="select_less_cat">Necesitas seleccionar menos categorías. Menos de 31 </string>
+
     <!-- Turn based-->
-    <string name="choose_category_turnbased">Choose Category/ies to Play TurnBased</string>
+    <string name="choose_category_turnbased">Choose Category/ies to Play Turn Based</string>
     <string name="welcome_to_our_skeleton_app_">Welcome to our skeleton app!</string>
     <string name="check_games">Check games</string>
     <string name="start_match">Start Match</string>
@@ -120,17 +126,48 @@
 
     <string name="game_canceled">This game was canceled!</string>
     <string name="game_expired">This game is expired.  So sad!</string>
-    <string name="waiting_automatch">Waiting for an automatch partner...</string>
+    <string name="waiting_automatch">Waiting for \nan automatch partner...</string>
     <string name="complete">Complete!</string>
-    <string name="your_turn">It\'s your turn!</string>
+    <string name="your_turn">\nIt\'s your turn!\n</string>
     <string name="match_finish">Finalized Game</string>
     <string name="canceled">Canceled!</string>
     <string name="expired">Expired!</string>
     <string name="next_player">Next player</string>
-    <string name="still_waiting_invitations">Still waiting for invitations!</string>
+    <string name="still_waiting_invitations">Still waiting for \ninvitations!</string>
     <string name="problem_finish">There is a problem ending the game</string>
     <string name="game_corrupt">The game is corrupt</string>
     <string name="categories_d_d">Categories (%d/%d)</string>
+
+    <string name="invitation_turn_based">The invitation corresponds to a TURN BASED GAME</string>
+    <string name="problem_activation_hint">There was a problem getting the activation hint!</string>
+    <string name="problem_getting">There was a problem getting the player!</string>
+    <string name="game_over">This game is over; someone finished it, and so did you! There is nothing to be done.</string>
+    <string name="match">Match</string>
+    <string name="canceled_players_end">This match was canceled. All other players will have their game ended.</string>
+    <string name="problem_cancelling">There was a problem cancelling the match!</string>
+    <string name="problem_leaving">There was a problem leaving the match!</string>
+    <string name="waiting_auto_match">Waiting for auto-match...</string>
+    <string name="still_waiting_automatch">We\'re still waiting for an automatch partner.</string>
+    <string name="not_your_turn">It\'s not your turn...</string>
+    <string name="good_inititative">Good inititative!</string>
+    <string name="waiting_invitations_be_patient">Still waiting for invitations. \\n\\n Be patient!</string>
+    <string name="invitation_real_time">The invitation corresponds to a REAL TIME GAME</string>
+    <string name="out_of_date">Match was out of date, updating with latest match data...</string>
+    <string name="error_string">Did not have warning or string to deal with:</string>
+    <string name="warning">Warning</string>
+    <string name="oops_no_internet">Oops! You do not have an Internet connection</string>
+    <string name="no_connectio_gpg">It has not been possible to connect with Google Play Games</string>
+    <string name="user_cancelled">User cancelled returning from the \'Select Match\' dialog.</string>
+    <string name="finished_match_txt">You\'ve joind at the end of the match. Indeed,</string>
+    <string name="finished_match">Finished Match</string>
+    <string name="want_rematch">Do you want a rematch?</string>
+    <string name="sure_rematch">Sure, rematch!</string>
+    <string name="want_play_whith">Do you want to play the Game with</string>
+    <string name="sure_accept">Sure, accept!</string>
+    <string name="problem_rematch">There was a problem starting a rematch!</string>
+    <string name="why_sending_score">Why: Sending Score!</string>
+    <string name="waiting_players">Waiting Players...</string>
+
 
 
     <!--Preferencias-->
@@ -149,22 +186,23 @@
     <string name="pref_time_online_title">Total Time</string>
     <string name="pref_warning_summary">Any change in \'Mode Online\' only takes effect when you start a Game. It means that the player who starts the Game is the Master, and the rest of players take his settings as theirs.</string>
     <string name="pref_warning_title">Warning:</string>
-    <string name="play_turn_based">Jugar Por Turnos</string>
+    <string name="play_turn_based">Play Turn Based</string>
     <string name="select_partida">Select Match …</string>
     <string name="new_match">New Game</string>
-    <string name="num_quizzes">Num Quizzes</string>
+    <string name="num_quizzes">Num. Quizzes</string>
     <string name="leave_game">Leave Game </string>
     <string name="score">Statistics</string>
 
 
     <!--QuizActivity-->
-    <string name="quiz_problem">¡Hay un problema con la partida!</string>
-    <string name="quiz_error_connect">Error al conectar el cliente.</string>
+    <string name="quiz_problem">There is a problem with the game!</string>
+    <string name="quiz_error_connect">Error connecting the client.</string>
     <string name="quiz_waiting_player">Waiting Player to be Ready...</string>
     <string name="quiz_yes">Yes!</string>
-    <string name="quiz_error_disconnect">Error al desconectar el cliente.</string>
-    <string name="quiz_no_disconnect">No ha sido posible desconectar</string>
-    <string name="quiz_no_id_player">Hay un problema para obtener el id del jugador!</string>
-    <string name="do_you_want_tu_pass">Do you want tu pass your Turn?</string>
-    <!--JTG.E-->
+    <string name="quiz_error_disconnect">Error when disconnecting the client.</string>
+    <string name="quiz_no_disconnect">It has not been possible to disconnect</string>
+    <string name="quiz_no_id_player">There is a problem to get the player\'s id!</string>
+    <string name="do_you_want_tu_pass">Do you want to pass your Turn?</string>
+
+
 </resources>

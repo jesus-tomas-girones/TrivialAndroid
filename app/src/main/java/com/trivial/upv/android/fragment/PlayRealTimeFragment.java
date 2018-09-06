@@ -1,6 +1,5 @@
 package com.trivial.upv.android.fragment;
 
-import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -415,7 +414,7 @@ public class PlayRealTimeFragment extends Fragment
                             final TurnBasedMatch match = bundle.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
                             if (match != null) {
                                 new AlertDialog.Builder(getActivity())
-                                        .setMessage("La invitación corresponde a una PARTIDA POR TURNOS de " + Game.pendingTurnBasedMatch.getParticipants().get(0).getDisplayName())
+                                        .setMessage(getString(R.string.invitation_turn_based) + Game.pendingTurnBasedMatch.getParticipants().get(0).getDisplayName())
                                         .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -446,7 +445,7 @@ public class PlayRealTimeFragment extends Fragment
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(getActivity(),
-                                "There was a problem getting the activation hint!"
+                                R.string.problem_activation_hint
                                 , Toast.LENGTH_LONG).show();
 
                     }
@@ -628,7 +627,7 @@ public class PlayRealTimeFragment extends Fragment
         } else {
             final TurnBasedMatch match = data.getExtras().getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
             new AlertDialog.Builder(getActivity())
-                    .setMessage("La invitación corresponde a una PARTIDA POR TURNOS de " + match.getParticipants().get(0).getDisplayName())
+                    .setMessage(getString(R.string.invitation_turn_based) + match.getParticipants().get(0).getDisplayName())
                     .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -780,7 +779,7 @@ public class PlayRealTimeFragment extends Fragment
             } else if (invitation.getInvitationType() == Invitation.INVITATION_TYPE_TURN_BASED) {
 
                 new AlertDialog.Builder(getActivity())
-                        .setMessage("La invitación corresponde a una PARTIDA POR TURNOS de " + invitation.getInviter().getDisplayName())
+                        .setMessage(getString(R.string.invitation_turn_based) + invitation.getInviter().getDisplayName())
                         .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {

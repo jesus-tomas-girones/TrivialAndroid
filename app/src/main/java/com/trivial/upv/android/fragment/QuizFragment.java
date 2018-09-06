@@ -399,7 +399,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
                     if (numTimesSended <= MAX_RETRY_TIMES) {
                         sendMessageScore(tmpMessage, participantId, numTimesSended + 1);
                     } else {
-                        ((QuizActivity) getActivity()).showGameError("Why: Sending Score!", false);
+                        ((QuizActivity) getActivity()).showGameError(getString(R.string.why_sending_score), false);
                     }
                 }
             }
@@ -412,7 +412,7 @@ public class QuizFragment extends android.support.v4.app.Fragment {
     public void showSummary() {
         if (mCategory.getId().equals(QuizActivity.ARG_REAL_TIME_ONLINE)) {
             pWaitingProgress = new ProgressDialog(getContext());
-            pWaitingProgress.setTitle("Waiting Players...");
+            pWaitingProgress.setTitle(getString(R.string.waiting_players));
             pWaitingProgress.show();
             pWaitingProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
