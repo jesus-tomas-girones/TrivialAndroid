@@ -51,8 +51,8 @@
             android:id="@+id/title"
             style="@style/Topeka.TextAppearance.Title.Inverse"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text='@{player.firstName + " " + player.lastInitial }'
+            android:layout_height="@dimen/size_avatar_toolbar"
+            android:text='@{player.firstName + "" + player.lastInitial }'
             tools:ignore="PrivateResource" />
     </LinearLayout>
 </layout>

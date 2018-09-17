@@ -22,10 +22,6 @@ public class HelpDialogFragment extends DialogFragment {
    public Dialog onCreateDialog(Bundle savedInstanceState) {
       LayoutInflater inflater = getActivity().getLayoutInflater();
       View view = inflater.inflate(R.layout.dialog_help, null);
-      TextView textView = (TextView) view.findViewById(R.id.text1);
-      textView.setMovementMethod(LinkMovementMethod.getInstance());
-      textView = (TextView) view.findViewById(R.id.text2);
-      textView.setMovementMethod(LinkMovementMethod.getInstance());
       AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
       builder.setView(view)
               .setPositiveButton("OK", new DialogInterface.OnClickListener() {

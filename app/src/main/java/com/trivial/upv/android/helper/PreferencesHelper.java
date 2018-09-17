@@ -142,8 +142,8 @@ public class PreferencesHelper {
 
     // JVG.S
     public static Player getDummyPlayer(FragmentActivity activity) {
-        final String firstName = "Android";
-        final String lastInitial = "Curso.com";
+        final String firstName = "android";
+        final String lastInitial = "curso.com";
 
         Random rand = new Random();
         int pos = rand.nextInt(16);

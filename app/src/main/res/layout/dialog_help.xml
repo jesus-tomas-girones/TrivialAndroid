@@ -1,54 +1,74 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--JTG.S-->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><!--JTG.S-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingEnd="@dimen/spacing_double"
-    android:paddingStart="@dimen/spacing_double"
-    android:paddingTop="@dimen/spacing_double"
-    android:paddingBottom="@dimen/spacing_double">
-    <TextView
-        android:id="@+id/toolbar_main"
+    android:orientation="vertical">
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/Topeka.TextAppearance.Title"
-        android:elevation="@dimen/elevation_header"
-        android:gravity="center_vertical"
-        android:text="@string/help_title"
-        android:paddingBottom="@dimen/spacing_double" />
-    <TextView
-        android:id="@+id/text1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Topeka.TextAppearance.Subhead"
-        android:gravity="center_vertical"
-        android:text="@string/help_text1" />
-    <TextView
-        android:id="@+id/text2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Topeka.TextAppearance.Subhead"
-        android:elevation="@dimen/elevation_header"
-        android:paddingTop="12dp"
-        android:gravity="center_vertical"
-        android:text="@string/help_text2" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Topeka.TextAppearance.Subhead"
-        android:elevation="@dimen/elevation_header"
-        android:paddingTop="12dp"
-        android:gravity="center_vertical"
-        android:text="@string/help_text3" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/Topeka.TextAppearance.Subhead"
-        android:elevation="@dimen/elevation_header"
-        android:paddingTop="12dp"
-        android:gravity="center_vertical"
-        android:text="@string/help_text4" />
-</LinearLayout>
-<!--JTG.E-->
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/spacing_double"
+        android:paddingEnd="@dimen/spacing_double"
+        android:paddingStart="@dimen/spacing_double"
+        android:paddingTop="@dimen/spacing_double">
+
+        <TextView
+            android:id="@+id/toolbar_main"
+            style="@style/Topeka.TextAppearance.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:gravity="center_vertical"
+            android:paddingBottom="@dimen/spacing_double"
+            android:text="@string/help_title" />
+
+        <TextView
+            android:id="@+id/text1"
+            style="@style/Topeka.TextAppearance.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="@string/help_text1" />
+
+        <TextView
+            android:id="@+id/text2"
+            style="@style/Topeka.TextAppearance.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:gravity="center_vertical"
+            android:paddingTop="12dp"
+            android:text="@string/help_text2" />
+
+        <TextView
+            android:id="@+id/text3"
+            style="@style/Topeka.TextAppearance.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:gravity="center_vertical"
+            android:paddingTop="12dp"
+            android:text="@string/help_text3" />
+
+        <TextView
+            android:id="@+id/text4"
+            style="@style/Topeka.TextAppearance.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:gravity="center_vertical"
+            android:paddingTop="12dp"
+            android:text="@string/help_text4" />
+
+        <TextView
+            android:id="@+id/text5"
+            style="@style/Topeka.TextAppearance.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_header"
+            android:gravity="center_vertical"
+            android:paddingTop="12dp"
+            android:text="@string/help_text5" />
+    </LinearLayout>
+</ScrollView><!--JTG.E-->

@@ -74,6 +74,7 @@ import com.trivial.upv.android.fragment.AboutDialogFragment;
 import com.trivial.upv.android.fragment.CategorySelectionFragment;
 import com.trivial.upv.android.fragment.CategorySelectionTreeViewFragment;
 import com.trivial.upv.android.fragment.HelpDialogFragment;
+import com.trivial.upv.android.fragment.MainDialogFragment;
 import com.trivial.upv.android.fragment.PlayRealTimeFragment;
 import com.trivial.upv.android.fragment.PlayTurnBasedFragment;
 import com.trivial.upv.android.helper.ApiLevelHelper;
@@ -621,6 +622,10 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
 //        title = (TextView) (navigationView.getHeaderView(0).findViewById(R.id.title));
         toggle.syncState();
         //JVG.E
+        // JTG.S
+        MainDialogFragment dialog = new MainDialogFragment();
+        dialog.show(getSupportFragmentManager(), "diálogo principal");
+        // JTG.E
     }
 
     @Override
@@ -717,12 +722,9 @@ public class CategorySelectionActivity extends AppCompatActivity implements Navi
             supportFragmentManager
                     .beginTransaction().replace(R.id.category_container, fragment)
                     .commit();
-
             backButton.setVisibility(View.GONE);
             scoreView.setVisibility(View.VISIBLE);
             showScore();
-
-
         }
     }
 

@@ -73,7 +73,8 @@
     <string name="help_text1">Selecciona el modo de juego desde el menú de navegación:</string>
     <string name="help_text2"><b>Modo repaso:</b> navega por todas las materias desarrolladas en el Master de Android y revisa tus conocimientos. En muchas de las materias podrás ver vídeos explicativos o acceder a tutoriales.</string>
     <string name="help_text3"><b>Modo un jugador:</b> podrás evaluar tus conocimientos a partir de un test aleatorio de 10 preguntas. Puedes seleccionar una o más categorías / subcategorías.</string>
-    <string name="help_text4"><b>Modo multijugador:</b> Compite con amigos u otros jugadores para ver quien responde más preguntas en el menor tiempo posible. Puedes configurar las categorías y número de jugadores.</string>
+    <string name="help_text4"><b>Modo multijugador en tiempo real:</b> Compite con amigos u otros jugadores para ver quien responde más preguntas en el menor tiempo posible. Puedes configurar las categorías y número de jugadores.</string>
+    <string name="help_text5"><b>Modo multijugador por turnos:</b> Compite con amigos u otros jugadores para ver quién acierta al menos una pregunta de cada una de las categorías, en el menor número de turnos. Puedes personalizar el número de categorías. </string>
     <string name="help">Help</string>
     <string name="about">About</string>
     <!--Modo online-->
