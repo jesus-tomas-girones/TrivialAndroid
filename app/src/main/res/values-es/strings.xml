@@ -112,7 +112,7 @@
     <string name="match_finish">Partida Finalizada</string>
     <string name="canceled">¡Cancelado!</string>
     <string name="expired">¡Expirado!</string>
-    <string name="next_player">Siguiente jugador\n\n</string>
+    <string name="next_player">Siguiente jugador\n</string>
     <string name="still_waiting_invitations">\n¡Esperando invitaciones!\n</string>
     <string name="problem_finish">Hay un problema finalizando la partida</string>
     <string name="game_corrupt">La partida está corrupta</string>
@@ -130,7 +130,7 @@
     <string name="still_waiting_automatch">Todavía estamos esperando un rival de automatch.</string>
     <string name="not_your_turn">No es tu turno...</string>
     <string name="good_inititative">¡Buena iniciativa!</string>
-    <string name="waiting_invitations_be_patient">Todavía esperando invitaciones. \\n\\n ¡Ten paciencia!</string>
+    <string name="waiting_invitations_be_patient">Todavía esperando invitaciones. \n\n ¡Ten paciencia!</string>
     <string name="invitation_real_time">La invitación corresponde a una PARTIDA de TIEMPO REAL</string>
     <string name="out_of_date">La partida no esta actualizada, actualizando con los últimos datos...</string>
     <string name="error_string">No hay advertencia o cadena para tratar:</string>

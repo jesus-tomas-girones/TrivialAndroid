@@ -333,7 +333,8 @@ public class QuizActivity extends AppCompatActivity {
                 mIcon.setVisibility(View.GONE);
             }
             if (mCategory.getId().equals(ARG_ONE_PLAYER) || isMatchTurnBased()) {
-                postDelayHandlerPlayGame();
+                if (!mCategory.isSolved())
+                    postDelayHandlerPlayGame();
             }
         } else {
             //JVG.S
@@ -1425,7 +1426,7 @@ public class QuizActivity extends AppCompatActivity {
     private void showMessageAcceptCancelTurn() {
 
         android.app.AlertDialog.Builder alertDialogBuilder = new android.app.AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'>" +  getString(R.string.do_you_want_tu_pass)));
+        alertDialogBuilder.setMessage(Html.fromHtml("<font color='#000000'>" + getString(R.string.do_you_want_tu_pass)));
 
         alertDialogBuilder
                 .setCancelable(false)

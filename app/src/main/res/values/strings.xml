@@ -133,7 +133,7 @@
     <string name="match_finish">Finalized Game</string>
     <string name="canceled">Canceled!</string>
     <string name="expired">Expired!</string>
-    <string name="next_player">Next player</string>
+    <string name="next_player">Next player\n</string>
     <string name="still_waiting_invitations">Still waiting for \ninvitations!</string>
     <string name="problem_finish">There is a problem ending the game</string>
     <string name="game_corrupt">The game is corrupt</string>
@@ -151,7 +151,7 @@
     <string name="still_waiting_automatch">We\'re still waiting for an automatch partner.</string>
     <string name="not_your_turn">It\'s not your turn...</string>
     <string name="good_inititative">Good inititative!</string>
-    <string name="waiting_invitations_be_patient">Still waiting for invitations. \\n\\n Be patient!</string>
+    <string name="waiting_invitations_be_patient">Still waiting for invitations. \n\n Be patient!</string>
     <string name="invitation_real_time">The invitation corresponds to a REAL TIME GAME</string>
     <string name="out_of_date">Match was out of date, updating with latest match data...</string>
     <string name="error_string">Did not have warning or string to deal with:</string>
